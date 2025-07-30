@@ -7,75 +7,103 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      background-color: #0e0e0e;
+      background-color: #0b0b0b;
     }
     .card {
       background-color: #1a1a1a;
-      border: 1px solid #333;
+      border: 1px solid #2e2e2e;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
     .switch input:checked + span {
-      background-color: #4ade80;
+      background-color: #22c55e;
     }
     .switch input:checked + span::before {
       transform: translateX(1.25rem);
     }
   </style>
 </head>
-<body class="text-white font-sans p-6">
-  <div class="max-w-xl mx-auto">
-    <h1 class="text-4xl font-bold mb-6 text-center">SmartBed</h1>
+<body class="text-white font-sans p-4 sm:p-6 md:p-10">
+  <div class="max-w-md mx-auto space-y-6">
 
-    <!-- Power Card -->
-    <div class="card rounded-2xl p-5 mb-6">
-      <div class="flex justify-between items-center mb-4">
-        <span class="text-xl font-semibold">Power</span>
+    <!-- Title -->
+    <h1 class="text-3xl font-semibold text-center mb-2">SmartBed</h1>
+
+    <!-- Power Toggle -->
+    <div class="card p-5 rounded-2xl">
+      <div class="flex justify-between items-center">
+        <span class="text-lg font-medium">Power</span>
         <label class="switch relative inline-block w-12 h-6">
-          <input type="checkbox" class="sr-only" />
+          <input type="checkbox" id="powerToggle" class="sr-only" />
           <span class="block bg-gray-600 rounded-full h-full transition-all before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:bg-white before:rounded-full before:w-5 before:h-5 before:transition-transform"></span>
         </label>
       </div>
     </div>
 
-    <!-- Brightness -->
-    <div class="card rounded-2xl p-5 mb-6">
-      <div class="mb-2 text-xl font-semibold">Brightness</div>
-      <input type="range" min="0" max="100" value="50" class="w-full">
+    <!-- Brightness Slider -->
+    <div class="card p-5 rounded-2xl">
+      <label for="brightness" class="block text-lg font-medium mb-2">Brightness</label>
+      <input type="range" id="brightness" min="0" max="100" value="50" class="w-full accent-green-400">
     </div>
 
     <!-- Flash Settings -->
-    <div class="card rounded-2xl p-5 mb-6">
-      <div class="mb-4 flex justify-between items-center">
-        <span class="text-xl font-semibold">Flash</span>
+    <div class="card p-5 rounded-2xl space-y-4">
+      <div class="flex justify-between items-center">
+        <span class="text-lg font-medium">Flash</span>
         <label class="switch relative inline-block w-12 h-6">
-          <input type="checkbox" class="sr-only" />
+          <input type="checkbox" id="flashToggle" class="sr-only" />
           <span class="block bg-gray-600 rounded-full h-full transition-all before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:bg-white before:rounded-full before:w-5 before:h-5 before:transition-transform"></span>
         </label>
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block mb-1 text-sm">Flash Duration (ms)</label>
-          <input type="number" value="200" class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white" />
+          <label for="flashDuration" class="block text-sm mb-1">Duration (ms)</label>
+          <input id="flashDuration" type="number" value="200" class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none" />
         </div>
         <div>
-          <label class="block mb-1 text-sm">Flash Interval (ms)</label>
-          <input type="number" value="1000" class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white" />
+          <label for="flashInterval" class="block text-sm mb-1">Interval (ms)</label>
+          <input id="flashInterval" type="number" value="1000" class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none" />
         </div>
       </div>
-    </div>
-
-    <!-- Mode Select -->
-    <div class="card rounded-2xl p-5 mb-6">
-      <div class="mb-2 text-xl font-semibold">Mode</div>
-      <select class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white">
-        <option>Solid</option>
-        <option>Rainbow</option>
-        <option>Pulse</option>
-        <option>Flash</option>
-      </select>
     </div>
 
     <!-- Footer -->
     <p class="text-center text-gray-500 text-sm mt-10">SmartBed Web Controller</p>
   </div>
+
+  <script>
+    // Placeholder: connect these to your ESP32 later
+    document.getElementById("powerToggle").addEventListener("change", (e) => {
+      const state = e.target.checked;
+      console.log("Power:", state);
+      // sendToESP32("power", state);
+    });
+
+    document.getElementById("brightness").addEventListener("input", (e) => {
+      const val = e.target.value;
+      console.log("Brightness:", val);
+      // sendToESP32("brightness", val);
+    });
+
+    document.getElementById("flashToggle").addEventListener("change", (e) => {
+      const state = e.target.checked;
+      console.log("Flash:", state);
+      // sendToESP32("flash", state);
+    });
+
+    document.getElementById("flashDuration").addEventListener("change", (e) => {
+      console.log("Flash Duration:", e.target.value);
+      // sendToESP32("flashDuration", e.target.value);
+    });
+
+    document.getElementById("flashInterval").addEventListener("change", (e) => {
+      console.log("Flash Interval:", e.target.value);
+      // sendToESP32("flashInterval", e.target.value);
+    });
+
+    // Example stub for sending data to ESP32
+    function sendToESP32(key, value) {
+      fetch(`/api?${key}=${value}`).catch(err => console.error(err));
+    }
+  </script>
 </body>
 </html>
