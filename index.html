@@ -6,16 +6,26 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed</title>
   <style>
+    /* Background void behind all content */
+    .background-void {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(to bottom, #000000, #2a2a2a); /* black to dark grey gradient */
+      z-index: -1;
+    }
+
     html, body {
       margin: 0; padding: 0;
       height: 100%;
       width: 100%;
       overflow: hidden;
       font-family: Arial, sans-serif;
-      background-color: #888888; /* Medium grey background */
       color: white;
       display: flex;
       flex-direction: column;
+      background: transparent; /* transparent so .background-void shows */
     }
 
     .top-footer {
@@ -27,6 +37,11 @@
       font-size: clamp(0.8rem, 1vw, 1rem);
       backdrop-filter: blur(6px);
       border-bottom: 1px solid rgba(255,255,255,0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 100;
     }
 
     .content {
@@ -39,6 +54,7 @@
       text-align: center;
       box-sizing: border-box;
       min-height: 0;
+      margin-top: 60px; /* offset below fixed top-footer */
     }
 
     h1 {
@@ -55,10 +71,15 @@
 </head>
 <body>
 
+  <!-- Background gradient behind everything -->
+  <div class="background-void"></div>
+
+  <!-- Fixed top bar -->
   <div class="top-footer">
     SmartBed &nbsp;|&nbsp; Control Interface &nbsp;|&nbsp; Made with ❤️
   </div>
 
+  <!-- Main content -->
   <main class="content">
     <h1>SmartBed</h1>
     <p>LED Remote Control Interface</p>
