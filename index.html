@@ -3,147 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SmartBed - Apple UI</title>
+  <title>SmartBed</title>
   <style>
-    html {
-      height: 100%;
-      width: 100%;
-    }
-
-    body {
+    html, body {
       margin: 0;
       padding: 0;
-      height: 100dvh;
       width: 100vw;
+      height: 100dvh;
       overflow: hidden;
-      background: linear-gradient(to bottom, #000000, #2a2a2a);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(to bottom, #000, #2a2a2a);
+      color: #f0f0f0;
     }
 
-    .top-footer {
+    /* Top Glass Footer */
+    .top-bar {
+      height: 60px;
       width: 100%;
-      height: 55px;
-      background-color: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1rem;
       position: fixed;
       top: 0;
       left: 0;
-      z-index: 100;
-      backdrop-filter: blur(6px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .top-footer .left,
-    .top-footer .right {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: space-between;
+      padding: 0 1.2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.6);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
     }
 
-    .top-footer svg {
-      height: 24px;
+    .top-bar .icon,
+    .top-bar button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      padding: 0.25rem;
+    }
+
+    .top-bar svg {
       width: 24px;
+      height: 24px;
       fill: #ccc;
       transition: fill 0.2s ease;
     }
 
-    .top-footer button {
-      background: none;
-      border: none;
-      padding: 0.25rem;
-      cursor: pointer;
+    .top-bar button:hover svg {
+      fill: #fff;
     }
 
-    .top-footer button:hover svg {
-      fill: white;
-    }
-
-    .top-footer .center {
-      flex: 1;
-      text-align: center;
+    .top-bar .title {
       font-size: 1.1rem;
       font-weight: 500;
-      color: #ccc;
+      text-align: center;
+      flex: 1;
+      color: #ddd;
       pointer-events: none;
     }
 
-    .content {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding-top: 60px;
-      box-sizing: border-box;
+    .spacer {
+      width: 24px;
     }
 
-    h1 {
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-    }
-
-    p {
-      font-size: 1.25rem;
-      opacity: 0.8;
-    }
-
+    /* Settings Panel */
     .settings-panel {
       position: fixed;
-      top: 60px;
-      right: 10px;
-      width: 250px;
-      padding: 1rem;
-      background-color: rgba(20, 20, 20, 0.95);
-      color: #eee;
-      border-radius: 10px;
+      top: 65px;
+      right: 15px;
+      background: rgba(30, 30, 30, 0.95);
       border: 1px solid #444;
+      border-radius: 12px;
+      padding: 1rem;
+      width: 250px;
       display: none;
       z-index: 999;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
     }
 
     .settings-panel.active {
       display: block;
     }
 
+    /* Main content */
+    .content {
+      height: 100%;
+      width: 100%;
+      padding-top: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin: 0;
+    }
+
+    p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      margin-top: 0.5rem;
+    }
+
     @media (max-width: 600px) {
       h1 { font-size: 2rem; }
       p { font-size: 1rem; }
+      .settings-panel {
+        right: 10px;
+        width: 90%;
+      }
     }
   </style>
 </head>
 <body>
 
   <!-- Top Bar -->
-  <div class="top-footer">
-    <div class="left">
-      <!-- Bed Icon (Heroicons/Apple-style equivalent) -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h18a1 1 0 0 1 1 1v13h-2v-2H4v2H2V6a1 1 0 0 1 1-1Zm1 6v3h16v-3H4Zm5-4a2 2 0 1 0 0 4h2V7H9Z"/></svg>
+  <div class="top-bar">
+    <!-- Bed Icon -->
+    <div class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M3 5h18a1 1 0 0 1 1 1v13h-2v-2H4v2H2V6a1 1 0 0 1 1-1Zm1 6v3h16v-3H4Zm5-4a2 2 0 1 0 0 4h2V7H9Z"/>
+      </svg>
     </div>
 
-    <div class="center">SmartBed</div>
+    <!-- Center Title -->
+    <div class="title">SmartBed</div>
 
-    <div class="right">
-      <!-- Settings Button -->
-      <button onclick="toggleSettings()" aria-label="Settings">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-          <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7Zm7.43-2.43a7.99 7.99 0 0 0 0-2.14l2.1-1.64a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.48 1a8.12 8.12 0 0 0-1.84-1.07l-.38-2.65a.5.5 0 0 0-.5-.42h-4a.5.5 0 0 0-.5.42l-.38 2.65a8.12 8.12 0 0 0-1.84 1.07l-2.48-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65l2.1 1.64a7.99 7.99 0 0 0 0 2.14L2.17 14.7a.5.5 0 0 0-.12.65l2 3.46c.14.24.43.33.68.22l2.48-1a8.12 8.12 0 0 0 1.84 1.07l.38 2.65c.04.25.25.42.5.42h4c.25 0 .46-.17.5-.42l.38-2.65a8.12 8.12 0 0 0 1.84-1.07l2.48 1c.25.1.54.02.68-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.63Z"/>
-        </svg>
-      </button>
-    </div>
+    <!-- Settings Button -->
+    <button onclick="toggleSettings()" aria-label="Settings">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M12 15.5A3.5 3.5 0 1 0 12 8.5a3.5 3.5 0 0 0 0 7Zm7.43-2.43a7.99 7.99 0 0 0 0-2.14l2.1-1.64a.5.5 0 0 0 .12-.65l-2-3.46a.5.5 0 0 0-.6-.22l-2.48 1a8.12 8.12 0 0 0-1.84-1.07l-.38-2.65a.5.5 0 0 0-.5-.42h-4a.5.5 0 0 0-.5.42l-.38 2.65a8.12 8.12 0 0 0-1.84 1.07l-2.48-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.65l2.1 1.64a7.99 7.99 0 0 0 0 2.14L2.17 14.7a.5.5 0 0 0-.12.65l2 3.46c.14.24.43.33.68.22l2.48-1a8.12 8.12 0 0 0 1.84 1.07l.38 2.65c.04.25.25.42.5.42h4c.25 0 .46-.17.5-.42l.38-2.65a8.12 8.12 0 0 0 1.84-1.07l2.48 1c.25.1.54.02.68-.22l2-3.46a.5.5 0 0 0-.12-.65l-2.1-1.63Z"/>
+      </svg>
+    </button>
   </div>
 
   <!-- Settings Panel -->
   <div id="settingsPanel" class="settings-panel">
     <h3>Settings</h3>
-    <p>Coming soon...</p>
+    <p>More features coming soon...</p>
   </div>
 
   <!-- Main Content -->
@@ -154,9 +155,9 @@
 
   <script>
     function toggleSettings() {
-      const panel = document.getElementById('settingsPanel');
-      panel.classList.toggle('active');
+      document.getElementById("settingsPanel").classList.toggle("active");
     }
   </script>
+
 </body>
 </html>
