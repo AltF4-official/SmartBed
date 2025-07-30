@@ -2,70 +2,150 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SmartBed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>SmartBed - Gradient Background</title>
   <style>
-    html, body {
-      margin: 0; padding: 0;
+    html {
       height: 100%;
-      background: linear-gradient(to bottom, #000000, #2a2a2a);
-      color: white;
-      font-family: Arial, sans-serif;
-      overflow-x: hidden;
+      width: 100%;
     }
 
     body {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+      background: linear-gradient(to bottom, #000000, #2a2a2a);
+      font-family: Arial, sans-serif;
+      color: white;
     }
 
+    /* Top Bar (styled like a footer at the top) */
     .top-footer {
-      padding: 0.75rem 1.5rem;
+      width: 100%;
+      height: 55px;
       background-color: rgba(0, 0, 0, 0.7);
-      color: #bbb;
-      text-align: center;
-      font-size: clamp(0.8rem, 1vw, 1rem);
+      color: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1rem;
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 100;
       backdrop-filter: blur(6px);
       border-bottom: 1px solid rgba(255,255,255,0.1);
-      position: fixed;
-      top: 0; left: 0; width: 100%;
-      z-index: 1000;
+    }
+
+    .top-footer .left, .top-footer .center, .top-footer .right {
+      display: flex;
+      align-items: center;
+    }
+
+    .top-footer .center {
+      flex: 1;
+      justify-content: center;
+      font-size: 1.1rem;
+      font-weight: 500;
+      pointer-events: none;
+    }
+
+    .top-footer .right button {
+      background: none;
+      border: none;
+      color: #ccc;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+
+    .top-footer .right button:hover {
+      color: #fff;
     }
 
     .content {
-      flex: 1;
-      margin-top: 60px; /* height of top-footer */
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding: 1rem;
+      padding-top: 60px;
+      box-sizing: border-box;
     }
 
     h1 {
-      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-size: 3rem;
       margin-bottom: 0.5rem;
     }
 
     p {
-      font-size: clamp(1rem, 2.5vw, 1.25rem);
+      font-size: 1.25rem;
       opacity: 0.8;
-      margin: 0;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      p {
+        font-size: 1rem;
+      }
+    }
+
+    /* Settings Panel */
+    .settings-panel {
+      position: fixed;
+      top: 55px;
+      right: 10px;
+      width: 250px;
+      padding: 1rem;
+      background-color: rgba(20, 20, 20, 0.95);
+      color: #eee;
+      border-radius: 10px;
+      border: 1px solid #444;
+      display: none;
+      z-index: 999;
+    }
+
+    .settings-panel.active {
+      display: block;
     }
   </style>
 </head>
 <body>
 
+  <!-- Top Bar -->
   <div class="top-footer">
-    SmartBed &nbsp;|&nbsp; Control Interface &nbsp;|&nbsp; Made with ❤️
+    <div class="left">🛏️</div>
+    <div class="center">SmartBed</div>
+    <div class="right">
+      <button onclick="toggleSettings()">⚙️ Settings</button>
+    </div>
   </div>
 
-  <main class="content">
+  <!-- Settings Panel -->
+  <div id="settingsPanel" class="settings-panel">
+    <h3>Settings</h3>
+    <p>Coming soon...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content">
     <h1>SmartBed</h1>
     <p>LED Remote Control Interface</p>
-  </main>
+  </div>
 
+  <script>
+    function toggleSettings() {
+      const panel = document.getElementById('settingsPanel');
+      panel.classList.toggle('active');
+    }
+  </script>
 </body>
 </html>
