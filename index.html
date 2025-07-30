@@ -1,277 +1,46 @@
-import SwiftUI
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartBed LED Controller</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 400px; margin: 30px auto; text-align: center; padding: 10px; background: #f0f0f0; }
+    h1 { margin-bottom: 20px; }
+    .btn { width: 100%; padding: 15px; margin: 10px 0; font-size: 1.2em; border-radius: 8px; border: none; background-color: #007BFF; color: white; cursor: pointer; }
+    .btn:hover { background-color: #0056b3; }
+    input[type=range] { width: 100%; margin: 20px 0; }
+    label { display: block; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>SmartBed LED Controller</h1>
+  <button class="btn" onclick="send('on')">Turn ON</button>
+  <button class="btn" onclick="send('off')">Turn OFF</button>
+  <label for="brightness">Brightness: <span id="brightVal">100%</span></label>
+  <input type="range" id="brightness" min="0" max="100" value="100" oninput="updateBrightness(this.value)">
+  <button class="btn" onclick="toggleFlash()" id="flashBtn">Enable Flash Mode</button>
 
-// Base URL for control (GitHub Pages hosting index.html)
-let serverBaseURL = "https://AltF4-official.github.io/SmartBed"
+  <script>
+    // Change to your ESP32 IP or keep this page served locally via GitHub
+    const espBase = 'http://192.168.1.123';
+    let flashEnabled = false;
 
-/// Helper to send simple GET requests via the web interface
-func send(_ path: String) {
-    guard let url = URL(string: "\(serverBaseURL)/\(path)") else { return }
-    URLSession.shared.dataTask(with: url).resume()
-}
-
-struct Theme: Identifiable, Hashable {
-    let id = UUID()
-    let name: String
-    var background: Color
-    var foreground: Color
-    var isCustom: Bool
-}
-
-@MainActor
-class NotificationManager: ObservableObject {
-    @Published var message: String?
-    func show(_ msg: String) {
-        withAnimation(.interpolatingSpring(stiffness: 200, damping: 15)) {
-            message = msg
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
-            withAnimation { self.message = nil }
-        }
-    }
-}
-
-struct ContentView: View {
-    @State private var isOn = false {
-        didSet { send(isOn ? "on" : "off") }
-    }
-    @State private var brightness: Double = 35.0 {
-        didSet {
-            let percent = Int((brightness / 35) * 100)
-            send("brightness?v=\(percent)")
-        }
-    }
-    @State private var flashMode = false {
-        didSet { send("flash?mode=\(flashMode ? "on" : "off")") }
-    }
-    @State private var showFlashSettings = false
-    @State private var flashOnTime: Double = 100.0
-    @State private var flashOffTime: Double = 100.0
-    @State private var flashOnText: String = "100"
-    @State private var flashOffText: String = "100"
-    @State private var showSettings = false
-    @State private var selectedTheme: Theme
-    @State private var customPrimary: Color = .blue
-    @State private var customSecondary: Color = .white
-    @State private var showColorError = false
-
-    @StateObject private var notifier = NotificationManager()
-
-    let themes: [Theme] = [
-        Theme(name: "Electric Blue & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: .blue, isCustom: false),
-        Theme(name: "Baby Blue & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: Color(red: 0.7, green: 0.9, blue: 1), isCustom: false),
-        Theme(name: "Bubblegum Pink & White", background: .white, foreground: Color(red: 1, green: 0.4, blue: 0.7), isCustom: false),
-        Theme(name: "Forest Green & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: Color(red: 0, green: 0.5, blue: 0), isCustom: false),
-        Theme(name: "Gold & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: .yellow, isCustom: false),
-        Theme(name: "Cherry & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: .red, isCustom: false),
-        Theme(name: "Soft Lilac & White", background: .white, foreground: Color(red: 0.8, green: 0.7, blue: 1), isCustom: false),
-        Theme(name: "Custom", background: .blue, foreground: .white, isCustom: true)
-    ]
-
-    init() {
-        _selectedTheme = State(initialValue: themes.first!)
+    function send(path) {
+      fetch(`${espBase}/${path}`)
+        .catch(() => alert('Could not reach ESP32'));
     }
 
-    var body: some View {
-        ZStack {
-            themeBackground.ignoresSafeArea()
-            WavyBackground(color: themeForeground.opacity(0.2), spread: 1.5)
-
-            VStack {
-                header
-                Spacer()
-                powerButton
-                Spacer()
-                if isOn {
-                    if !flashMode {
-                        brightnessControl.transition(.opacity)
-                    }
-                    flashControls
-                }
-            }
-            .padding()
-            .animation(.easeInOut, value: isOn)
-            .animation(.easeInOut, value: flashMode)
-
-            if flashMode && showFlashSettings {
-                ModalView(primary: themeForeground, secondary: themeBackground) {
-                    VStack(spacing: 20) {
-                        Text("Flash Settings").font(.headline).foregroundColor(themeForeground)
-                        flashSettingInput(label: "On (ms)", text: $flashOnText)
-                        flashSettingInput(label: "Off (ms)", text: $flashOffText)
-                        HStack(spacing: 16) {
-                            Button("Cancel") {
-                                showFlashSettings = false
-                                flashOnText = String(Int(flashOnTime))
-                                flashOffText = String(Int(flashOffTime))
-                            }
-                            .frame(maxWidth: .infinity).padding()
-                            .background(themeBackground.opacity(0.6)).foregroundColor(themeForeground)
-                            .cornerRadius(10)
-
-                            Button("Apply") {
-                                guard let onVal = Double(flashOnText), let offVal = Double(flashOffText) else {
-                                    notifier.show("Enter valid numbers.")
-                                    return
-                                }
-                                guard onVal >= 10, onVal <= 10000, offVal >= 10, offVal <= 10000 else {
-                                    notifier.show("Values must be 10–10000 ms.")
-                                    return
-                                }
-                                flashOnTime = onVal
-                                flashOffTime = offVal
-                                send("flash?on=\(Int(onVal))&off=\(Int(offVal))")
-                                showFlashSettings = false
-                            }
-                            .frame(maxWidth: .infinity).padding()
-                            .background(themeForeground).foregroundColor(themeBackground)
-                            .cornerRadius(10)
-                        }
-                    }
-                    .padding(24)
-                    .background(RoundedRectangle(cornerRadius: 20)
-                        .fill(themeBackground.opacity(0.95)).shadow(radius: 10))
-                    .frame(width: UIScreen.main.bounds.width / 2)
-                }
-                .transition(.opacity.combined(with: .scale))
-            }
-
-            if showSettings {
-                ModalView(primary: themeForeground, secondary: themeBackground) {
-                    ScrollView {
-                        VStack(spacing: 20) {
-                            Text("Theme Settings").font(.headline).foregroundColor(themeForeground)
-                            CustomDropdown(
-                                themes: themes,
-                                selectedTheme: $selectedTheme,
-                                themeBackground: themeBackground,
-                                themeForeground: themeForeground
-                            )
-                            .frame(maxWidth: 300)
-
-                            if selectedTheme.isCustom {
-                                HStack {
-                                    Text("Primary:").foregroundColor(themeForeground).frame(width: 80, alignment: .trailing)
-                                    ColorPicker("", selection: Binding(get: { customPrimary }, set: { new in
-                                        customPrimary = new
-                                        showColorError = colorsAreTooSimilar(foreground: new, background: customSecondary)
-                                    })).labelsHidden()
-                                }
-                                HStack {
-                                    Text("Secondary:").foregroundColor(themeForeground).frame(width: 80, alignment: .trailing)
-                                    ColorPicker("", selection: Binding(get: { customSecondary }, set: { new in
-                                        customSecondary = new
-                                        showColorError = colorsAreTooSimilar(foreground: customPrimary, background: new)
-                                    })).labelsHidden()
-                                }
-                            }
-                            if showColorError {
-                                Text("Primary and secondary colors too similar").foregroundColor(.red).font(.footnote).multilineTextAlignment(.center)
-                            }
-                            Button("Close") {
-                                showSettings = false
-                                showColorError = false
-                            }
-                            .padding().background(themeBackground).foregroundColor(themeForeground)
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(themeForeground, lineWidth: 1))
-                            .cornerRadius(8)
-
-                            Spacer(minLength: 20)
-                        }
-                        .padding().frame(width: UIScreen.main.bounds.width / 2)
-                    }
-                }
-                .transition(.opacity.animation(.easeIn(duration: 0.3)))
-            }
-
-            if let msg = notifier.message {
-                VStack { Spacer()
-                    Text(msg).padding().background(Color.black.opacity(0.8)).foregroundColor(.white)
-                        .cornerRadius(10).padding(.bottom, 30)
-                        .transition(.move(edge: .bottom))
-                }
-                .animation(.easeOut, value: notifier.message)
-            }
-        }
-        .onAppear {
-            flashOnText = String(Int(flashOnTime))
-            flashOffText = String(Int(flashOffTime))
-        }
+    function updateBrightness(val) {
+      document.getElementById('brightVal').textContent = val + '%';
+      send(`brightness?v=${val}`);
     }
 
-    @ViewBuilder
-    private func flashSettingInput(label: String, text: Binding<String>) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(label).foregroundColor(themeForeground)
-            TextField("", text: text)
-                .keyboardType(.numberPad)
-                .padding(10)
-                .background(themeBackground.opacity(0.3))
-                .foregroundColor(themeForeground)
-                .cornerRadius(6)
-                .overlay(RoundedRectangle(cornerRadius: 6).stroke(themeForeground, lineWidth: 1))
-                .onChange(of: text.wrappedValue) { v in
-                    let filtered = v.filter { "0123456789".contains($0) }
-                    text.wrappedValue = String(filtered.prefix(5))
-                }
-        }
+    function toggleFlash() {
+      flashEnabled = !flashEnabled;
+      document.getElementById('flashBtn').textContent = flashEnabled ? 'Disable Flash Mode' : 'Enable Flash Mode';
+      send(`flash?mode=${flashEnabled ? 'on' : 'off'}`);
     }
-
-    private var header: some View {
-        HStack {
-            Image(systemName: "bed.double.fill").font(.title2).foregroundColor(themeForeground)
-            Spacer()
-            Text("SmartBed").font(.title2).bold().foregroundColor(themeForeground)
-            Spacer()
-            Button { showSettings.toggle() } label: {
-                Image(systemName: "gearshape.fill").font(.title2).foregroundColor(themeForeground)
-            }
-        }
-    }
-
-    private var powerButton: some View {
-        Button { isOn.toggle() } label: {
-            Image(systemName: "power.circle.fill").resizable().frame(width: 100, height: 100)
-                .foregroundColor(isOn ? themeForeground : .gray)
-        }
-        .buttonStyle(PlainButtonStyle())
-        .animation(.spring(), value: isOn)
-    }
-
-    private var flashControls: some View {
-        HStack(spacing: 10) {
-            Button { flashMode.toggle() } label: {
-                Text("Flash Mode").font(.headline)
-                    .padding(12)
-                    .background(flashMode ? themeForeground : .clear)
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(themeForeground, lineWidth: 2))
-                    .foregroundColor(flashMode ? themeBackground : themeForeground)
-                    .cornerRadius(8)
-            }
-            if flashMode {
-                Button { showFlashSettings.toggle() } label: {
-                    Image(systemName: "slider.horizontal.3").font(.headline).foregroundColor(themeForeground)
-                }
-            }
-        }
-        .disabled(!isOn)
-        .animation(.easeInOut, value: flashMode)
-    }
-
-    private var brightnessControl: some View {
-        VStack {
-            HStack {
-                Button { brightness = max(brightness - 1, 0) } label: {
-                    Image(systemName: "sun.min.fill").foregroundColor(themeForeground)
-                }
-                Slider(value: $brightness, in: 0...35).accentColor(themeForeground)
-                Button { brightness = min(brightness + 1, 35) } label: {
-                    Image(systemName: "sun.max.fill").foregroundColor(themeForeground)
-                }
-            }
-            Text("\(Int((brightness / 35) * 100))%")
-                .foregroundColor(themeForeground)
-        }
-        .animation(.easeInOut, value: brightness)
-    }
-
-    private func colorsAreTooSimilar(foreground: Color, background: Color) -> Bool {
+  </script>
+</body>
+</html>
