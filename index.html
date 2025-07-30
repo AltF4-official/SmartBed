@@ -3,48 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartBed - Aurora Background</title>
+  <title>SmartBed - Mountain Background</title>
   <style>
     html, body {
       margin: 0;
+      padding: 0;
       height: 100%;
-      background: radial-gradient(ellipse at bottom, #050505 0%, #000000 100%);
+      background: linear-gradient(to top, #0a0a0a 0%, #121212 100%);
       overflow: hidden;
       font-family: Arial, sans-serif;
       color: white;
     }
 
-    .aurora {
+    .mountains {
       position: absolute;
-      width: 200%;
-      height: 100%;
-      top: -20%;
-      left: -50%;
-      background: linear-gradient(120deg, #003366 0%, #004d4d 40%, #003300 70%, transparent 100%);
-      opacity: 0.12;
-      filter: blur(100px);
-      animation: moveAurora 20s ease-in-out infinite alternate;
-      transform: rotate(6deg);
+      bottom: 0;
+      width: 100%;
+      height: 60%;
+      background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><path fill="%23001122" d="M0 100 Q 50 0 100 100 T 200 100 T 300 100 T 400 100 T 500 100 T 600 100 T 700 100 T 800 100 T 900 100 T 1000 100 V 200 H 0 Z"/></svg>') repeat-x;
+      background-size: cover;
+      animation: moveMountains 60s linear infinite;
+      opacity: 0.9;
       z-index: 0;
     }
 
-    .aurora2 {
-      background: linear-gradient(90deg, #002b36 0%, #003c3c 50%, #001a33 100%);
-      opacity: 0.1;
-      animation-delay: 5s;
-      animation-duration: 30s;
-      transform: rotate(-8deg);
-    }
-
-    @keyframes moveAurora {
+    @keyframes moveMountains {
       0% {
-        transform: translateX(-25%) rotate(4deg);
-      }
-      50% {
-        transform: translateX(20%) rotate(6deg);
+        background-position-x: 0;
       }
       100% {
-        transform: translateX(-10%) rotate(4deg);
+        background-position-x: -1000px;
       }
     }
 
@@ -56,29 +44,26 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      pointer-events: none;
       text-align: center;
     }
 
     h1 {
       font-size: 3rem;
-      letter-spacing: 1.2px;
       margin-bottom: 0.3rem;
     }
 
     p {
       font-size: 1.25rem;
-      opacity: 0.65;
+      opacity: 0.7;
     }
   </style>
 </head>
 <body>
 
-  <!-- Aurora layers -->
-  <div class="aurora"></div>
-  <div class="aurora aurora2"></div>
+  <!-- Mountain Background -->
+  <div class="mountains"></div>
 
-  <!-- Page content -->
+  <!-- Page Content -->
   <div class="content">
     <h1>SmartBed</h1>
     <p>LED Remote Control Interface</p>
