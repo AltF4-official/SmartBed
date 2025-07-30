@@ -3,20 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartBed - LED Background</title>
+  <title>SmartBed - Aurora Background</title>
   <style>
     html, body {
       margin: 0;
       height: 100%;
-      background: #0a0a0a;
+      background: radial-gradient(ellipse at bottom, #0b0c10 0%, #000000 100%);
       overflow: hidden;
       font-family: Arial, sans-serif;
       color: white;
     }
 
+    .aurora {
+      position: absolute;
+      width: 200%;
+      height: 100%;
+      top: -20%;
+      left: -50%;
+      background: linear-gradient(120deg, #39f 0%, #0ff 40%, #0f0 70%, transparent 100%);
+      opacity: 0.2;
+      filter: blur(80px);
+      animation: moveAurora 18s ease-in-out infinite alternate;
+      transform: rotate(8deg);
+      z-index: 0;
+    }
+
+    .aurora2 {
+      background: linear-gradient(90deg, #4ff 0%, #0f0 50%, #39f 100%);
+      opacity: 0.15;
+      animation-delay: 3s;
+      animation-duration: 25s;
+      transform: rotate(-6deg);
+    }
+
+    @keyframes moveAurora {
+      0% {
+        transform: translateX(-20%) rotate(5deg);
+      }
+      50% {
+        transform: translateX(20%) rotate(8deg);
+      }
+      100% {
+        transform: translateX(-10%) rotate(5deg);
+      }
+    }
+
     .content {
       position: relative;
-      z-index: 10;
+      z-index: 1;
       height: 100vh;
       display: flex;
       flex-direction: column;
@@ -28,83 +62,27 @@
 
     h1 {
       font-size: 3rem;
+      letter-spacing: 1.2px;
       margin-bottom: 0.3rem;
-      letter-spacing: 1.5px;
     }
 
     p {
       font-size: 1.25rem;
       opacity: 0.7;
     }
-
-    .led-wrapper {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, 40px);
-      grid-auto-rows: 40px;
-      justify-content: center;
-      align-content: center;
-      gap: 10px;
-      perspective: 600px;
-    }
-
-    .led {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: radial-gradient(circle, #00ffff 0%, #003333 70%);
-      box-shadow: 0 0 8px #0ff;
-      animation: pulse 3s ease-in-out infinite;
-    }
-
-    .led:nth-child(3n) {
-      animation-delay: 1s;
-    }
-
-    .led:nth-child(4n) {
-      animation-delay: 2s;
-    }
-
-    .led:nth-child(5n) {
-      animation-delay: 3s;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        transform: scale(1) rotateX(0deg);
-        opacity: 0.3;
-      }
-      50% {
-        transform: scale(1.5) rotateX(15deg);
-        opacity: 1;
-      }
-    }
   </style>
 </head>
 <body>
 
-  <div class="led-wrapper" id="ledWrapper"></div>
+  <!-- Aurora layers -->
+  <div class="aurora"></div>
+  <div class="aurora aurora2"></div>
 
+  <!-- Page content -->
   <div class="content">
     <h1>SmartBed</h1>
     <p>LED Remote Control Interface</p>
   </div>
-
-  <script>
-    const ledWrapper = document.getElementById("ledWrapper");
-    const totalLEDs = Math.floor((window.innerWidth * window.innerHeight) / 1600);
-
-    for (let i = 0; i < totalLEDs; i++) {
-      const led = document.createElement('div');
-      led.className = 'led';
-      ledWrapper.appendChild(led);
-    }
-  </script>
 
 </body>
 </html>
