@@ -5,13 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed - Gradient Background</title>
   <style>
-    html, body {
+    html {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
       margin: 0;
       padding: 0;
+      height: 100dvh; /* FULL viewport height across all devices */
       width: 100vw;
-      height: 100vh;
       overflow: hidden;
-      background: linear-gradient(to bottom, #000000, #2a2a2a); /* black to dark grey */
+      background: linear-gradient(to bottom, #000000, #2a2a2a);
       font-family: Arial, sans-serif;
       color: white;
     }
@@ -41,7 +46,7 @@
       justify-content: center;
       align-items: center;
       text-align: center;
-      padding-top: 60px;
+      padding-top: 60px; /* Space for top bar */
       box-sizing: border-box;
     }
 
@@ -53,6 +58,15 @@
     p {
       font-size: 1.25rem;
       opacity: 0.8;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 2rem;
+      }
+      p {
+        font-size: 1rem;
+      }
     }
   </style>
 </head>
