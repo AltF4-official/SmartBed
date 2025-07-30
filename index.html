@@ -2,112 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>SmartBed - LED Grid</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartBed - LED Animated Background</title>
   <style>
     html, body {
       margin: 0;
       height: 100%;
-      background-color: #0a0a0a;
+      background: #0a0a0a;
       overflow: hidden;
       font-family: Arial, sans-serif;
       color: white;
     }
-    #canvas {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      display: block;
-      z-index: 0;
-    }
+
     .content {
       position: relative;
-      z-index: 10;
+      z-index: 2;
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      text-align: center;
       pointer-events: none;
+      text-align: center;
     }
+
     h1 {
       font-size: 3rem;
       margin-bottom: 0.3rem;
       letter-spacing: 1.2px;
     }
+
     p {
       font-size: 1.25rem;
       opacity: 0.7;
     }
+
+    .led-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 20px);
+      grid-auto-rows: 20px;
+      gap: 5px;
+      background: #0a0a0a;
+    }
+
+    .led {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0ff;
+      opacity: 0.1;
+      animation: blink 3s infinite ease-in-out;
+    }
+
+    @keyframes blink {
+      0%, 100% {
+        opacity: 0.1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.4);
+      }
+    }
+
+    .led:nth-child(odd) {
+      animation-delay: 1.5s;
+    }
+
+    .led:nth-child(3n) {
+      animation-delay: 2s;
+    }
+
+    .led:nth-child(5n) {
+      animation-delay: 0.5s;
+    }
+
   </style>
 </head>
 <body>
 
-<canvas id="canvas"></canvas>
-
-<div class="content">
-  <h1>SmartBed</h1>
-  <p>LED Remote Control Interface</p>
-</div>
-
-<script>
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-
-  let width, height, cols, rows;
-  let grid = [];
-
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-    canvas.width = width;
-    canvas.height = height;
-    initGrid();
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-
-  function initGrid() {
-    const spacing = 30;
-    cols = Math.floor(width / spacing);
-    rows = Math.floor(height / spacing);
-    grid = [];
-
-    for (let y = 0; y < rows; y++) {
-      for (let x = 0; x < cols; x++) {
-        grid.push({
-          x: x * spacing + spacing / 2,
-          y: y * spacing + spacing / 2,
-          radius: Math.random() * 1.5 + 1,
-          pulse: Math.random() * Math.PI * 2,
-          colorHue: Math.floor(Math.random() * 360)
-        });
+  <div class="led-grid">
+    <!-- Create 500+ LED dots -->
+    <script>
+      const grid = document.querySelector('.led-grid');
+      for (let i = 0; i < 800; i++) {
+        const led = document.createElement('div');
+        led.className = 'led';
+        grid.appendChild(led);
       }
-    }
-  }
+    </script>
+  </div>
 
-  function animate() {
-    ctx.clearRect(0, 0, width, height);
-    grid.forEach(dot => {
-      dot.pulse += 0.05;
-      const glow = Math.sin(dot.pulse) * 0.4 + 0.6;
-
-      ctx.beginPath();
-      ctx.arc(dot.x, dot.y, dot.radius * glow, 0, Math.PI * 2);
-      ctx.fillStyle = `hsl(${dot.colorHue}, 100%, ${glow * 70}%)`;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = `hsl(${dot.colorHue}, 100%, ${glow * 70}%)`;
-      ctx.fill();
-    });
-
-    requestAnimationFrame(animate);
-  }
-
-  animate();
-</script>
+  <div class="content">
+    <h1>SmartBed</h1>
+    <p>LED Remote Control Interface</p>
+  </div>
 
 </body>
 </html>
