@@ -10,7 +10,14 @@
       --secondary-color: #111;
       --foreground-color: #fff;
       --error-color: #f33;
+      --transition-speed: 0.3s;
     }
+
+    * {
+      box-sizing: border-box;
+      transition: all var(--transition-speed) ease;
+    }
+
     body {
       margin: 0;
       padding: 20px;
@@ -20,77 +27,140 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      overflow-x: hidden;
     }
-    h1 { margin-bottom: 1rem; }
 
-    /* Power Button */
-    #powerBtn {
-      width: 100px; height: 100px;
-      font-size: 2rem;
-      border: none; border-radius: 50%;
+    h1 {
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeInUp 0.5s forwards;
+    }
+
+    /* Fade-in-up */
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Scale button class */
+    .btn {
+      cursor: pointer;
+      border: none;
       background: var(--primary-color);
       color: var(--foreground-color);
-      cursor: pointer;
+      border-radius: 8px;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      transform: scale(1);
+      will-change: transform;
+    }
+    .btn:hover { transform: scale(1.05); }
+    .btn:active {
+      transition-duration: 0.1s;
+      transform: scale(0.95);
     }
 
-    /* Controls */
-    .controls { max-width:300px; width:100%; margin-top:1rem; }
+    /* Power button */
+    #powerBtn {
+      width: 100px;
+      height: 100px;
+      font-size: 2rem;
+      border-radius: 50%;
+      background: var(--primary-color);
+      margin-bottom: 20px;
+    }
+
+    /* Controls layout */
+    .controls { max-width: 300px; width: 100%; margin-top: 1rem; opacity: 0; animation: fadeInUp 0.6s 0.2s forwards; }
     .slider-row {
-      display:flex; align-items:center; margin-bottom: .5rem;
+      display: flex;
+      align-items: center;
+      margin-bottom: .75rem;
     }
-    .slider-row span { width:70px; }
-    input[type=range] { flex:1; }
+    .slider-row span { width: 70px; }
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 6px;
+      background: #444;
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: var(--primary-color);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    input[type=range]::-webkit-slider-thumb:active { transform: scale(1.2); }
 
-    /* Modals */
+    /* Modal backdrop + modal window */
     .modal-backdrop {
-      position:fixed; top:0; left:0; right:0; bottom:0;
-      background:rgba(0,0,0,0.4);
-      display:none; align-items:center; justify-content:center;
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--transition-speed), visibility var(--transition-speed);
+    }
+    .modal-backdrop.show {
+      opacity: 1; visibility: visible;
     }
     .modal {
       background: var(--secondary-color);
-      border-radius:12px;
-      padding:1.5rem;
-      width:50vw; max-width:400px; max-height:80vh;
-      overflow-y:auto;
-      box-shadow:0 4px 16px rgba(0,0,0,0.6);
+      border-radius: 12px;
+      padding: 1.5rem;
+      width: 50vw; max-width: 400px; max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      transform: translateY(-20px);
+      transition: transform var(--transition-speed);
     }
-    .modal h2 { margin-top:0; }
-
+    .modal-backdrop.show .modal {
+      transform: translateY(0);
+    }
+    .modal h2 {
+      margin-top: 0;
+      opacity: 0; transform: translateY(-10px);
+      animation: fadeInUp 0.4s forwards;
+    }
     .modal label {
-      display:flex; align-items:center; margin:0.5rem 0;
+      display: flex; align-items: center; margin: 0.5rem 0;
+      opacity: 0; transform: translateX(-10px);
+      animation: fadeInUp 0.4s forwards;
     }
-    .modal label span {
-      width:80px; text-align:right; margin-right:.5rem;
+    .modal label span { width: 80px; text-align: right; margin-right: .5rem; }
+    .modal input[type=color] {
+      width: 2rem; height: 2rem; border: none; padding: 0;
+      cursor: pointer;
     }
-    .modal input[type=color] { width:2rem; height:2rem; border:none; padding:0; }
-
-    .modal button {
-      margin-top:1rem; padding:.5rem 1rem;
-      border:none; border-radius:8px;
-      cursor:pointer;
+    .modal .actions {
+      display: flex; gap: 1rem; margin-top: 1rem;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeInUp 0.4s forwards 0.2s;
     }
-    .modal .actions { display:flex; gap:1rem; }
 
     /* Notification */
     #notification {
-      position:fixed; bottom:-100px; left:50%;
-      transform:translateX(-50%);
+      position: fixed; bottom: -100px; left: 50%;
+      transform: translateX(-50%);
       color: var(--error-color);
-      font-weight:bold;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
     }
     @keyframes notifIn {
-      to { bottom:40px; }
+      to { bottom: 40px; }
     }
     @keyframes notifOut {
-      to { bottom:-100px; }
+      to { bottom: -100px; }
     }
   </style>
 </head>
 <body>
 
   <h1>SmartBed</h1>
-  <button id="powerBtn">⏻</button>
+  <button id="powerBtn" class="btn">⏻</button>
 
   <div class="controls">
     <div class="slider-row">
@@ -99,19 +169,23 @@
       <span id="brightVal">35%</span>
     </div>
 
-    <button id="flashToggle">Flash Settings…</button>
-    <button id="themeToggle">Theme Settings…</button>
+    <button id="flashToggle" class="btn">Flash Settings…</button>
+    <button id="themeToggle" class="btn">Theme Settings…</button>
   </div>
 
   <!-- Flash Modal -->
   <div id="flashModalBg" class="modal-backdrop">
     <div class="modal">
       <h2>Flash Settings</h2>
-      <label><span>On (ms):</span><input type="number" id="flashOn" min="10" max="10000" value="100"></label>
-      <label><span>Off (ms):</span><input type="number" id="flashOff" min="10" max="10000" value="100"></label>
+      <label><span>On (ms):</span>
+        <input type="number" id="flashOn" min="10" max="10000" value="100">
+      </label>
+      <label><span>Off (ms):</span>
+        <input type="number" id="flashOff" min="10" max="10000" value="100">
+      </label>
       <div class="actions">
-        <button id="flashCancel">Cancel</button>
-        <button id="flashApply" style="background:var(--primary-color);color:white;">Apply</button>
+        <button id="flashCancel" class="btn" style="background:#444;">Cancel</button>
+        <button id="flashApply" class="btn">Apply</button>
       </div>
     </div>
   </div>
@@ -121,7 +195,7 @@
     <div class="modal">
       <h2>Theme Settings</h2>
       <label><span style="width:auto;text-align:left;">Select:</span>
-        <select id="themeSelect">
+        <select id="themeSelect" class="btn" style="width:100%;text-align:left;">
           <option>Electric Blue & Dark Gray</option>
           <option>Baby Blue & Dark Gray</option>
           <option>Bubblegum Pink & White</option>
@@ -133,11 +207,15 @@
         </select>
       </label>
       <div id="customColors" style="display:none;">
-        <label><span>Primary:</span><input type="color" id="primaryColor" value="#1e90ff"></label>
-        <label><span>Secondary:</span><input type="color" id="secondaryColor" value="#111111"></label>
+        <label><span>Primary:</span>
+          <input type="color" id="primaryColor" value="#1e90ff">
+        </label>
+        <label><span>Secondary:</span>
+          <input type="color" id="secondaryColor" value="#111111">
+        </label>
       </div>
       <div class="actions">
-        <button id="themeClose">Close</button>
+        <button id="themeClose" class="btn" style="background:#444;">Close</button>
       </div>
     </div>
   </div>
@@ -145,80 +223,88 @@
   <div id="notification"></div>
 
   <script>
-    // Power toggle (stub)
-    document.getElementById('powerBtn').onclick = () => {
-      const btn = document.getElementById('powerBtn');
-      btn.style.filter = btn.style.filter ? '' : 'brightness(0.7)';
+    // Elements
+    const powerBtn = document.getElementById('powerBtn');
+    const brightness = document.getElementById('brightness');
+    const brightVal = document.getElementById('brightVal');
+    const flashToggle = document.getElementById('flashToggle');
+    const flashModalBg = document.getElementById('flashModalBg');
+    const flashCancel = document.getElementById('flashCancel');
+    const flashApply = document.getElementById('flashApply');
+    const themeToggle = document.getElementById('themeToggle');
+    const themeModalBg = document.getElementById('themeModalBg');
+    const themeClose = document.getElementById('themeClose');
+    const themeSelect = document.getElementById('themeSelect');
+    const customColors = document.getElementById('customColors');
+    const primaryColor = document.getElementById('primaryColor');
+    const secondaryColor = document.getElementById('secondaryColor');
+    const notification = document.getElementById('notification');
+
+    // Power toggle
+    powerBtn.onclick = () => {
+      powerBtn.style.filter = powerBtn.style.filter ? '' : 'brightness(0.7)';
     };
 
-    // Brightness
-    const br = document.getElementById('brightness'), bv = document.getElementById('brightVal');
-    br.oninput = ()=> bv.textContent = br.value + '%';
+    // Brightness display
+    brightness.oninput = () => {
+      brightVal.textContent = brightness.value + '%';
+    };
 
-    // Flash modal logic
-    const flashBg = document.getElementById('flashModalBg');
-    document.getElementById('flashToggle').onclick = () => flashBg.style.display='flex';
-    document.getElementById('flashCancel').onclick =
-      () => flashBg.style.display='none';
-    document.getElementById('flashApply').onclick = () => {
-      const on = +document.getElementById('flashOn').value,
-            off = +document.getElementById('flashOff').value;
+    // Show/hide modals
+    function toggleModal(bg, show) {
+      if (show) bg.classList.add('show'); else bg.classList.remove('show');
+    }
+    flashToggle.onclick = () => toggleModal(flashModalBg, true);
+    flashCancel.onclick  = () => toggleModal(flashModalBg, false);
+    themeToggle.onclick = () => toggleModal(themeModalBg, true);
+    themeClose.onclick  = () => toggleModal(themeModalBg, false);
+
+    // Flash apply
+    flashApply.onclick = () => {
+      const on = +document.getElementById('flashOn').value;
+      const off = +document.getElementById('flashOff').value;
       if (isNaN(on)||isNaN(off)||on<10||off<10||on>10000||off>10000) {
         showNotification('Flash timing must be 10–10000 ms');
       } else {
         showNotification('Flash applied', false);
-        flashBg.style.display='none';
+        toggleModal(flashModalBg, false);
       }
     };
 
-    // Theme modal logic
-    const themeBg = document.getElementById('themeModalBg'),
-          themeSelect = document.getElementById('themeSelect'),
-          customDiv = document.getElementById('customColors');
-    document.getElementById('themeToggle').onclick = ()=> themeBg.style.display='flex';
-    document.getElementById('themeClose').onclick = ()=> themeBg.style.display='none';
-    themeSelect.onchange = ()=>{
-      if (themeSelect.value==='Custom') customDiv.style.display='block';
-      else {
-        customDiv.style.display='none';
-        // apply presets:
-        const presets = {
-          'Electric Blue & Dark Gray': ['#1e90ff','#111111'],
-          'Baby Blue & Dark Gray':    ['#B3E5FC','#111111'],
-          'Bubblegum Pink & White':   ['#111111','#FF6EB4'],
-          'Forest Green & Dark Gray': ['#228B22','#111111'],
-          'Gold & Dark Gray':         ['#FFD700','#111111'],
-          'Cherry & Dark Gray':       ['#FF0000','#111111'],
-          'Soft Lilac & White':       ['#111111','#D8BFD8']
-        };
-        let [p,s] = presets[themeSelect.value]||['#1e90ff','#111'];
+    // Theme selection
+    const presets = {
+      'Electric Blue & Dark Gray': ['#1e90ff','#111'],
+      'Baby Blue & Dark Gray':    ['#B3E5FC','#111'],
+      'Bubblegum Pink & White':   ['#111','#FF6EB4'],
+      'Forest Green & Dark Gray': ['#228B22','#111'],
+      'Gold & Dark Gray':         ['#FFD700','#111'],
+      'Cherry & Dark Gray':       ['#FF0000','#111'],
+      'Soft Lilac & White':       ['#111','#D8BFD8']
+    };
+    themeSelect.onchange = () => {
+      if (themeSelect.value === 'Custom') {
+        customColors.style.display = 'block';
+      } else {
+        customColors.style.display = 'none';
+        const [p,s] = presets[themeSelect.value] || ['#1e90ff','#111'];
         setTheme(p,s);
       }
     };
+    primaryColor.oninput = () => setTheme(primaryColor.value, secondaryColor.value);
+    secondaryColor.oninput = () => setTheme(primaryColor.value, secondaryColor.value);
 
-    // Color pickers
-    document.getElementById('primaryColor').oninput =
-    document.getElementById('secondaryColor').oninput = e => {
-      setTheme(
-        document.getElementById('primaryColor').value,
-        document.getElementById('secondaryColor').value
-      );
-    };
-
-    function setTheme(p,s) {
+    function setTheme(p, s) {
       document.documentElement.style.setProperty('--primary-color', p);
       document.documentElement.style.setProperty('--secondary-color', s);
     }
 
     // Notification
-    const note = document.getElementById('notification');
-    function showNotification(msg, isError=true) {
-      note.textContent = msg;
-      note.style.color = isError ? 'var(--error-color)' : 'var(--primary-color)';
-      note.style.display = 'block';
-      note.style.animation = 'notifIn 0.4s forwards';
-      setTimeout(()=>{
-        note.style.animation = 'notifOut 0.4s forwards';
+    function showNotification(msg, isError = true) {
+      notification.textContent = msg;
+      notification.style.color = isError ? 'var(--error-color)' : 'var(--primary-color)';
+      notification.style.animation = 'notifIn 0.4s forwards';
+      setTimeout(() => {
+        notification.style.animation = 'notifOut 0.4s forwards';
       }, 3000);
     }
   </script>
