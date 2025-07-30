@@ -3,41 +3,34 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SmartBed - Animated Background</title>
+<title>SmartBed - Animated Waves Background</title>
 <style>
-  /* Make sure body fills entire viewport */
+  /* Reset */
   html, body {
     height: 100%;
     margin: 0;
+    background: #121212; /* Dark black-grey background */
+    overflow: hidden; /* Hide scrollbars */
     font-family: Arial, sans-serif;
-  }
-
-  /* Animated gradient background */
-  body {
-    background: linear-gradient(270deg, #0f2027, #203a43, #2c5364);
-    background-size: 600% 600%;
-    animation: gradientShift 20s ease infinite;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     color: white;
   }
 
-  @keyframes gradientShift {
-    0% {
-      background-position: 0% 50%;
-    }
-    50% {
-      background-position: 100% 50%;
-    }
-    100% {
-      background-position: 0% 50%;
-    }
+  /* Container to hold waves and content */
+  .container {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
   }
 
-  /* Example centered content */
+  /* Content centered */
   .content {
+    position: relative;
+    z-index: 10;
     text-align: center;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0 20px;
   }
 
   .content h1 {
@@ -49,12 +42,72 @@
     font-size: 1.25rem;
     opacity: 0.8;
   }
+
+  /* Wave base styles */
+  .wave {
+    position: absolute;
+    bottom: 0;
+    width: 200%;
+    height: 20vh;
+    background: transparent;
+    border-radius: 100% 100% 0 0 / 50% 50% 0 0;
+    opacity: 0.15;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center bottom;
+  }
+
+  /* Individual waves with different animations */
+  .wave1 {
+    left: -50%;
+    background: #444;
+    animation: waveMove 8s linear infinite;
+    height: 20vh;
+    opacity: 0.2;
+    z-index: 1;
+  }
+
+  .wave2 {
+    left: -60%;
+    background: #666;
+    animation: waveMove 12s linear infinite reverse;
+    height: 15vh;
+    opacity: 0.15;
+    z-index: 2;
+  }
+
+  .wave3 {
+    left: -40%;
+    background: #888;
+    animation: waveMove 10s linear infinite;
+    height: 10vh;
+    opacity: 0.1;
+    z-index: 3;
+  }
+
+  /* Wave animation: horizontal translate */
+  @keyframes waveMove {
+    0% {
+      transform: translateX(0) scaleX(1);
+    }
+    50% {
+      transform: translateX(25%) scaleX(1.1);
+    }
+    100% {
+      transform: translateX(0) scaleX(1);
+    }
+  }
 </style>
 </head>
 <body>
-  <div class="content">
-    <h1>SmartBed</h1>
-    <p>LED Remote Control Interface</p>
+  <div class="container">
+    <div class="wave wave1"></div>
+    <div class="wave wave2"></div>
+    <div class="wave wave3"></div>
+
+    <div class="content">
+      <h1>SmartBed</h1>
+      <p>LED Remote Control Interface</p>
+    </div>
   </div>
 </body>
 </html>
