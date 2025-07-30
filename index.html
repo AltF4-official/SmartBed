@@ -2,149 +2,80 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SmartBed</title>
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @keyframes bgShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-
     body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: linear-gradient(-45deg, #0e0e0e, #1a1a1a, #121212, #1f1f1f);
-      background-size: 400% 400%;
-      animation: bgShift 40s ease infinite;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      color: #fff;
+      background-color: #0e0e0e;
     }
-
     .card {
-      background-color: rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(20px);
-      border-radius: 30px;
-      padding: 2.5rem 2rem;
-      width: 92%;
-      max-width: 420px;
-      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2rem;
+      background-color: #1a1a1a;
+      border: 1px solid #333;
     }
-
-    .power-btn {
-      width: 85px;
-      height: 85px;
-      border-radius: 50%;
-      border: 3px solid #fff;
-      background: #0e0e0e;
-      color: #00aaff;
-      font-size: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 0 15px #00aaff50;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
-      cursor: pointer;
+    .switch input:checked + span {
+      background-color: #4ade80;
     }
-
-    .power-btn.active {
-      box-shadow: 0 0 20px #00ffaa99, inset 0 0 15px #00ffaa44;
-      color: #00ffaa;
-    }
-
-    .power-btn:active {
-      transform: scale(0.95);
-    }
-
-    .slider-control {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-    }
-
-    .slider-label {
-      font-size: 1rem;
-      opacity: 0.9;
-    }
-
-    .slider-value {
-      font-size: 0.85rem;
-      text-align: right;
-      opacity: 0.6;
-    }
-
-    input[type=range] {
-      -webkit-appearance: none;
-      width: 100%;
-      height: 6px;
-      background: #333;
-      border-radius: 3px;
-      outline: none;
-    }
-
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      background: #00aaff;
-      border-radius: 50%;
-      cursor: pointer;
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
-    }
-
-    @media (max-width: 500px) {
-      .card {
-        padding: 2rem 1.5rem;
-        border-radius: 24px;
-      }
-
-      .power-btn {
-        width: 72px;
-        height: 72px;
-        font-size: 26px;
-      }
+    .switch input:checked + span::before {
+      transform: translateX(1.25rem);
     }
   </style>
 </head>
-<body>
-  <div class="card">
-    <button id="power" class="power-btn">⏻</button>
+<body class="text-white font-sans p-6">
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-4xl font-bold mb-6 text-center">SmartBed</h1>
 
-    <div class="slider-control">
-      <div class="slider-label">Brightness</div>
-      <input id="brightness" type="range" min="0" max="100" value="50">
-      <div class="slider-value" id="brightnessValue">50%</div>
+    <!-- Power Card -->
+    <div class="card rounded-2xl p-5 mb-6">
+      <div class="flex justify-between items-center mb-4">
+        <span class="text-xl font-semibold">Power</span>
+        <label class="switch relative inline-block w-12 h-6">
+          <input type="checkbox" class="sr-only" />
+          <span class="block bg-gray-600 rounded-full h-full transition-all before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:bg-white before:rounded-full before:w-5 before:h-5 before:transition-transform"></span>
+        </label>
+      </div>
     </div>
 
-    <div class="slider-control">
-      <div class="slider-label">Flash Time</div>
-      <input id="flash" type="range" min="10" max="1000" value="250">
-      <div class="slider-value" id="flashValue">250ms</div>
+    <!-- Brightness -->
+    <div class="card rounded-2xl p-5 mb-6">
+      <div class="mb-2 text-xl font-semibold">Brightness</div>
+      <input type="range" min="0" max="100" value="50" class="w-full">
     </div>
+
+    <!-- Flash Settings -->
+    <div class="card rounded-2xl p-5 mb-6">
+      <div class="mb-4 flex justify-between items-center">
+        <span class="text-xl font-semibold">Flash</span>
+        <label class="switch relative inline-block w-12 h-6">
+          <input type="checkbox" class="sr-only" />
+          <span class="block bg-gray-600 rounded-full h-full transition-all before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:bg-white before:rounded-full before:w-5 before:h-5 before:transition-transform"></span>
+        </label>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block mb-1 text-sm">Flash Duration (ms)</label>
+          <input type="number" value="200" class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white" />
+        </div>
+        <div>
+          <label class="block mb-1 text-sm">Flash Interval (ms)</label>
+          <input type="number" value="1000" class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Mode Select -->
+    <div class="card rounded-2xl p-5 mb-6">
+      <div class="mb-2 text-xl font-semibold">Mode</div>
+      <select class="w-full p-2 rounded bg-gray-800 border border-gray-600 text-white">
+        <option>Solid</option>
+        <option>Rainbow</option>
+        <option>Pulse</option>
+        <option>Flash</option>
+      </select>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-gray-500 text-sm mt-10">SmartBed Web Controller</p>
   </div>
-
-  <script>
-    const brightness = document.getElementById("brightness");
-    const flash = document.getElementById("flash");
-    const brightnessValue = document.getElementById("brightnessValue");
-    const flashValue = document.getElementById("flashValue");
-
-    brightness.oninput = () => brightnessValue.textContent = `${brightness.value}%`;
-    flash.oninput = () => flashValue.textContent = `${flash.value}ms`;
-
-    const powerBtn = document.getElementById("power");
-    powerBtn.onclick = () => {
-      powerBtn.classList.toggle("active");
-    };
-  </script>
 </body>
 </html>
