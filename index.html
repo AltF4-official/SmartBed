@@ -1,1 +1,437 @@
+import SwiftUI
 
+struct Theme: Identifiable, Hashable {
+    let id = UUID()
+    let name: String
+    var background: Color
+    var foreground: Color
+    var isCustom: Bool
+}
+
+@MainActor
+class NotificationManager: ObservableObject {
+    @Published var message: String?
+    func show(_ msg: String) {
+        withAnimation(.interpolatingSpring(stiffness: 200, damping: 15)) {
+            message = msg
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
+            withAnimation {
+                self.message = nil
+            }
+        }
+    }
+}
+
+struct ContentView: View {
+    @State private var isOn = false
+    @State private var brightness: Double = 35.0
+    @State private var flashMode = false
+    @State private var showFlashSettings = false
+    @State private var flashOnTime: Double = 100.0
+    @State private var flashOffTime: Double = 100.0
+    @State private var flashOnText: String = "100"
+    @State private var flashOffText: String = "100"
+    @State private var showSettings = false
+    @State private var selectedTheme: Theme
+    @State private var customPrimary: Color = .blue
+    @State private var customSecondary: Color = .white
+    @State private var showColorError = false
+
+    @StateObject private var notifier = NotificationManager()
+
+    let themes: [Theme] = [
+        Theme(name: "Electric Blue & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: .blue, isCustom: false),
+        Theme(name: "Baby Blue & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: Color(red: 0.7, green: 0.9, blue: 1), isCustom: false),
+        Theme(name: "Bubblegum Pink & White", background: .white, foreground: Color(red: 1, green: 0.4, blue: 0.7), isCustom: false),
+        Theme(name: "Forest Green & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: Color(red: 0, green: 0.5, blue: 0), isCustom: false),
+        Theme(name: "Gold & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: .yellow, isCustom: false),
+        Theme(name: "Cherry & Dark Gray", background: Color(red: 15/255, green: 15/255, blue: 15/255), foreground: .red, isCustom: false),
+        Theme(name: "Soft Lilac & White", background: .white, foreground: Color(red: 0.8, green: 0.7, blue: 1), isCustom: false),
+        Theme(name: "Custom", background: .blue, foreground: .white, isCustom: true)
+    ]
+
+    init() {
+        _selectedTheme = State(initialValue: themes.first!)
+    }
+
+    var body: some View {
+        ZStack {
+            themeBackground.ignoresSafeArea()
+            WavyBackground(color: themeForeground.opacity(0.2), spread: 1.5)
+
+            VStack {
+                header
+                Spacer()
+                powerButton
+                Spacer()
+                if isOn {
+                    if !flashMode {
+                        brightnessControl.transition(.opacity)
+                    }
+                    flashControls
+                }
+            }
+            .padding()
+            .animation(.easeInOut, value: isOn)
+            .animation(.easeInOut, value: flashMode)
+
+            if flashMode && showFlashSettings {
+                ModalView(primary: themeForeground, secondary: themeBackground) {
+                    VStack(spacing: 20) {
+                        Text("Flash Settings")
+                            .font(.headline)
+                            .foregroundColor(themeForeground)
+
+                        flashSettingInput(label: "On (ms)", text: $flashOnText)
+                        flashSettingInput(label: "Off (ms)", text: $flashOffText)
+
+                        HStack(spacing: 16) {
+                            Button("Cancel") {
+                                showFlashSettings = false
+                                flashOnText = String(Int(flashOnTime))
+                                flashOffText = String(Int(flashOffTime))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(themeBackground.opacity(0.6))
+                            .foregroundColor(themeForeground)
+                            .cornerRadius(10)
+
+                            Button("Apply") {
+                                guard let onVal = Double(flashOnText),
+                                      let offVal = Double(flashOffText) else {
+                                    notifier.show("Enter valid numbers.")
+                                    return
+                                }
+                                guard onVal >= 10, onVal <= 10000, offVal >= 10, offVal <= 10000 else {
+                                    notifier.show("Values must be 10 – 10000 ms.")
+                                    return
+                                }
+                                flashOnTime = onVal
+                                flashOffTime = offVal
+                                showFlashSettings = false
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(themeForeground)
+                            .foregroundColor(themeBackground)
+                            .cornerRadius(10)
+                        }
+                    }
+                    .padding(24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(themeBackground.opacity(0.95))
+                            .shadow(radius: 10)
+                    )
+                    .frame(width: UIScreen.main.bounds.width / 2)
+                }
+                .transition(.opacity.combined(with: .scale))
+            }
+
+            if showSettings {
+                ModalView(primary: themeForeground, secondary: themeBackground) {
+                    ScrollView {
+                        VStack(spacing: 20) {
+                            Text("Theme Settings")
+                                .font(.headline)
+                                .foregroundColor(themeForeground)
+
+                            CustomDropdown(
+                                themes: themes,
+                                selectedTheme: $selectedTheme,
+                                themeBackground: themeBackground,
+                                themeForeground: themeForeground
+                            )
+                            .frame(maxWidth: 300)
+
+                            if selectedTheme.isCustom {
+                                HStack {
+                                    Text("Primary:")
+                                        .foregroundColor(themeForeground)
+                                        .frame(width: 80, alignment: .trailing)
+                                    ColorPicker("", selection: Binding(
+                                        get: { customPrimary },
+                                        set: { new in
+                                            customPrimary = new
+                                            showColorError = colorsAreTooSimilar(foreground: new, background: customSecondary)
+                                        }
+                                    ))
+                                    .labelsHidden()
+                                }
+
+                                HStack {
+                                    Text("Secondary:")
+                                        .foregroundColor(themeForeground)
+                                        .frame(width: 80, alignment: .trailing)
+                                    ColorPicker("", selection: Binding(
+                                        get: { customSecondary },
+                                        set: { new in
+                                            customSecondary = new
+                                            showColorError = colorsAreTooSimilar(foreground: customPrimary, background: new)
+                                        }
+                                    ))
+                                    .labelsHidden()
+                                }
+                            }
+
+                            if showColorError {
+                                Text("Primary and secondary colors too similar")
+                                    .foregroundColor(.red)
+                                    .font(.footnote)
+                                    .multilineTextAlignment(.center)
+                            }
+
+                            Button("Close") {
+                                showSettings = false
+                                showColorError = false
+                            }
+                            .padding()
+                            .background(themeBackground)
+                            .foregroundColor(themeForeground)
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(themeForeground, lineWidth: 1))
+                            .cornerRadius(8)
+
+                            Spacer(minLength: 20)
+                        }
+                        .padding()
+                        .frame(width: UIScreen.main.bounds.width / 2)
+                    }
+                }
+                .transition(.opacity.animation(.easeIn(duration: 0.3)))
+            }
+
+            if let msg = notifier.message {
+                VStack {
+                    Spacer()
+                    Text(msg)
+                        .padding()
+                        .background(Color.black.opacity(0.8))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.bottom, 30)
+                        .transition(.move(edge: .bottom))
+                }
+                .animation(.easeOut, value: notifier.message)
+            }
+        }
+        .onAppear {
+            flashOnText = String(Int(flashOnTime))
+            flashOffText = String(Int(flashOffTime))
+        }
+    }
+
+    @ViewBuilder
+    private func flashSettingInput(label: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(label).foregroundColor(themeForeground)
+            TextField("", text: text)
+                .keyboardType(.numberPad)
+                .padding(10)
+                .background(themeBackground.opacity(0.3))
+                .foregroundColor(themeForeground)
+                .cornerRadius(6)
+                .overlay(RoundedRectangle(cornerRadius: 6).stroke(themeForeground, lineWidth: 1))
+                .onChange(of: text.wrappedValue) { v in
+                    let filtered = v.filter { "0123456789".contains($0) }
+                    text.wrappedValue = String(filtered.prefix(5))
+                }
+        }
+    }
+
+    private var header: some View {
+        HStack {
+            Image(systemName: "bed.double.fill").font(.title2).foregroundColor(themeForeground)
+            Spacer()
+            Text("SmartBed").font(.title2).bold().foregroundColor(themeForeground)
+            Spacer()
+            Button { showSettings.toggle() } label: {
+                Image(systemName: "gearshape.fill").font(.title2).foregroundColor(themeForeground)
+            }
+        }
+    }
+
+    private var powerButton: some View {
+        Button { isOn.toggle() } label: {
+            Image(systemName: "power.circle.fill")
+                .resizable()
+                .frame(width: 100, height: 100)
+                .foregroundColor(isOn ? themeForeground : .gray)
+        }
+        .buttonStyle(PlainButtonStyle())
+        .animation(.spring(), value: isOn)
+    }
+
+    private var flashControls: some View {
+        HStack(spacing: 10) {
+            Button { flashMode.toggle() } label: {
+                Text("Flash Mode")
+                    .font(.headline)
+                    .padding(12)
+                    .background(flashMode ? themeForeground : .clear)
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(themeForeground, lineWidth: 2))
+                    .foregroundColor(flashMode ? themeBackground : themeForeground)
+                    .cornerRadius(8)
+            }
+            if flashMode {
+                Button { showFlashSettings.toggle() } label: {
+                    Image(systemName: "slider.horizontal.3").font(.headline).foregroundColor(themeForeground)
+                }
+            }
+        }
+        .disabled(!isOn)
+        .animation(.easeInOut, value: flashMode)
+    }
+
+    private var brightnessControl: some View {
+        VStack {
+            HStack {
+                Button { brightness = max(brightness - 1, 0) } label: {
+                    Image(systemName: "sun.min.fill").foregroundColor(themeForeground)
+                }
+                Slider(value: $brightness, in: 0...35).accentColor(themeForeground)
+                Button { brightness = min(brightness + 1, 35) } label: {
+                    Image(systemName: "sun.max.fill").foregroundColor(themeForeground)
+                }
+            }
+            Text("\(Int((brightness / 35) * 100))%")
+                .foregroundColor(themeForeground)
+        }
+        .animation(.easeInOut, value: brightness)
+    }
+
+    private func colorsAreTooSimilar(foreground: Color, background: Color) -> Bool {
+        let fg = UIColor(foreground)
+        let bg = UIColor(background)
+        var fr: CGFloat = 0, fgC: CGFloat = 0, fb: CGFloat = 0, fa: CGFloat = 0
+        var br: CGFloat = 0, bgC: CGFloat = 0, bb: CGFloat = 0, ba: CGFloat = 0
+        fg.getRed(&fr, green: &fgC, blue: &fb, alpha: &fa)
+        bg.getRed(&br, green: &bgC, blue: &bb, alpha: &ba)
+        let dr = abs(fr - br) * 255
+        let dg = abs(fgC - bgC) * 255
+        let db = abs(fb - bb) * 255
+        return dr < 25 && dg < 25 && db < 25
+    }
+
+    private var themeBackground: Color { selectedTheme.isCustom ? customPrimary : selectedTheme.background }
+    private var themeForeground: Color { selectedTheme.isCustom ? customSecondary : selectedTheme.foreground }
+}
+
+struct CustomDropdown: View {
+    let themes: [Theme]
+    @Binding var selectedTheme: Theme
+    var themeBackground: Color
+    var themeForeground: Color
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Button(action: { withAnimation { isExpanded.toggle() } }) {
+                HStack {
+                    Text(selectedTheme.name).foregroundColor(themeForeground)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down").foregroundColor(themeForeground)
+                }
+                .padding()
+                .background(themeBackground)
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(themeForeground, lineWidth: 1))
+            }
+            if isExpanded {
+                VStack(spacing: 0) {
+                    ForEach(themes, id: \.self) { theme in
+                        Button(action: {
+                            withAnimation {
+                                selectedTheme = theme
+                                isExpanded = false
+                            }
+                        }) {
+                            Text(theme.name)
+                                .foregroundColor(themeForeground)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
+                                .background(themeBackground)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                        if theme != themes.last {
+                            Divider().background(themeForeground)
+                        }
+                    }
+                }
+                .background(themeBackground)
+                .cornerRadius(8)
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(themeForeground, lineWidth: 1))
+                .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+    }
+}
+
+struct WavyBackground: View {
+    var color: Color
+    var spread: CGFloat = 1.0
+
+    var body: some View {
+        GeometryReader { geo in
+            let count = Int(3 * spread)
+            ForEach(0..<count, id: \.self) { i in
+                WaveShape(amplitude: 15 + CGFloat(i * 5), frequency: spread * (0.5 + CGFloat(i) * 0.5))
+                    .stroke(color, lineWidth: 2)
+                    .offset(y: CGFloat(i) * 60 - 80)
+                    .frame(width: geo.size.width, height: geo.size.height)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+struct WaveShape: Shape {
+    var amplitude: CGFloat
+    var frequency: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let mid = rect.midY
+        path.move(to: CGPoint(x: 0, y: mid))
+        for x in stride(from: 0, to: rect.width, by: 1) {
+            let y = mid + sin((x / rect.width) * .pi * frequency) * amplitude
+            path.addLine(to: CGPoint(x: x, y: y))
+        }
+        return path
+    }
+}
+
+struct ModalView<Content: View>: View {
+    var primary: Color
+    var secondary: Color
+    let content: Content
+
+    init(primary: Color, secondary: Color, @ViewBuilder content: () -> Content) {
+        self.primary = primary
+        self.secondary = secondary
+        self.content = content()
+    }
+
+    var body: some View {
+        ZStack {
+            Color.black.opacity(0.4).ignoresSafeArea()
+            VStack { content }
+                .padding()
+                .background(secondary)
+                .cornerRadius(12)
+                .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(primary, lineWidth: 1))
+                .shadow(radius: 10)
+                .transition(.scale.combined(with: .opacity))
+        }
+    }
+}
+
+@main
+struct SmartBedApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
