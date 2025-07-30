@@ -3,174 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SmartBed Controller</title>
+  <title>SmartBed</title>
   <style>
-    /* Animated dark gradient background */
-    @keyframes bgAnim {
+    /* Animated background */
+    @keyframes gradientMove {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
-    html, body {
-      height: 100%;
+
+    body {
       margin: 0;
-      background: linear-gradient(-45deg, #0f1118, #1a1f2b, #0f1118, #242832);
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #0c0f14, #1a1f2c, #10141b, #2e3440);
       background-size: 400% 400%;
-      animation: bgAnim 25s ease infinite;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
+      animation: gradientMove 30s ease infinite;
+      color: #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #e0e0e0;
-      padding: 1rem;
+      height: 100vh;
     }
-    :root {
-      --primary: #4da8da;
-      --panel-bg: rgba(20,24,32,0.6);
-      --shadow-dark: rgba(0,0,0,0.6);
-      --shadow-light: rgba(255,255,255,0.1);
-      --radius: 16px;
-      --transition: 0.3s ease;
-    }
-    * { box-sizing: border-box; }
 
-    /* Unified panel */
     .panel {
-      width: 100%;
-      max-width: 360px;
-      background: var(--panel-bg);
-      border-radius: var(--radius);
-      box-shadow:
-        8px 8px 16px var(--shadow-dark),
-        -8px -8px 16px var(--shadow-light);
-      padding: 2rem 1.5rem;
-    }
-    .panel h1 {
-      margin: 0 0 1.5rem;
-      font-weight: 300;
-      text-align: center;
-      font-size: 1.6rem;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
     }
 
-    /* Control rows */
-    .control-row {
+    .power-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: #1e88e5;
       display: flex;
       align-items: center;
-      margin-bottom: 1.5rem;
+      justify-content: center;
+      font-size: 32px;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+      border: none;
+      cursor: pointer;
+      transition: transform 0.2s ease;
     }
-    .control-row:last-child { margin-bottom: 0; }
 
-    .control-row label {
-      flex: 1;
+    .power-button:active {
+      transform: scale(0.95);
+    }
+
+    .control {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .control label {
       font-size: 1rem;
-      font-weight: 400;
+      margin-left: 0.25rem;
     }
 
-    /* Neumorphic button */
-    .btn {
-      width: 56px; height: 56px;
-      background: rgba(20,24,32,0.8);
-      border: none; border-radius: 50%;
-      color: var(--primary);
-      font-size: 1.4rem;
-      box-shadow:
-        inset 4px 4px 8px var(--shadow-dark),
-        inset -4px -4px 8px var(--shadow-light),
-        4px 4px 8px var(--shadow-dark),
-        -4px -4px 8px var(--shadow-light);
-      cursor: pointer;
-      transition: transform var(--transition);
-    }
-    .btn.on {
-      background: var(--primary);
-      color: #141821;
-      box-shadow:
-        inset 4px 4px 8px var(--shadow-dark),
-        inset -4px -4px 8px var(--shadow-light);
-    }
-    .btn:hover { transform: scale(1.1); }
-    .btn:active { transform: scale(0.95); }
-
-    /* Range slider */
-    input[type=range] {
-      -webkit-appearance: none;
-      flex: 1;
+    .control input[type="range"] {
+      width: 100%;
       height: 6px;
-      background: rgba(20,24,32,0.8);
-      border-radius: 4px;
-      box-shadow:
-        inset 2px 2px 4px var(--shadow-dark),
-        inset -2px -2px 4px var(--shadow-light);
+      border-radius: 5px;
+      background: #333;
       outline: none;
-      transition: background var(--transition);
+      transition: background 0.3s ease;
+      appearance: none;
     }
-    input[type=range]:hover { background: rgba(20,24,32,0.9); }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px; height: 20px;
-      background: var(--primary);
+
+    .control input[type="range"]::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
+      background: #4da8ff;
+      box-shadow: 0 0 0 2px #ffffff20;
       cursor: pointer;
-      box-shadow:
-        2px 2px 4px var(--shadow-dark),
-        -2px -2px 4px var(--shadow-light);
       transition: transform 0.2s;
     }
-    input[type=range]::-webkit-slider-thumb:active {
-      transform: scale(1.3);
+
+    .control input[type="range"]:active::-webkit-slider-thumb {
+      transform: scale(1.2);
     }
 
-    /* Value text */
     .value {
-      width: 40px;
       text-align: right;
-      font-weight: 500;
+      font-size: 0.9rem;
+      opacity: 0.8;
     }
 
-    @media (max-width: 400px) {
-      .panel { padding: 1.5rem 1rem; }
-      .control-row { flex-direction: column; align-items: stretch; gap: .5rem; }
-      .control-row label, .value, .btn { text-align: center; margin: 0 auto; }
-      input[type=range], .btn, .value { width: 100%; }
-      .value { text-align: center; }
+    @media (max-width: 450px) {
+      .panel {
+        padding: 1.5rem;
+        border-radius: 16px;
+      }
+
+      .power-button {
+        width: 64px;
+        height: 64px;
+        font-size: 24px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="panel">
-    <h1>SmartBed</h1>
-    <div class="control-row">
-      <label for="powerBtn">Power</label>
-      <button id="powerBtn" class="btn">⏻</button>
-    </div>
-    <div class="control-row">
+    <button class="power-button" id="powerBtn">⏻</button>
+
+    <div class="control">
       <label for="brightness">Brightness</label>
-      <input type="range" id="brightness" min="0" max="100" value="50">
-      <div id="brightVal" class="value">50%</div>
+      <input type="range" id="brightness" min="0" max="100" value="50" />
+      <div class="value" id="brightnessValue">50%</div>
     </div>
-    <div class="control-row">
-      <label for="flashBtn">Flash</label>
-      <button id="flashBtn" class="btn">⚡</button>
+
+    <div class="control">
+      <label for="flash">Flash Time</label>
+      <input type="range" id="flash" min="10" max="1000" value="250" />
+      <div class="value" id="flashValue">250ms</div>
     </div>
   </div>
 
   <script>
-    // Power toggle
-    document.getElementById('powerBtn').addEventListener('click', e => {
-      e.currentTarget.classList.toggle('on');
-    });
+    const brightness = document.getElementById('brightness');
+    const brightnessValue = document.getElementById('brightnessValue');
+    brightness.oninput = () => {
+      brightnessValue.textContent = `${brightness.value}%`;
+    };
 
-    // Brightness
-    const bright = document.getElementById('brightness');
-    const brightVal = document.getElementById('brightVal');
-    bright.addEventListener('input', () => {
-      brightVal.textContent = bright.value + '%';
-    });
+    const flash = document.getElementById('flash');
+    const flashValue = document.getElementById('flashValue');
+    flash.oninput = () => {
+      flashValue.textContent = `${flash.value}ms`;
+    };
 
-    // Flash toggle
-    document.getElementById('flashBtn').addEventListener('click', e => {
-      e.currentTarget.classList.toggle('on');
-    });
+    const powerBtn = document.getElementById('powerBtn');
+    powerBtn.onclick = () => {
+      powerBtn.classList.toggle('active');
+      powerBtn.style.backgroundColor = powerBtn.classList.contains('active') ? '#00e676' : '#1e88e5';
+    };
   </script>
 </body>
 </html>
