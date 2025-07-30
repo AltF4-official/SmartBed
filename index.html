@@ -8,7 +8,7 @@
     html, body {
       margin: 0;
       height: 100%;
-      background: radial-gradient(ellipse at bottom, #0b0c10 0%, #000000 100%);
+      background: radial-gradient(ellipse at bottom, #050505 0%, #000000 100%);
       overflow: hidden;
       font-family: Arial, sans-serif;
       color: white;
@@ -20,31 +20,31 @@
       height: 100%;
       top: -20%;
       left: -50%;
-      background: linear-gradient(120deg, #39f 0%, #0ff 40%, #0f0 70%, transparent 100%);
-      opacity: 0.2;
-      filter: blur(80px);
-      animation: moveAurora 18s ease-in-out infinite alternate;
-      transform: rotate(8deg);
+      background: linear-gradient(120deg, #003366 0%, #004d4d 40%, #003300 70%, transparent 100%);
+      opacity: 0.12;
+      filter: blur(100px);
+      animation: moveAurora 20s ease-in-out infinite alternate;
+      transform: rotate(6deg);
       z-index: 0;
     }
 
     .aurora2 {
-      background: linear-gradient(90deg, #4ff 0%, #0f0 50%, #39f 100%);
-      opacity: 0.15;
-      animation-delay: 3s;
-      animation-duration: 25s;
-      transform: rotate(-6deg);
+      background: linear-gradient(90deg, #002b36 0%, #003c3c 50%, #001a33 100%);
+      opacity: 0.1;
+      animation-delay: 5s;
+      animation-duration: 30s;
+      transform: rotate(-8deg);
     }
 
     @keyframes moveAurora {
       0% {
-        transform: translateX(-20%) rotate(5deg);
+        transform: translateX(-25%) rotate(4deg);
       }
       50% {
-        transform: translateX(20%) rotate(8deg);
+        transform: translateX(20%) rotate(6deg);
       }
       100% {
-        transform: translateX(-10%) rotate(5deg);
+        transform: translateX(-10%) rotate(4deg);
       }
     }
 
@@ -68,7 +68,7 @@
 
     p {
       font-size: 1.25rem;
-      opacity: 0.7;
+      opacity: 0.65;
     }
   </style>
 </head>
