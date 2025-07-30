@@ -22,7 +22,7 @@
   <button class="btn" onclick="toggleFlash()" id="flashBtn">Enable Flash Mode</button>
 
   <script>
-    // Change to your ESP32 IP or keep this page served locally via GitHub
+    // Replace with your ESP32’s address
     const espBase = 'http://192.168.1.123';
     let flashEnabled = false;
 
@@ -38,7 +38,9 @@
 
     function toggleFlash() {
       flashEnabled = !flashEnabled;
-      document.getElementById('flashBtn').textContent = flashEnabled ? 'Disable Flash Mode' : 'Enable Flash Mode';
+      document.getElementById('flashBtn').textContent = flashEnabled
+        ? 'Disable Flash Mode'
+        : 'Enable Flash Mode';
       send(`flash?mode=${flashEnabled ? 'on' : 'off'}`);
     }
   </script>
