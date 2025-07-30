@@ -2,108 +2,239 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartBed</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    :root {
+      --bg: #0b0b0b;
+      --card: #1a1a1a;
+      --border: #2e2e2e;
+      --accent: #4ade80;
+      --text: #ffffff;
+      --text-muted: #888888;
+    }
+
     body {
-      background-color: #0b0b0b;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', sans-serif;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
     }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
     .card {
-      background-color: #1a1a1a;
-      border: 1px solid #2e2e2e;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
     }
-    .switch input:checked + span {
-      background-color: #22c55e;
+
+    /* Toggle Switch */
+    .toggle-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .switch input:checked + span::before {
-      transform: translateX(1.25rem);
+
+    .toggle {
+      position: relative;
+      width: 48px;
+      height: 26px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      background-color: #444;
+      border-radius: 50px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      transition: background-color 0.3s;
+    }
+
+    .slider::before {
+      content: "";
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      top: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .toggle input:checked + .slider {
+      background-color: var(--accent);
+    }
+
+    .toggle input:checked + .slider::before {
+      transform: translateX(22px);
+    }
+
+    /* Custom Slider */
+    .slider-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slider-wrapper input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 5px;
+      background: linear-gradient(to right, var(--accent) 50%, #333 0%);
+      outline: none;
+      transition: background 0.3s;
+    }
+
+    .slider-wrapper input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      transition: transform 0.2s;
+      box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+    }
+
+    .slider-wrapper input[type="range"]::-moz-range-thumb {
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+    }
+
+    /* Flash inputs */
+    .flash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .flash-grid input {
+      background: #111;
+      color: white;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 10px;
+      width: 100%;
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .footer {
+      text-align: center;
+      color: #666;
+      font-size: 0.8rem;
+      margin-top: 32px;
     }
   </style>
 </head>
-<body class="text-white font-sans p-4 sm:p-6 md:p-10">
-  <div class="max-w-md mx-auto space-y-6">
-
-    <!-- Title -->
-    <h1 class="text-3xl font-semibold text-center mb-2">SmartBed</h1>
+<body>
+  <div class="container">
+    <h1>SmartBed</h1>
 
     <!-- Power Toggle -->
-    <div class="card p-5 rounded-2xl">
-      <div class="flex justify-between items-center">
-        <span class="text-lg font-medium">Power</span>
-        <label class="switch relative inline-block w-12 h-6">
-          <input type="checkbox" id="powerToggle" class="sr-only" />
-          <span class="block bg-gray-600 rounded-full h-full transition-all before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:bg-white before:rounded-full before:w-5 before:h-5 before:transition-transform"></span>
+    <div class="card">
+      <div class="toggle-wrapper">
+        <span>Power</span>
+        <label class="toggle">
+          <input type="checkbox" id="powerToggle">
+          <span class="slider"></span>
         </label>
       </div>
     </div>
 
-    <!-- Brightness Slider -->
-    <div class="card p-5 rounded-2xl">
-      <label for="brightness" class="block text-lg font-medium mb-2">Brightness</label>
-      <input type="range" id="brightness" min="0" max="100" value="50" class="w-full accent-green-400">
+    <!-- Brightness -->
+    <div class="card">
+      <label for="brightness">Brightness</label>
+      <div class="slider-wrapper">
+        <input type="range" id="brightness" min="0" max="100" value="50">
+      </div>
     </div>
 
     <!-- Flash Settings -->
-    <div class="card p-5 rounded-2xl space-y-4">
-      <div class="flex justify-between items-center">
-        <span class="text-lg font-medium">Flash</span>
-        <label class="switch relative inline-block w-12 h-6">
-          <input type="checkbox" id="flashToggle" class="sr-only" />
-          <span class="block bg-gray-600 rounded-full h-full transition-all before:content-[''] before:absolute before:top-0.5 before:left-0.5 before:bg-white before:rounded-full before:w-5 before:h-5 before:transition-transform"></span>
+    <div class="card">
+      <div class="toggle-wrapper mb-2">
+        <span>Flash</span>
+        <label class="toggle">
+          <input type="checkbox" id="flashToggle">
+          <span class="slider"></span>
         </label>
       </div>
-      <div class="grid grid-cols-2 gap-4">
+      <div class="flash-grid">
         <div>
-          <label for="flashDuration" class="block text-sm mb-1">Duration (ms)</label>
-          <input id="flashDuration" type="number" value="200" class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none" />
+          <label for="flashDuration">Duration (ms)</label>
+          <input type="number" id="flashDuration" value="200">
         </div>
         <div>
-          <label for="flashInterval" class="block text-sm mb-1">Interval (ms)</label>
-          <input id="flashInterval" type="number" value="1000" class="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none" />
+          <label for="flashInterval">Interval (ms)</label>
+          <input type="number" id="flashInterval" value="1000">
         </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <p class="text-center text-gray-500 text-sm mt-10">SmartBed Web Controller</p>
+    <p class="footer">SmartBed Web Controller</p>
   </div>
 
   <script>
-    // Placeholder: connect these to your ESP32 later
-    document.getElementById("powerToggle").addEventListener("change", (e) => {
-      const state = e.target.checked;
-      console.log("Power:", state);
-      // sendToESP32("power", state);
-    });
-
-    document.getElementById("brightness").addEventListener("input", (e) => {
+    const brightnessSlider = document.getElementById("brightness");
+    brightnessSlider.addEventListener("input", (e) => {
       const val = e.target.value;
-      console.log("Brightness:", val);
+      const percent = val + "%";
+      e.target.style.background = `linear-gradient(to right, var(--accent) ${val}%, #333 ${val}%)`;
       // sendToESP32("brightness", val);
     });
 
+    document.getElementById("powerToggle").addEventListener("change", (e) => {
+      console.log("Power:", e.target.checked);
+    });
+
     document.getElementById("flashToggle").addEventListener("change", (e) => {
-      const state = e.target.checked;
-      console.log("Flash:", state);
-      // sendToESP32("flash", state);
+      console.log("Flash:", e.target.checked);
     });
 
     document.getElementById("flashDuration").addEventListener("change", (e) => {
       console.log("Flash Duration:", e.target.value);
-      // sendToESP32("flashDuration", e.target.value);
     });
 
     document.getElementById("flashInterval").addEventListener("change", (e) => {
       console.log("Flash Interval:", e.target.value);
-      // sendToESP32("flashInterval", e.target.value);
     });
-
-    // Example stub for sending data to ESP32
-    function sendToESP32(key, value) {
-      fetch(`/api?${key}=${value}`).catch(err => console.error(err));
-    }
   </script>
 </body>
 </html>
