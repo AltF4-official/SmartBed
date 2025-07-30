@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SmartBed</title>
   <style>
-    /* Animated background */
-    @keyframes gradientMove {
+    @keyframes bgShift {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
@@ -14,142 +13,137 @@
 
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(-45deg, #0c0f14, #1a1f2c, #10141b, #2e3440);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(-45deg, #0e0e0e, #1a1a1a, #121212, #1f1f1f);
       background-size: 400% 400%;
-      animation: gradientMove 30s ease infinite;
-      color: #fff;
+      animation: bgShift 40s ease infinite;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
+      color: #fff;
     }
 
-    .panel {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(16px);
-      border-radius: 24px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-      padding: 2rem;
-      width: 90%;
-      max-width: 400px;
+    .card {
+      background-color: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px);
+      border-radius: 30px;
+      padding: 2.5rem 2rem;
+      width: 92%;
+      max-width: 420px;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2rem;
     }
 
-    .power-button {
-      width: 80px;
-      height: 80px;
+    .power-btn {
+      width: 85px;
+      height: 85px;
       border-radius: 50%;
-      background-color: #1e88e5;
+      border: 3px solid #fff;
+      background: #0e0e0e;
+      color: #00aaff;
+      font-size: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 32px;
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
-      border: none;
+      box-shadow: 0 0 15px #00aaff50;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
       cursor: pointer;
-      transition: transform 0.2s ease;
     }
 
-    .power-button:active {
+    .power-btn.active {
+      box-shadow: 0 0 20px #00ffaa99, inset 0 0 15px #00ffaa44;
+      color: #00ffaa;
+    }
+
+    .power-btn:active {
       transform: scale(0.95);
     }
 
-    .control {
+    .slider-control {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
-    .control label {
+    .slider-label {
       font-size: 1rem;
-      margin-left: 0.25rem;
+      opacity: 0.9;
     }
 
-    .control input[type="range"] {
+    .slider-value {
+      font-size: 0.85rem;
+      text-align: right;
+      opacity: 0.6;
+    }
+
+    input[type=range] {
+      -webkit-appearance: none;
       width: 100%;
       height: 6px;
-      border-radius: 5px;
       background: #333;
+      border-radius: 3px;
       outline: none;
-      transition: background 0.3s ease;
-      appearance: none;
     }
 
-    .control input[type="range"]::-webkit-slider-thumb {
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
       appearance: none;
       width: 18px;
       height: 18px;
+      background: #00aaff;
       border-radius: 50%;
-      background: #4da8ff;
-      box-shadow: 0 0 0 2px #ffffff20;
       cursor: pointer;
-      transition: transform 0.2s;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
     }
 
-    .control input[type="range"]:active::-webkit-slider-thumb {
-      transform: scale(1.2);
-    }
-
-    .value {
-      text-align: right;
-      font-size: 0.9rem;
-      opacity: 0.8;
-    }
-
-    @media (max-width: 450px) {
-      .panel {
-        padding: 1.5rem;
-        border-radius: 16px;
+    @media (max-width: 500px) {
+      .card {
+        padding: 2rem 1.5rem;
+        border-radius: 24px;
       }
 
-      .power-button {
-        width: 64px;
-        height: 64px;
-        font-size: 24px;
+      .power-btn {
+        width: 72px;
+        height: 72px;
+        font-size: 26px;
       }
     }
   </style>
 </head>
 <body>
-  <div class="panel">
-    <button class="power-button" id="powerBtn">⏻</button>
+  <div class="card">
+    <button id="power" class="power-btn">⏻</button>
 
-    <div class="control">
-      <label for="brightness">Brightness</label>
-      <input type="range" id="brightness" min="0" max="100" value="50" />
-      <div class="value" id="brightnessValue">50%</div>
+    <div class="slider-control">
+      <div class="slider-label">Brightness</div>
+      <input id="brightness" type="range" min="0" max="100" value="50">
+      <div class="slider-value" id="brightnessValue">50%</div>
     </div>
 
-    <div class="control">
-      <label for="flash">Flash Time</label>
-      <input type="range" id="flash" min="10" max="1000" value="250" />
-      <div class="value" id="flashValue">250ms</div>
+    <div class="slider-control">
+      <div class="slider-label">Flash Time</div>
+      <input id="flash" type="range" min="10" max="1000" value="250">
+      <div class="slider-value" id="flashValue">250ms</div>
     </div>
   </div>
 
   <script>
-    const brightness = document.getElementById('brightness');
-    const brightnessValue = document.getElementById('brightnessValue');
-    brightness.oninput = () => {
-      brightnessValue.textContent = `${brightness.value}%`;
-    };
+    const brightness = document.getElementById("brightness");
+    const flash = document.getElementById("flash");
+    const brightnessValue = document.getElementById("brightnessValue");
+    const flashValue = document.getElementById("flashValue");
 
-    const flash = document.getElementById('flash');
-    const flashValue = document.getElementById('flashValue');
-    flash.oninput = () => {
-      flashValue.textContent = `${flash.value}ms`;
-    };
+    brightness.oninput = () => brightnessValue.textContent = `${brightness.value}%`;
+    flash.oninput = () => flashValue.textContent = `${flash.value}ms`;
 
-    const powerBtn = document.getElementById('powerBtn');
+    const powerBtn = document.getElementById("power");
     powerBtn.onclick = () => {
-      powerBtn.classList.toggle('active');
-      powerBtn.style.backgroundColor = powerBtn.classList.contains('active') ? '#00e676' : '#1e88e5';
+      powerBtn.classList.toggle("active");
     };
   </script>
 </body>
