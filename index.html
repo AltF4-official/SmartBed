@@ -6,26 +6,30 @@
   <title>SmartBed</title>
   <style>
     :root {
-      --bg: #0b0b0b;
+      --bg: #000000;
       --card: #1a1a1a;
-      --border: #2e2e2e;
+      --border: #2c2c2c;
       --accent: #4ade80;
       --text: #ffffff;
-      --text-muted: #888888;
+      --text-muted: #aaaaaa;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
-      background: var(--bg);
+      padding: 24px;
+      font-family: "Segoe UI", sans-serif;
+      background-color: var(--bg);
       color: var(--text);
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
       display: flex;
       justify-content: center;
     }
 
     .container {
-      max-width: 400px;
+      max-width: 440px;
       width: 100%;
       display: flex;
       flex-direction: column;
@@ -34,32 +38,32 @@
 
     h1 {
       text-align: center;
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 8px;
     }
 
     .card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background-color: var(--card);
       border-radius: 16px;
       padding: 20px;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
 
-    /* Toggle Switch */
-    .toggle-wrapper {
+    .row {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .toggle {
+    /* Toggle Switch */
+    .switch {
       position: relative;
-      width: 48px;
+      width: 50px;
       height: 26px;
     }
 
-    .toggle input {
+    .switch input {
       opacity: 0;
       width: 0;
       height: 0;
@@ -86,80 +90,66 @@
       top: 3px;
       background-color: white;
       border-radius: 50%;
-      transition: transform 0.3s;
+      transition: transform 0.25s ease;
     }
 
-    .toggle input:checked + .slider {
+    .switch input:checked + .slider {
       background-color: var(--accent);
     }
 
-    .toggle input:checked + .slider::before {
-      transform: translateX(22px);
+    .switch input:checked + .slider::before {
+      transform: translateX(24px);
     }
 
-    /* Custom Slider */
-    .slider-wrapper {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .slider-wrapper input[type="range"] {
+    /* Slider */
+    input[type="range"] {
       -webkit-appearance: none;
       width: 100%;
       height: 6px;
-      border-radius: 5px;
-      background: linear-gradient(to right, var(--accent) 50%, #333 0%);
+      border-radius: 4px;
+      background: #444;
       outline: none;
-      transition: background 0.3s;
     }
 
-    .slider-wrapper input[type="range"]::-webkit-slider-thumb {
+    input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      height: 20px;
-      width: 20px;
+      height: 18px;
+      width: 18px;
       border-radius: 50%;
       background: white;
       cursor: pointer;
-      transition: transform 0.2s;
-      box-shadow: 0 0 6px rgba(0, 0, 0, 0.5);
+      margin-top: -6px;
     }
 
-    .slider-wrapper input[type="range"]::-moz-range-thumb {
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
-      background: white;
-      cursor: pointer;
-    }
-
-    /* Flash inputs */
+    /* Flash Input Fields */
     .flash-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
+      margin-top: 12px;
     }
 
-    .flash-grid input {
-      background: #111;
+    .flash-grid input[type="number"] {
+      width: 100%;
+      background-color: #111;
       color: white;
       border: 1px solid #444;
-      border-radius: 8px;
-      padding: 10px;
-      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      font-size: 15px;
     }
 
     label {
-      font-size: 0.9rem;
+      font-size: 14px;
       color: var(--text-muted);
-      display: block;
       margin-bottom: 6px;
+      display: block;
     }
 
     .footer {
       text-align: center;
+      font-size: 13px;
       color: #666;
-      font-size: 0.8rem;
       margin-top: 32px;
     }
   </style>
@@ -170,28 +160,26 @@
 
     <!-- Power Toggle -->
     <div class="card">
-      <div class="toggle-wrapper">
+      <div class="row">
         <span>Power</span>
-        <label class="toggle">
+        <label class="switch">
           <input type="checkbox" id="powerToggle">
           <span class="slider"></span>
         </label>
       </div>
     </div>
 
-    <!-- Brightness -->
+    <!-- Brightness Slider -->
     <div class="card">
       <label for="brightness">Brightness</label>
-      <div class="slider-wrapper">
-        <input type="range" id="brightness" min="0" max="100" value="50">
-      </div>
+      <input type="range" id="brightness" min="0" max="100" value="50">
     </div>
 
     <!-- Flash Settings -->
     <div class="card">
-      <div class="toggle-wrapper mb-2">
+      <div class="row">
         <span>Flash</span>
-        <label class="toggle">
+        <label class="switch">
           <input type="checkbox" id="flashToggle">
           <span class="slider"></span>
         </label>
@@ -212,16 +200,12 @@
   </div>
 
   <script>
-    const brightnessSlider = document.getElementById("brightness");
-    brightnessSlider.addEventListener("input", (e) => {
-      const val = e.target.value;
-      const percent = val + "%";
-      e.target.style.background = `linear-gradient(to right, var(--accent) ${val}%, #333 ${val}%)`;
-      // sendToESP32("brightness", val);
-    });
-
     document.getElementById("powerToggle").addEventListener("change", (e) => {
       console.log("Power:", e.target.checked);
+    });
+
+    document.getElementById("brightness").addEventListener("input", (e) => {
+      console.log("Brightness:", e.target.value);
     });
 
     document.getElementById("flashToggle").addEventListener("change", (e) => {
