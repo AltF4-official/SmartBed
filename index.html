@@ -2,340 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>SmartBed Interface</title>
+  <title>SmartBed Controller</title>
   <style>
     :root {
-      --primary-color: #3f51b5;
-      --background-color: #f5f5f5;
-      --text-color: #333;
-      --card-color: #ffffff;
+      --primary: #4eacff;
+      --secondary: #111111;
+      --bg: #121212;
+      --fg: #f0f0f0;
+      --radius: 12px;
+      --shadow: 0 8px 24px rgba(0,0,0,0.6);
+      --transition: 0.3s ease;
     }
+    * { box-sizing: border-box; margin:0; padding:0; }
     body {
-      margin: 0;
-      padding: 20px;
-      background-color: var(--background-color);
-      font-family: Arial, sans-serif;
-      color: var(--text-color);
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    .container {
+    .wrapper {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      grid-gap: 20px;
-      max-width: 900px;
-      margin: 0 auto;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      width: 600px;
     }
     .card {
-      background-color: var(--card-color);
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      background: var(--secondary);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      text-align: center;
+      transition: transform var(--transition);
     }
-    .brightness-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .card:hover { transform: translateY(-4px); }
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
     }
-    .brightness-card h2 {
-      margin: 0 0 15px;
-      font-size: 24px;
-    }
-    #brightnessRange {
+
+    /* Brightness */
+    #brightness {
       width: 100%;
-      margin: 10px 0;
+      -webkit-appearance: none;
+      height: 6px;
+      background: #333;
+      border-radius: 3px;
+      outline: none;
+      transition: background 0.3s;
     }
-    #brightnessValue {
-      font-size: 18px;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .settings-column {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .flash-card, .theme-card {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .flash-card h2, .theme-card h2 {
-      margin: 0 0 10px;
-      font-size: 20px;
-    }
-    .flash-card {
-      align-items: center;
-    }
-    .theme-card .theme-info {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    button {
-      padding: 8px 16px;
-      background-color: var(--primary-color);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      transition: background-color 0.3s;
-    }
-    button:hover {
-      background-color: #5c6bc0;
-    }
-    .switch {
-      position: relative;
-      display: inline-block;
-      width: 50px;
-      height: 24px;
-      margin-right: 10px;
-    }
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      border-radius: 24px;
-      transition: background-color 0.4s;
-    }
-    .slider:before {
-      position: absolute;
-      content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      top: 3px;
-      background-color: white;
+    #brightness:hover { background: #444; }
+    #brightness::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      background: var(--primary);
       border-radius: 50%;
-      transition: transform 0.4s;
-    }
-    input:checked + .slider {
-      background-color: var(--primary-color);
-    }
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background-color: var(--card-color);
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 8px;
-      width: 300px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      position: relative;
-      animation: slideDown 0.4s ease;
-    }
-    @keyframes slideDown {
-      from { transform: translateY(-20px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .close {
-      color: #aaa;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 24px;
-      font-weight: bold;
       cursor: pointer;
+      transition: transform 0.2s;
     }
-    .close:hover {
-      color: #555;
-    }
-    .modal-content h2 {
-      margin-top: 0;
-      font-size: 20px;
-    }
-    .modal-content label {
+    #brightness::-webkit-slider-thumb:active { transform: scale(1.3); }
+    #brightVal {
       display: block;
-      margin: 10px 0;
-      font-size: 14px;
+      margin-top: 1rem;
+      font-size: 1.25rem;
+      font-weight: bold;
     }
-    .modal-content input[type=number] {
-      width: calc(100% - 12px);
-      padding: 5px;
-      margin-top: 5px;
-    }
-    .modal-content input[type=color] {
-      width: 100%;
-      height: 30px;
-      border: none;
-      padding: 0;
-      margin-top: 5px;
+
+    /* Flash */
+    .flash-btn {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 4px solid var(--primary);
+      background: none;
       cursor: pointer;
+      font-size: 2rem;
+      color: var(--primary);
+      transition: background var(--transition), transform var(--transition), color var(--transition);
     }
-    .notification {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background-color: var(--primary-color);
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-      font-size: 14px;
-      z-index: 200;
+    .flash-btn.on {
+      background: var(--primary);
+      color: var(--secondary);
     }
-    @keyframes fadein {
-      from {opacity: 0;}
-      to {opacity: 1;}
-    }
-    @keyframes fadeout {
-      from {opacity: 1;}
-      to {opacity: 0;}
-    }
-    .color-box {
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      border: 1px solid #aaa;
-      background-color: var(--primary-color);
-    }
+    .flash-btn:hover { transform: scale(1.05); }
+    .flash-btn:active { transform: scale(0.95); }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="card brightness-card">
+  <div class="wrapper">
+    <!-- Brightness Card -->
+    <div class="card">
       <h2>Brightness</h2>
-      <input type="range" id="brightnessRange" min="0" max="100" value="50">
-      <span id="brightnessValue">50%</span>
+      <input type="range" id="brightness" min="0" max="100" value="50">
+      <span id="brightVal">50%</span>
     </div>
-    <div class="settings-column">
-      <div class="card flash-card">
-        <h2>Flash</h2>
-        <div>
-          <label class="switch">
-            <input type="checkbox" id="flashToggle"><span class="slider"></span>
-          </label>
-          <button id="flashSettingsButton">Settings</button>
-        </div>
-      </div>
-      <div class="card theme-card">
-        <h2>Theme</h2>
-        <div class="theme-info">
-          <div id="colorPreview" class="color-box"></div>
-          <button id="themeSettingsButton">Settings</button>
-        </div>
-      </div>
+
+    <!-- Flash Card -->
+    <div class="card">
+      <h2>Flash</h2>
+      <button id="flashBtn" class="flash-btn">⚡</button>
     </div>
   </div>
-  <!-- Flash Settings Modal -->
-  <div id="flashModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="flashModalClose">&times;</span>
-      <h2>Flash Settings</h2>
-      <label>On Duration (ms):
-        <input id="flashOn" type="number" min="0" value="500">
-      </label>
-      <label>Off Duration (ms):
-        <input id="flashOff" type="number" min="0" value="500">
-      </label>
-      <button id="flashSave">Save</button>
-    </div>
-  </div>
-  <!-- Theme Settings Modal -->
-  <div id="themeModal" class="modal">
-    <div class="modal-content">
-      <span class="close" id="themeModalClose">&times;</span>
-      <h2>Theme Settings</h2>
-      <label>Primary Color:
-        <input id="primaryColor" type="color" value="#3f51b5">
-      </label>
-      <label>Background Color:
-        <input id="backgroundColor" type="color" value="#f5f5f5">
-      </label>
-      <button id="themeSave">Save</button>
-    </div>
-  </div>
-  <!-- Notification -->
-  <div id="notification"></div>
+
   <script>
-    function showNotification(message, duration=3000) {
-      var notif = document.getElementById("notification");
-      notif.textContent = message;
-      notif.style.display = "block";
-      notif.style.animation = "fadein 0.5s, fadeout 0.5s " + (duration/1000 - 0.5) + "s";
-      setTimeout(function(){
-        notif.style.display = "none";
-      }, duration);
-    }
-    var brightnessRange = document.getElementById("brightnessRange");
-    var brightnessValue = document.getElementById("brightnessValue");
-    brightnessRange.addEventListener("input", function() {
-      brightnessValue.textContent = brightnessRange.value + "%";
-    });
-    brightnessRange.addEventListener("change", function() {
-      showNotification("Brightness set to " + brightnessRange.value + "%");
-    });
-    var flashModal = document.getElementById("flashModal");
-    var flashBtn = document.getElementById("flashSettingsButton");
-    var flashClose = document.getElementById("flashModalClose");
-    var flashSave = document.getElementById("flashSave");
-    var themeModal = document.getElementById("themeModal");
-    var themeBtn = document.getElementById("themeSettingsButton");
-    var themeClose = document.getElementById("themeModalClose");
-    var themeSave = document.getElementById("themeSave");
-    var colorPreview = document.getElementById("colorPreview");
-    flashBtn.onclick = function() {
-      flashModal.style.display = "block";
-    }
-    flashClose.onclick = function() {
-      flashModal.style.display = "none";
-    }
-    themeBtn.onclick = function() {
-      themeModal.style.display = "block";
-    }
-    themeClose.onclick = function() {
-      themeModal.style.display = "none";
-    }
-    window.onclick = function(event) {
-      if (event.target == flashModal) {
-        flashModal.style.display = "none";
-      }
-      if (event.target == themeModal) {
-        themeModal.style.display = "none";
-      }
-    }
-    flashSave.onclick = function() {
-      var onVal = document.getElementById("flashOn").value;
-      var offVal = document.getElementById("flashOff").value;
-      if (onVal === "" || offVal === "" || onVal < 0 || offVal < 0) {
-        showNotification("Invalid flash values!", 2000);
-      } else {
-        showNotification("Flash settings saved");
-        flashModal.style.display = "none";
-      }
+    // Brightness display
+    const brightness = document.getElementById('brightness');
+    const brightVal  = document.getElementById('brightVal');
+    brightness.oninput = () => brightVal.textContent = brightness.value + '%';
+
+    // Flash toggle
+    const flashBtn = document.getElementById('flashBtn');
+    let flashOn = false;
+    flashBtn.onclick = () => {
+      flashOn = !flashOn;
+      flashBtn.classList.toggle('on', flashOn);
     };
-    themeSave.onclick = function() {
-      var primary = document.getElementById("primaryColor").value;
-      var background = document.getElementById("backgroundColor").value;
-      document.documentElement.style.setProperty('--primary-color', primary);
-      document.documentElement.style.setProperty('--background-color', background);
-      colorPreview.style.backgroundColor = primary;
-      showNotification("Theme updated");
-      themeModal.style.display = "none";
-    };
-    colorPreview.style.backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
   </script>
 </body>
 </html>
