@@ -4,18 +4,22 @@
   <meta charset="UTF-8" />
   <title>SmartBed Controller</title>
   <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+
     /* Animated gradient background */
     @keyframes bgAnimation {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
     body {
-      margin: 0; padding: 0;
-      height: 100vh;
-      overflow: hidden;
       font-family: 'Segoe UI', sans-serif;
-      display: flex; align-items: center; justify-content: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       background: linear-gradient(-45deg, #0b3d91, #1e90ff, #4eacff, #0c1f78);
       background-size: 400% 400%;
       animation: bgAnimation 15s ease infinite;
@@ -29,7 +33,8 @@
       --shadow: 0 8px 24px rgba(0,0,0,0.6);
       --transition: 0.3s ease;
     }
-    * { box-sizing: border-box; margin:0; padding:0; }
+
+    * { box-sizing: border-box; }
 
     .container {
       display: flex;
@@ -57,7 +62,7 @@
       width: 80px; height: 80px;
       border-radius: 50%;
       border: 4px solid var(--primary);
-      background: none;
+      background: var(--secondary);
       cursor: pointer;
       font-size: 2rem;
       color: var(--primary);
@@ -103,7 +108,7 @@
       width: 80px; height: 80px;
       border-radius: 50%;
       border: 4px solid var(--primary);
-      background: none;
+      background: var(--secondary);
       cursor: pointer;
       font-size: 2rem;
       color: var(--primary);
