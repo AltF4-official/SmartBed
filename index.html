@@ -6,88 +6,63 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed</title>
   <style>
-    :root {
-      --top-bar-height: 48px;
-    }
-
     html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
+      margin: 0; padding: 0;
       height: 100%;
+      width: 100%;
       overflow: hidden;
       font-family: Arial, sans-serif;
       background: linear-gradient(to bottom, #000000, #2a2a2a);
       color: white;
-    }
-
-    body {
-      height: 100dvh; /* Mobile-safe full height */
+      display: flex;
+      flex-direction: column;
     }
 
     .top-footer {
-      width: 100%;
-      height: var(--top-bar-height);
-      line-height: var(--top-bar-height);
+      flex: 0 0 auto;
+      padding: 0.75rem 1.5rem;
       background-color: rgba(0, 0, 0, 0.7);
       color: #bbb;
       text-align: center;
-      font-size: 0.95rem;
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: 100;
+      font-size: clamp(0.8rem, 1vw, 1rem);
       backdrop-filter: blur(6px);
       border-bottom: 1px solid rgba(255,255,255,0.1);
     }
 
     .content {
-      position: absolute;
-      top: var(--top-bar-height);
-      left: 0;
-      width: 100%;
-      height: calc(100dvh - var(--top-bar-height));
+      flex: 1 1 auto;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
-      flex-direction: column;
+      padding: 1rem;
       text-align: center;
       box-sizing: border-box;
+      min-height: 0; /* for proper flexbox scrolling */
     }
 
     h1 {
-      font-size: 3rem;
-      margin: 0.25em 0;
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      margin: 0 0 0.5rem 0;
     }
 
     p {
-      font-size: 1.25rem;
+      font-size: clamp(1rem, 2.5vw, 1.25rem);
       opacity: 0.8;
       margin: 0;
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 2rem;
-      }
-      p {
-        font-size: 1rem;
-      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Top bar -->
   <div class="top-footer">
     SmartBed &nbsp;|&nbsp; Control Interface &nbsp;|&nbsp; Made with ❤️
   </div>
 
-  <!-- Main content -->
-  <div class="content">
+  <main class="content">
     <h1>SmartBed</h1>
     <p>LED Remote Control Interface</p>
-  </div>
+  </main>
 
 </body>
 </html>
