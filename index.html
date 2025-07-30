@@ -1,170 +1,425 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SmartBed Controller</title>
-<style>
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    background-color: #0f0f0f;
-    color: #3ea6ff;
-    margin: 0; padding: 2rem;
-    display: flex; flex-direction: column; align-items: center;
-  }
-  h1 {
-    margin-bottom: 1rem;
-  }
-  button, input[type=range], input[type=number] {
-    margin: 0.5rem 0;
-  }
-  button {
-    padding: 1rem 2rem;
-    font-size: 1.2rem;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    background-color: #3ea6ff;
-    color: #0f0f0f;
-    transition: background-color 0.3s;
-  }
-  button:disabled {
-    background-color: #555;
-    cursor: not-allowed;
-  }
-  button:hover:not(:disabled) {
-    background-color: #297acc;
-  }
-  label {
-    display: block;
-    margin-top: 1rem;
-  }
-  input[type=range] {
-    width: 300px;
-  }
-  .flash-settings {
-    margin-top: 1rem;
-    border: 1px solid #3ea6ff;
-    padding: 1rem;
-    border-radius: 10px;
-    width: 320px;
-    background-color: #151515;
-  }
-  .flash-settings input {
-    width: 80px;
-    font-size: 1rem;
-    padding: 0.2rem;
-  }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .status {
-    margin-top: 1rem;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartBed Controller</title>
+  <style>
+    /* Reset & base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      background-color: #0f0f0f;
+      color: #3ea6ff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      user-select: none;
+    }
+
+    h1 {
+      margin: 0 0 1.5rem 0;
+      font-weight: 700;
+      font-size: 2rem;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.25rem;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      border: none;
+      background-color: #3ea6ff;
+      color: #0f0f0f;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 5px 12px rgba(62, 166, 255, 0.5);
+      user-select: none;
+    }
+    button:disabled {
+      background-color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+      color: #999;
+    }
+    button:hover:not(:disabled) {
+      background-color: #297acc;
+      box-shadow: 0 8px 16px rgba(41, 122, 204, 0.75);
+    }
+    button:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 2px;
+    }
+
+    .power-btn {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 5rem;
+      line-height: 1;
+      padding: 0;
+      margin: 2rem 0;
+      box-shadow: 0 0 40px rgba(62, 166, 255, 0.6);
+      transition: color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .power-btn.off {
+      color: #555;
+      box-shadow: none;
+    }
+    .power-btn.on {
+      color: #3ea6ff;
+      box-shadow: 0 0 40px #3ea6ff;
+    }
+
+    label {
+      font-size: 1rem;
+      margin-top: 1rem;
+      display: block;
+      user-select: none;
+    }
+
+    input[type="range"] {
+      width: 300px;
+      margin: 0.5rem 0;
+      accent-color: #3ea6ff;
+    }
+    input[type="number"] {
+      width: 80px;
+      font-size: 1rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #3ea6ff;
+      background: #151515;
+      color: #3ea6ff;
+      text-align: center;
+      margin-left: 0.5rem;
+      transition: border-color 0.3s ease;
+    }
+    input[type="number"]:focus {
+      outline: none;
+      border-color: #297acc;
+    }
+
+    .flash-controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .flash-controls button {
+      padding: 0.7rem 1.4rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      border: 2px solid #3ea6ff;
+      background: transparent;
+      color: #3ea6ff;
+      transition: all 0.3s ease;
+      user-select: none;
+    }
+    .flash-controls button.active {
+      background: #3ea6ff;
+      color: #0f0f0f;
+      box-shadow: 0 0 10px #3ea6ff;
+    }
+    .flash-controls button:disabled {
+      color: #555;
+      border-color: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .flash-settings {
+      margin-top: 1.5rem;
+      background-color: #151515;
+      border: 1px solid #3ea6ff;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      max-width: 340px;
+      box-shadow: 0 0 15px rgba(62, 166, 255, 0.6);
+      user-select: none;
+    }
+    .flash-settings .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .status {
+      margin-top: 2rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: #3ea6ff;
+      height: 1.5rem;
+      min-width: 320px;
+      text-align: center;
+      user-select: none;
+      font-feature-settings: "liga" off;
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0,0,0,0.45);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+      user-select: none;
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* Modal Content */
+    .modal-content {
+      background-color: #0f0f0f;
+      border: 1px solid #3ea6ff;
+      border-radius: 16px;
+      box-shadow: 0 0 40px #3ea6ff;
+      padding: 2rem 2.5rem;
+      width: 400px;
+      max-width: 90vw;
+      color: #3ea6ff;
+      font-weight: 600;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .modal-content h2 {
+      margin: 0 0 1rem 0;
+      font-weight: 700;
+      font-size: 1.5rem;
+      text-align: center;
+      user-select: none;
+    }
+
+    .modal-content label {
+      margin: 0;
+      user-select: none;
+    }
+
+    .modal-content input[type="number"] {
+      width: 100px;
+      font-size: 1rem;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #3ea6ff;
+      background-color: #151515;
+      color: #3ea6ff;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+    .modal-content input[type="number"]:focus {
+      outline: none;
+      border-color: #297acc;
+    }
+
+    .modal-content .buttons {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .modal-content .buttons button {
+      flex: 1;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 0.7rem;
+      user-select: none;
+    }
+    .modal-content .buttons button.cancel {
+      background-color: rgba(62, 166, 255, 0.3);
+      color: #3ea6ff;
+      border: 1px solid #3ea6ff;
+      transition: background-color 0.3s ease;
+    }
+    .modal-content .buttons button.cancel:hover {
+      background-color: rgba(62, 166, 255, 0.6);
+    }
+    .modal-content .buttons button.apply {
+      background-color: #3ea6ff;
+      color: #0f0f0f;
+      border: none;
+      box-shadow: 0 0 15px #3ea6ff;
+      transition: background-color 0.3s ease;
+    }
+    .modal-content .buttons button.apply:hover {
+      background-color: #297acc;
+    }
+
+    /* Responsive */
+    @media (max-width: 450px) {
+      .modal-content {
+        width: 90vw;
+        padding: 1.5rem 1rem;
+      }
+      input[type="range"] {
+        width: 100%;
+      }
+      .flash-settings {
+        width: 100%;
+      }
+      .status {
+        min-width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
 
-<h1>SmartBed Controller</h1>
+  <h1>SmartBed Controller</h1>
 
-<button id="powerBtn">Turn ON</button>
+  <button id="powerBtn" class="power-btn off" aria-pressed="false" aria-label="Power toggle">⏻</button>
 
-<label for="brightness">Brightness: <span id="brightnessVal">50%</span></label>
-<input type="range" id="brightness" min="0" max="100" value="50" disabled />
+  <label for="brightness">Brightness: <span id="brightnessVal">50%</span></label>
+  <input type="range" id="brightness" min="0" max="35" value="17" disabled />
 
-<div style="margin-top: 1rem;">
-  <button id="flashBtn" disabled>Enable Flash Mode</button>
-</div>
-
-<div class="flash-settings" id="flashSettings" style="display:none;">
-  <div class="row">
-    <label for="flashOn">Flash ON (ms):</label>
-    <input type="number" id="flashOn" min="10" max="10000" value="100" />
+  <div class="flash-controls">
+    <button id="flashBtn" disabled aria-pressed="false">Flash Mode</button>
+    <button id="showFlashSettingsBtn" style="display:none;" aria-label="Flash Settings">⚙️</button>
   </div>
-  <div class="row">
-    <label for="flashOff">Flash OFF (ms):</label>
-    <input type="number" id="flashOff" min="10" max="10000" value="100" />
+
+  <div class="flash-settings" id="flashSettings" style="display:none;">
+    <h2>Flash Settings</h2>
+    <div class="row">
+      <label for="flashOn">Flash ON (ms):</label>
+      <input type="number" id="flashOn" min="10" max="10000" value="100" />
+    </div>
+    <div class="row">
+      <label for="flashOff">Flash OFF (ms):</label>
+      <input type="number" id="flashOff" min="10" max="10000" value="100" />
+    </div>
+    <div class="buttons">
+      <button class="cancel" id="cancelFlashSettings">Cancel</button>
+      <button class="apply" id="applyFlashSettings">Apply</button>
+    </div>
   </div>
-  <button id="applyFlashSettings">Apply</button>
-</div>
 
-<div class="status" id="status"></div>
+  <div class="status" id="status" aria-live="polite"></div>
 
-<script>
-  const SERVER_BASE_URL = "http://192.168.1.100"; // Change this
+  <div class="modal-overlay" id="modalOverlay" tabindex="-1" aria-hidden="true">
+    <!-- Modal content can be added here if needed -->
+  </div>
 
-  const powerBtn = document.getElementById("powerBtn");
-  const brightnessSlider = document.getElementById("brightness");
-  const brightnessVal = document.getElementById("brightnessVal");
-  const flashBtn = document.getElementById("flashBtn");
-  const flashSettings = document.getElementById("flashSettings");
-  const flashOnInput = document.getElementById("flashOn");
-  const flashOffInput = document.getElementById("flashOff");
-  const applyFlashBtn = document.getElementById("applyFlashSettings");
-  const statusDiv = document.getElementById("status");
+  <script>
+    const SERVER_BASE_URL = "http://192.168.1.100";
 
-  let isOn = false;
-  let flashMode = false;
+    const powerBtn = document.getElementById("powerBtn");
+    const brightnessSlider = document.getElementById("brightness");
+    const brightnessVal = document.getElementById("brightnessVal");
+    const flashBtn = document.getElementById("flashBtn");
+    const showFlashSettingsBtn = document.getElementById("showFlashSettingsBtn");
+    const flashSettings = document.getElementById("flashSettings");
+    const flashOnInput = document.getElementById("flashOn");
+    const flashOffInput = document.getElementById("flashOff");
+    const applyFlashBtn = document.getElementById("applyFlashSettings");
+    const cancelFlashBtn = document.getElementById("cancelFlashSettings");
+    const statusDiv = document.getElementById("status");
 
-  function sendRequest(path) {
-    fetch(`${SERVER_BASE_URL}/${path}`)
-      .then(() => {
+    let isOn = false;
+    let flashMode = false;
+    let flashOnTime = 100;
+    let flashOffTime = 100;
+
+    function sendRequest(path) {
+      fetch(`${SERVER_BASE_URL}/${path}`).then(() => {
         statusDiv.textContent = `Sent command: ${path}`;
-      })
-      .catch(() => {
+      }).catch(() => {
         statusDiv.textContent = `Failed to send: ${path}`;
       });
-  }
+    }
 
-  powerBtn.addEventListener("click", () => {
-    isOn = !isOn;
-    powerBtn.textContent = isOn ? "Turn OFF" : "Turn ON";
-    brightnessSlider.disabled = !isOn;
-    flashBtn.disabled = !isOn;
+    function updatePowerUI() {
+      powerBtn.classList.toggle("on", isOn);
+      powerBtn.classList.toggle("off", !isOn);
+      powerBtn.setAttribute("aria-pressed", isOn.toString());
+      powerBtn.textContent = "⏻";
+      brightnessSlider.disabled = !isOn;
+      flashBtn.disabled = !isOn;
+      if (!isOn) {
+        flashMode = false;
+        flashBtn.classList.remove("active");
+        flashBtn.setAttribute("aria-pressed", "false");
+        flashBtn.textContent = "Flash Mode";
+        showFlashSettingsBtn.style.display = "none";
+        flashSettings.style.display = "none";
+      }
+    }
 
-    if (!isOn) {
-      flashMode = false;
-      flashBtn.textContent = "Enable Flash Mode";
+    powerBtn.addEventListener("click", () => {
+      isOn = !isOn;
+      updatePowerUI();
+      sendRequest(isOn ? "on" : "off");
+    });
+
+    brightnessSlider.addEventListener("input", () => {
+      brightnessVal.textContent = `${Math.round((brightnessSlider.value / 35) * 100)}%`;
+      sendRequest(`brightness?v=${brightnessSlider.value}`);
+    });
+
+    flashBtn.addEventListener("click", () => {
+      flashMode = !flashMode;
+      flashBtn.classList.toggle("active", flashMode);
+      flashBtn.setAttribute("aria-pressed", flashMode.toString());
+      flashBtn.textContent = flashMode ? "Flash Mode ON" : "Flash Mode";
+      showFlashSettingsBtn.style.display = flashMode ? "inline-block" : "none";
       flashSettings.style.display = "none";
-    }
+      sendRequest(`flash?mode=${flashMode ? "on" : "off"}`);
+    });
 
-    sendRequest(isOn ? "on" : "off");
-  });
+    showFlashSettingsBtn.addEventListener("click", () => {
+      flashSettings.style.display = flashSettings.style.display === "block" ? "none" : "block";
+      flashOnInput.value = flashOnTime;
+      flashOffInput.value = flashOffTime;
+    });
 
-  brightnessSlider.addEventListener("input", () => {
-    brightnessVal.textContent = `${brightnessSlider.value}%`;
-    const brightnessPercent = brightnessSlider.value;
-    sendRequest(`brightness?v=${brightnessPercent}`);
-  });
+    cancelFlashBtn.addEventListener("click", () => {
+      flashSettings.style.display = "none";
+      flashOnInput.value = flashOnTime;
+      flashOffInput.value = flashOffTime;
+    });
 
-  flashBtn.addEventListener("click", () => {
-    flashMode = !flashMode;
-    flashBtn.textContent = flashMode ? "Disable Flash Mode" : "Enable Flash Mode";
-    flashSettings.style.display = flashMode ? "block" : "none";
-    sendRequest(`flash?mode=${flashMode ? "on" : "off"}`);
-  });
+    applyFlashBtn.addEventListener("click", () => {
+      const onVal = parseInt(flashOnInput.value, 10);
+      const offVal = parseInt(flashOffInput.value, 10);
 
-  applyFlashBtn.addEventListener("click", () => {
-    const onTime = parseInt(flashOnInput.value);
-    const offTime = parseInt(flashOffInput.value);
+      if (isNaN(onVal) || isNaN(offVal)) {
+        alert("Please enter valid numbers for flash times.");
+        return;
+      }
+      if (onVal < 10 || onVal > 10000 || offVal < 10 || offVal > 10000) {
+        alert("Flash times must be between 10 and 10000 ms.");
+        return;
+      }
 
-    if (isNaN(onTime) || isNaN(offTime)) {
-      alert("Please enter valid numbers for flash times.");
-      return;
-    }
-    if (onTime < 10 || onTime > 10000 || offTime < 10 || offTime > 10000) {
-      alert("Flash times must be between 10 and 10000 ms.");
-      return;
-    }
+      flashOnTime = onVal;
+      flashOffTime = offVal;
+      flashSettings.style.display = "none";
+      sendRequest(`flash?on=${flashOnTime}&off=${flashOffTime}`);
+    });
 
-    sendRequest(`flash?on=${onTime}&off=${offTime}`);
-  });
+    // Initialize UI
+    updatePowerUI();
+    brightnessVal.textContent = `${Math.round((brightnessSlider.value / 35) * 100)}%`;
 
-</script>
-
+  </script>
 </body>
 </html>
