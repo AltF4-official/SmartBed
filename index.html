@@ -4,25 +4,33 @@
   <meta charset="UTF-8" />
   <title>SmartBed Controller</title>
   <style>
+    /* Animated gradient background */
+    @keyframes bgAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    body {
+      margin: 0; padding: 0;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(-45deg, #0b3d91, #1e90ff, #4eacff, #0c1f78);
+      background-size: 400% 400%;
+      animation: bgAnimation 15s ease infinite;
+    }
+
     :root {
       --primary: #4eacff;
       --secondary: #111;
-      --bg: #121212;
       --fg: #f0f0f0;
       --radius: 12px;
       --shadow: 0 8px 24px rgba(0,0,0,0.6);
       --transition: 0.3s ease;
     }
     * { box-sizing: border-box; margin:0; padding:0; }
-    body {
-      background: var(--bg);
-      color: var(--fg);
-      font-family: 'Segoe UI', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+
     .container {
       display: flex;
       flex-direction: column;
@@ -41,7 +49,26 @@
     h2 {
       font-size: 1.5rem;
       margin-bottom: 1.5rem;
+      color: var(--fg);
     }
+
+    /* Power button */
+    .power-btn {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 4px solid var(--primary);
+      background: none;
+      cursor: pointer;
+      font-size: 2rem;
+      color: var(--primary);
+      transition: background var(--transition), transform var(--transition), color var(--transition);
+    }
+    .power-btn.on {
+      background: var(--primary);
+      color: var(--secondary);
+    }
+    .power-btn:hover { transform: scale(1.05); }
+    .power-btn:active { transform: scale(0.95); }
 
     /* Brightness */
     #brightness {
@@ -68,6 +95,7 @@
       margin-top: 1rem;
       font-size: 1.25rem;
       font-weight: bold;
+      color: var(--fg);
     }
 
     /* Flash */
@@ -91,6 +119,12 @@
 </head>
 <body>
   <div class="container">
+    <!-- Power Card -->
+    <div class="card">
+      <h2>Power</h2>
+      <button id="powerBtn" class="power-btn">⏻</button>
+    </div>
+
     <!-- Brightness Card -->
     <div class="card">
       <h2>Brightness</h2>
@@ -106,6 +140,14 @@
   </div>
 
   <script>
+    // Power toggle
+    const powerBtn = document.getElementById('powerBtn');
+    let powerOn = false;
+    powerBtn.addEventListener('click', () => {
+      powerOn = !powerOn;
+      powerBtn.classList.toggle('on', powerOn);
+    });
+
     // Brightness display
     const brightness = document.getElementById('brightness');
     const brightVal  = document.getElementById('brightVal');
