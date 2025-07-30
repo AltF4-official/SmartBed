@@ -1,48 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartBed LED Controller</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 400px; margin: 30px auto; text-align: center; padding: 10px; background: #f0f0f0; }
-    h1 { margin-bottom: 20px; }
-    .btn { width: 100%; padding: 15px; margin: 10px 0; font-size: 1.2em; border-radius: 8px; border: none; background-color: #007BFF; color: white; cursor: pointer; }
-    .btn:hover { background-color: #0056b3; }
-    input[type=range] { width: 100%; margin: 20px 0; }
-    label { display: block; margin-top: 20px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SmartBed Controller</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+      Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background-color: #0f0f0f;
+    color: #3ea6ff;
+    margin: 0; padding: 2rem;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  h1 {
+    margin-bottom: 1rem;
+  }
+  button, input[type=range], input[type=number] {
+    margin: 0.5rem 0;
+  }
+  button {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    background-color: #3ea6ff;
+    color: #0f0f0f;
+    transition: background-color 0.3s;
+  }
+  button:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+  }
+  button:hover:not(:disabled) {
+    background-color: #297acc;
+  }
+  label {
+    display: block;
+    margin-top: 1rem;
+  }
+  input[type=range] {
+    width: 300px;
+  }
+  .flash-settings {
+    margin-top: 1rem;
+    border: 1px solid #3ea6ff;
+    padding: 1rem;
+    border-radius: 10px;
+    width: 320px;
+    background-color: #151515;
+  }
+  .flash-settings input {
+    width: 80px;
+    font-size: 1rem;
+    padding: 0.2rem;
+  }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .status {
+    margin-top: 1rem;
+    font-weight: bold;
+  }
+</style>
 </head>
 <body>
-  <h1>SmartBed LED Controller</h1>
-  <button class="btn" onclick="send('on')">Turn ON</button>
-  <button class="btn" onclick="send('off')">Turn OFF</button>
-  <label for="brightness">Brightness: <span id="brightVal">100%</span></label>
-  <input type="range" id="brightness" min="0" max="100" value="100" oninput="updateBrightness(this.value)">
-  <button class="btn" onclick="toggleFlash()" id="flashBtn">Enable Flash Mode</button>
 
-  <script>
-    // Replace with your ESP32’s address
-    const espBase = 'http://192.168.1.123';
-    let flashEnabled = false;
+<h1>SmartBed Controller</h1>
 
-    function send(path) {
-      fetch(`${espBase}/${path}`)
-        .catch(() => alert('Could not reach ESP32'));
+<button id="powerBtn">Turn ON</button>
+
+<label for="brightness">Brightness: <span id="brightnessVal">50%</span></label>
+<input type="range" id="brightness" min="0" max="100" value="50" disabled />
+
+<div style="margin-top: 1rem;">
+  <button id="flashBtn" disabled>Enable Flash Mode</button>
+</div>
+
+<div class="flash-settings" id="flashSettings" style="display:none;">
+  <div class="row">
+    <label for="flashOn">Flash ON (ms):</label>
+    <input type="number" id="flashOn" min="10" max="10000" value="100" />
+  </div>
+  <div class="row">
+    <label for="flashOff">Flash OFF (ms):</label>
+    <input type="number" id="flashOff" min="10" max="10000" value="100" />
+  </div>
+  <button id="applyFlashSettings">Apply</button>
+</div>
+
+<div class="status" id="status"></div>
+
+<script>
+  const SERVER_BASE_URL = "http://YOUR_ESP32_IP_OR_DOMAIN"; // Change this
+
+  const powerBtn = document.getElementById("powerBtn");
+  const brightnessSlider = document.getElementById("brightness");
+  const brightnessVal = document.getElementById("brightnessVal");
+  const flashBtn = document.getElementById("flashBtn");
+  const flashSettings = document.getElementById("flashSettings");
+  const flashOnInput = document.getElementById("flashOn");
+  const flashOffInput = document.getElementById("flashOff");
+  const applyFlashBtn = document.getElementById("applyFlashSettings");
+  const statusDiv = document.getElementById("status");
+
+  let isOn = false;
+  let flashMode = false;
+
+  function sendRequest(path) {
+    fetch(`${SERVER_BASE_URL}/${path}`)
+      .then(() => {
+        statusDiv.textContent = `Sent command: ${path}`;
+      })
+      .catch(() => {
+        statusDiv.textContent = `Failed to send: ${path}`;
+      });
+  }
+
+  powerBtn.addEventListener("click", () => {
+    isOn = !isOn;
+    powerBtn.textContent = isOn ? "Turn OFF" : "Turn ON";
+    brightnessSlider.disabled = !isOn;
+    flashBtn.disabled = !isOn;
+
+    if (!isOn) {
+      flashMode = false;
+      flashBtn.textContent = "Enable Flash Mode";
+      flashSettings.style.display = "none";
     }
 
-    function updateBrightness(val) {
-      document.getElementById('brightVal').textContent = val + '%';
-      send(`brightness?v=${val}`);
+    sendRequest(isOn ? "on" : "off");
+  });
+
+  brightnessSlider.addEventListener("input", () => {
+    brightnessVal.textContent = `${brightnessSlider.value}%`;
+    const brightnessPercent = brightnessSlider.value;
+    sendRequest(`brightness?v=${brightnessPercent}`);
+  });
+
+  flashBtn.addEventListener("click", () => {
+    flashMode = !flashMode;
+    flashBtn.textContent = flashMode ? "Disable Flash Mode" : "Enable Flash Mode";
+    flashSettings.style.display = flashMode ? "block" : "none";
+    sendRequest(`flash?mode=${flashMode ? "on" : "off"}`);
+  });
+
+  applyFlashBtn.addEventListener("click", () => {
+    const onTime = parseInt(flashOnInput.value);
+    const offTime = parseInt(flashOffInput.value);
+
+    if (isNaN(onTime) || isNaN(offTime)) {
+      alert("Please enter valid numbers for flash times.");
+      return;
+    }
+    if (onTime < 10 || onTime > 10000 || offTime < 10 || offTime > 10000) {
+      alert("Flash times must be between 10 and 10000 ms.");
+      return;
     }
 
-    function toggleFlash() {
-      flashEnabled = !flashEnabled;
-      document.getElementById('flashBtn').textContent = flashEnabled
-        ? 'Disable Flash Mode'
-        : 'Enable Flash Mode';
-      send(`flash?mode=${flashEnabled ? 'on' : 'off'}`);
-    }
-  </script>
+    sendRequest(`flash?on=${onTime}&off=${offTime}`);
+  });
+
+</script>
+
 </body>
 </html>
