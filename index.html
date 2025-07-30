@@ -6,7 +6,7 @@
   <style>
     :root {
       --primary: #4eacff;
-      --secondary: #111111;
+      --secondary: #111;
       --bg: #121212;
       --fg: #f0f0f0;
       --radius: 12px;
@@ -23,11 +23,11 @@
       align-items: center;
       height: 100vh;
     }
-    .wrapper {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
+    .container {
+      display: flex;
+      flex-direction: column;
       gap: 2rem;
-      width: 600px;
+      width: 320px;
     }
     .card {
       background: var(--secondary);
@@ -51,7 +51,7 @@
       background: #333;
       border-radius: 3px;
       outline: none;
-      transition: background 0.3s;
+      transition: background var(--transition);
     }
     #brightness:hover { background: #444; }
     #brightness::-webkit-slider-thumb {
@@ -90,7 +90,7 @@
   </style>
 </head>
 <body>
-  <div class="wrapper">
+  <div class="container">
     <!-- Brightness Card -->
     <div class="card">
       <h2>Brightness</h2>
@@ -109,15 +109,17 @@
     // Brightness display
     const brightness = document.getElementById('brightness');
     const brightVal  = document.getElementById('brightVal');
-    brightness.oninput = () => brightVal.textContent = brightness.value + '%';
+    brightness.addEventListener('input', () => {
+      brightVal.textContent = brightness.value + '%';
+    });
 
     // Flash toggle
     const flashBtn = document.getElementById('flashBtn');
     let flashOn = false;
-    flashBtn.onclick = () => {
+    flashBtn.addEventListener('click', () => {
       flashOn = !flashOn;
       flashBtn.classList.toggle('on', flashOn);
-    };
+    });
   </script>
 </body>
 </html>
