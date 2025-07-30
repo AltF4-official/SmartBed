@@ -6,31 +6,22 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed</title>
   <style>
-    /* Background void behind all content */
-    .background-void {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: linear-gradient(to bottom, #000000, #2a2a2a); /* black to dark grey gradient */
-      z-index: -9999;
-    }
-
     html, body {
       margin: 0; padding: 0;
       height: 100%;
-      width: 100%;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #000000, #2a2a2a);
       color: white;
+      font-family: Arial, sans-serif;
+      overflow-x: hidden;
+    }
+
+    body {
       display: flex;
       flex-direction: column;
-      background: transparent !important;
       min-height: 100vh;
     }
 
     .top-footer {
-      flex: 0 0 auto;
       padding: 0.75rem 1.5rem;
       background-color: rgba(0, 0, 0, 0.7);
       color: #bbb;
@@ -39,29 +30,23 @@
       backdrop-filter: blur(6px);
       border-bottom: 1px solid rgba(255,255,255,0.1);
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
+      top: 0; left: 0; width: 100%;
       z-index: 1000;
     }
 
     .content {
-      flex: 1 1 auto;
+      flex: 1;
+      margin-top: 60px; /* height of top-footer */
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 1rem;
       text-align: center;
-      box-sizing: border-box;
-      min-height: 0;
-      margin-top: 60px; /* offset for top-footer */
-      background: transparent !important;
+      padding: 1rem;
     }
 
     h1 {
       font-size: clamp(1.8rem, 5vw, 3rem);
-      margin: 0 0 0.5rem 0;
+      margin-bottom: 0.5rem;
     }
 
     p {
@@ -73,15 +58,10 @@
 </head>
 <body>
 
-  <!-- Background gradient behind everything -->
-  <div class="background-void"></div>
-
-  <!-- Fixed top bar -->
   <div class="top-footer">
     SmartBed &nbsp;|&nbsp; Control Interface &nbsp;|&nbsp; Made with ❤️
   </div>
 
-  <!-- Main content -->
   <main class="content">
     <h1>SmartBed</h1>
     <p>LED Remote Control Interface</p>
