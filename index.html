@@ -5,129 +5,212 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed</title>
   <style>
-    /* Variables */
-    :root {
-      --timing: 0.3s;
-      --radius: 100px;
-      --border: 8px;
-      --colorMirage: #1F2C3B;
-      --colorConifer: #98E744;
-      --colorAtlantis: #82D22E;
-      --colorMystic: #DAEAEA;
+    /* Reset and base styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
+
     html, body {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100dvh;
-      background: var(--colorMystic);
-      display: flex; align-items: center; justify-content: center;
-      font-family: -apple-system, sans-serif;
-      overflow: hidden;
-    }
-
-    /* Power button container */
-    .button {
-      position: relative;
-      width: calc(var(--radius) * 2);
-      height: calc(var(--radius) * 2);
-      border-radius: 50%;
-      background: var(--colorMirage);
-      cursor: pointer;
-      transition: transform var(--timing) ease;
-    }
-    .button.ready {
-      transform: scale(0.8);
-      transition: transform var(--timing) ease;
-    }
-
-    .bar {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: var(--border);
-      height: calc(var(--radius) / 2);
-      background: rgba(0, 0, 0, 0.3);
-      transform: translate(-50%, -50%);
-      border-radius: var(--border);
-      overflow: hidden;
-    }
-    .bar::before {
-      content: '';
-      display: block;
-      width: 100%;
-      height: 0;
-      background: var(--colorConifer);
-      border-radius: var(--border);
-      transition: height calc(var(--timing) * 2) ease;
-    }
-
-    .sc {
-      position: absolute;
-      top: 50%; left: 50%;
-      width: calc(var(--radius) * 0.66);
-      height: calc(var(--radius) * 2);
-      transform: translate(-100%, -50%);
-      overflow: hidden;
-    }
-    .sc:first-child {
-      transform: translate(0%, -50%) rotate(180deg);
-    }
-    .sc::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
-      width: calc(100% - var(--border));
-      height: calc(100% - (var(--border) * 2));
-      border: solid currentColor;
-      border-width: var(--border) 0 var(--border) var(--border);
-      border-radius: var(--radius) 0 0 var(--radius);
-      transform-origin: 100% 50%;
-      transform: rotate(-180deg);
-      transition: transform var(--timing) ease;
-      color: var(--colorConifer);
-    }
-
-    /* On state */
-    .button.on .sc::after {
-      transform: rotate(0deg);
-    }
-    .button.on .bar::before {
       height: 100%;
+      background: linear-gradient(to top, #1a1a1a, #000);
+      overflow: hidden;
     }
 
-    /* Ready state (on + ready) */
-    .button.on.ready .sc::after {
-      transform: rotate(-90deg);
-      transition-delay: 0s;
-    }
-    .button.on.ready .bar::before {
-      height: 50%;
-      transition: height var(--timing) ease;
+    .top-bar {
+      height: 60px;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.2rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
     }
 
+    .top-bar svg {
+      width: 26px;
+      height: 26px;
+      fill: #ccc;
+    }
+
+    .top-bar-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #f0f0f0;
+    }
+
+    .content {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #powerButton {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s ease;
+      box-shadow: inset 0 0 6px #000, 0 0 12px rgba(0,0,0,0.4);
+      cursor: pointer;
+    }
+
+    #powerButton:hover {
+      background: #3a3a3a;
+    }
+
+    #powerButton.on {
+      background: #00c3ff;
+      box-shadow: 0 0 20px #00c3ff, inset 0 0 8px #007a99;
+    }
+
+    .power-icon {
+      font-size: 2.5rem;
+      color: #ddd;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+
+    #powerButton.on .power-icon {
+      color: #002e3d;
+    }
+
+    /* Modal overlay */
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-bg.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: #121212;
+      color: #eee;
+      padding: 20px 24px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 300px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .modal-box h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-box p {
+      font-size: 0.9rem;
+      opacity: 0.85;
+    }
+
+    .close-btn {
+      margin-top: 1rem;
+      background: none;
+      color: #aaa;
+      border: 1px solid #444;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .close-btn:hover {
+      background: #222;
+      color: #fff;
+      border-color: #666;
+    }
+
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    @media (max-width: 500px) {
+      .top-bar-title {
+        font-size: 1rem;
+      }
+
+      #powerButton {
+        width: 70px;
+        height: 70px;
+      }
+
+      .power-icon {
+        font-size: 2rem;
+      }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Power button -->
-  <div class="button" id="powerBtn">
-    <div class="sc"></div>
-    <div class="sc"></div>
-    <div class="bar"></div>
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <svg viewBox="0 0 24 24">
+      <path d="M4 10V7c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v3h-2V7H6v3H4Zm16 2c1.1 0 2 .9 2 2v5h-2v-2H4v2H2v-5c0-1.1.9-2 2-2h16Z"/>
+    </svg>
+    <div class="top-bar-title">SmartBed</div>
+    <button onclick="openModal()" aria-label="Credits">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/>
+      </svg>
+    </button>
   </div>
 
-  <script>
-    const btn = document.getElementById('powerBtn');
-    btn.addEventListener('click', () => {
-      if (!btn.classList.contains('on')) {
-        btn.classList.add('on', 'ready');
-        setTimeout(() => btn.classList.remove('ready'), 300);
-      } else {
-        btn.classList.add('ready');
-        setTimeout(() => {
-          btn.classList.remove('on', 'ready');
-        }, 300);
-      }
-    });
-  </script>
+  <!-- Main Content -->
+  <div class="content">
+    <div id="powerButton" onclick="togglePower()">
+      <span class="power-icon">⏻</span>
+    </div>
+  </div>
 
+  <!-- Modal -->
+  <div id="creditModal" class="modal-bg">
+    <div class="modal-box">
+      <h2>SmartBed</h2>
+      <p>Made by altf4-official on GitHub</p>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function togglePower() {
+      document.getElementById('powerButton').classList.toggle('on');
+    }
+
+    function openModal() {
+      document.getElementById('creditModal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('creditModal').classList.remove('active');
+    }
+  </script>
 </body>
 </html>
