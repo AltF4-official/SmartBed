@@ -1,308 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed</title>
   <style>
-    :root {
-      --bg: #0F0F0F;
-      --fg: #0000FF;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html {
-      width: 100%; height: 100%;
-      font-family: sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      transition: background 0.3s, color 0.3s;
+
+    html, body {
+      height: 100%;
+      background: linear-gradient(to top, #1a1a1a, #000);
+      overflow: hidden;
     }
-    #app { display: flex; flex-direction: column; height: 100%; }
-    .header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 16px;
+
+    .top-bar {
+      height: 60px;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 1.2rem;
+      backdrop-filter: blur(10px);
+      background: rgba(10, 10, 10, 0.7);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
     }
-    .header .icon { font-size: 1.5rem; }
-    .header h2 { font-size: 1.25rem; }
-    .header button {
-      background: none; border: none; font-size: 1.25rem;
-      color: var(--fg); cursor: pointer;
+
+    .top-bar svg {
+      width: 26px;
+      height: 26px;
+      fill: #ccc;
     }
-    .center {
-      flex: 1; display: flex; align-items: center; justify-content: center;
+
+    .top-bar-title {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #f0f0f0;
     }
-    .power-button {
-      font-size: 5rem; color: gray; border: none; background: none;
-      cursor: pointer; transition: color 0.2s;
+
+    .content {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
-    .power-on { color: var(--fg); }
-    .controls { padding: 16px; }
-    .hidden { display: none; }
-    .brightness {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 16px;
+
+    #powerButton {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: #333;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+      box-shadow: inset 0 0 6px #000, 0 0 12px rgba(0,0,0,0.4);
+      cursor: pointer;
+      margin-bottom: 20px;
     }
-    .brightness button {
-      border: none; background: none;
-      font-size: 1.25rem; color: var(--fg); cursor: pointer;
+
+    #powerButton.on {
+      background: #00c3ff;
+      box-shadow: 0 0 20px #00c3ff, inset 0 0 8px #007a99;
+      transform: scale(1.05);
     }
-    .brightness input[type=range] { flex: 1; }
-    .flash-controls button {
-      margin-right: 8px; padding: 8px 12px; font-size: 1rem;
-      border: 2px solid var(--fg); border-radius: 8px;
-      background: none; color: var(--fg); cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+
+    .power-icon {
+      font-size: 2.5rem;
+      color: #ddd;
+      transition: color 0.3s ease;
     }
-    .flash-on { background: var(--fg); color: var(--bg); }
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.4);
-      display: flex; align-items: center; justify-content: center;
+
+    #powerButton.on .power-icon {
+      color: #002e3d;
     }
-    .modal-content {
-      background: var(--bg); padding: 24px; border-radius: 12px;
-      border: 1px solid var(--fg); width: 90%; max-width: 320px;
+
+    .controls {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.4s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
     }
-    .modal-content h3 { margin-bottom: 12px; }
-    .modal-content label {
-      display: block; margin: 8px 0;
-      font-size: 0.95rem;
+
+    .controls.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
-    .modal-content input[type=number],
-    .modal-content input[type=color],
-    .modal-content select {
-      width: 100%; padding: 6px; margin-top: 4px;
-      border: 1px solid var(--fg); border-radius: 4px;
-      background: none; color: var(--fg);
+
+    .brightness-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .modal-actions {
-      display: flex; justify-content: space-between; margin-top: 16px;
+
+    .brightness-control button {
+      font-size: 1.5rem;
+      background: none;
+      color: #ccc;
+      border: none;
+      cursor: pointer;
     }
-    .modal-actions button {
-      flex: 1; margin: 0 4px; padding: 8px;
-      border: none; border-radius: 6px; cursor: pointer;
+
+    .brightness-slider {
+      appearance: none;
+      height: 4px;
+      width: 160px;
+      background: #333;
+      border-radius: 2px;
+      outline: none;
     }
-    .error { color: #f33; font-size: 0.9rem; margin-top: 8px; }
-    .notification {
-      position: fixed; bottom: 30px; left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.8); color: #fff;
-      padding: 12px; border-radius: 8px;
+
+    .brightness-slider::-webkit-slider-thumb {
+      appearance: none;
+      height: 16px;
+      width: 16px;
+      background: #00c3ff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .brightness-slider::-moz-range-thumb {
+      height: 16px;
+      width: 16px;
+      background: #00c3ff;
+      border-radius: 50%;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div id="app">
-    <div class="header">
-      <span class="icon">🛏️</span>
+  <div class="top-bar">
+    <svg viewBox="0 0 24 24"><path d="M4 10V7c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v3h-2V7H6v3H4Zm16 2c1.1 0 2 .9 2 2v5h-2v-2H4v2H2v-5c0-1.1.9-2 2-2h16Z"/></svg>
+    <div class="top-bar-title">SmartBed</div>
+    <button onclick="openModal()" aria-label="Credits">
+      <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/></svg>
+    </button>
+  </div>
+
+  <div class="content">
+    <div id="powerButton" onclick="togglePower()">
+      <span class="power-icon">⏻</span>
+    </div>
+    <div class="controls" id="controls">
+      <div class="brightness-control">
+        <button onclick="adjustBrightness(-5)">🌙</button>
+        <input type="range" id="brightnessSlider" class="brightness-slider" min="0" max="100" value="50">
+        <button onclick="adjustBrightness(5)">☀️</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="creditModal" class="modal-bg">
+    <div class="modal-box">
       <h2>SmartBed</h2>
-      <button id="settings-btn">⚙️</button>
+      <p>Made by altf4-official on GitHub</p>
+      <button class="close-btn" onclick="closeModal()">Close</button>
     </div>
-
-    <div class="center">
-      <button id="power-btn" class="power-button">⏻</button>
-    </div>
-
-    <div id="controls" class="controls hidden">
-      <div id="brightness-control" class="brightness">
-        <button id="minus-bright">☀️–</button>
-        <input type="range" id="brightness" min="0" max="35" value="35">
-        <button id="plus-bright">☀️+</button>
-        <div id="brightness-label">100%</div>
-      </div>
-      <div class="flash-controls">
-        <button id="flash-toggle">Flash Mode</button>
-        <button id="flash-settings-btn" class="hidden">⚙️</button>
-      </div>
-    </div>
-
-    <!-- Flash settings modal -->
-    <div id="flash-modal" class="modal hidden">
-      <div class="modal-content">
-        <h3>Flash Settings</h3>
-        <label>On (ms):
-          <input type="number" id="flash-on" value="100" min="10" max="10000">
-        </label>
-        <label>Off (ms):
-          <input type="number" id="flash-off" value="100" min="10" max="10000">
-        </label>
-        <div class="modal-actions">
-          <button id="flash-cancel">Cancel</button>
-          <button id="flash-apply">Apply</button>
-        </div>
-        <div id="flash-error" class="error hidden">
-          Enter valid values 10–10000 ms.
-        </div>
-      </div>
-    </div>
-
-    <!-- Settings modal -->
-    <div id="settings-modal" class="modal hidden">
-      <div class="modal-content">
-        <h3>Theme Settings</h3>
-        <label>
-          Theme:
-          <select id="theme-select"></select>
-        </label>
-        <div id="custom-colors" class="hidden">
-          <label>Primary:
-            <input type="color" id="custom-primary" value="#0000ff">
-          </label>
-          <label>Secondary:
-            <input type="color" id="custom-secondary" value="#ffffff">
-          </label>
-          <div id="color-error" class="error hidden">
-            Colors too similar.
-          </div>
-        </div>
-        <button id="settings-close" style="margin-top:16px; width:100%; padding:8px; border:none; border-radius:6px; cursor:pointer; background:var(--fg); color:var(--bg);">
-          Close
-        </button>
-      </div>
-    </div>
-
-    <div id="notification" class="notification hidden"></div>
   </div>
 
   <script>
-    const themes = [
-      { name: "Electric Blue & Dark Gray", bg: "#0F0F0F", fg: "#0000FF" },
-      { name: "Baby Blue & Dark Gray",    bg: "#0F0F0F", fg: "#B3E6FF" },
-      { name: "Bubblegum Pink & White",    bg: "#FFFFFF", fg: "#FF66B3" },
-      { name: "Forest Green & Dark Gray",  bg: "#0F0F0F", fg: "#008000" },
-      { name: "Gold & Dark Gray",          bg: "#0F0F0F", fg: "#FFFF00" },
-      { name: "Cherry & Dark Gray",        bg: "#0F0F0F", fg: "#FF0000" },
-      { name: "Soft Lilac & White",        bg: "#FFFFFF", fg: "#CCB3FF" },
-      { name: "Custom",                    bg: "#0000FF", fg: "#FFFFFF", custom: true }
-    ];
-
-    const state = {
-      isOn: false,
-      brightness: 35,
-      flashMode: false,
-      flashOn: 100,
-      flashOff: 100,
-      selectedTheme: themes[0]
-    };
-
-    const root  = document.documentElement;
-    const powerBtn          = document.getElementById("power-btn");
-    const controls          = document.getElementById("controls");
-    const brightnessInput   = document.getElementById("brightness");
-    const brightnessLabel   = document.getElementById("brightness-label");
-    const minusBtn          = document.getElementById("minus-bright");
-    const plusBtn           = document.getElementById("plus-bright");
-    const flashToggle       = document.getElementById("flash-toggle");
-    const flashSettingsBtn  = document.getElementById("flash-settings-btn");
-    const flashModal        = document.getElementById("flash-modal");
-    const flashOnInput      = document.getElementById("flash-on");
-    const flashOffInput     = document.getElementById("flash-off");
-    const flashApply        = document.getElementById("flash-apply");
-    const flashCancel       = document.getElementById("flash-cancel");
-    const flashError        = document.getElementById("flash-error");
-    const settingsBtn       = document.getElementById("settings-btn");
-    const settingsModal     = document.getElementById("settings-modal");
-    const themeSelect       = document.getElementById("theme-select");
-    const customColors      = document.getElementById("custom-colors");
-    const customPrimary     = document.getElementById("custom-primary");
-    const customSecondary   = document.getElementById("custom-secondary");
-    const colorError        = document.getElementById("color-error");
-    const closeSettings     = document.getElementById("settings-close");
-    const notification      = document.getElementById("notification");
-
-    // --- Theme & Notification ---
-    function applyTheme() {
-      const t = state.selectedTheme;
-      root.style.setProperty('--bg', t.bg);
-      root.style.setProperty('--fg', t.fg);
-    }
-    function showNotification(msg) {
-      notification.textContent = msg;
-      notification.classList.remove('hidden');
-      setTimeout(() => notification.classList.add('hidden'), 4000);
+    function togglePower() {
+      const btn = document.getElementById('powerButton');
+      const controls = document.getElementById('controls');
+      btn.classList.toggle('on');
+      controls.classList.toggle('visible');
     }
 
-    // --- Power Toggle ---
-    powerBtn.addEventListener('click', () => {
-      state.isOn = !state.isOn;
-      controls.classList.toggle('hidden', !state.isOn);
-      powerBtn.classList.toggle('power-on', state.isOn);
-    });
-
-    // --- Brightness Controls ---
-    function updateBrightness() {
-      const pct = Math.round((state.brightness / 35) * 100);
-      brightnessLabel.textContent = pct + '%';
+    function openModal() {
+      document.getElementById('creditModal').classList.add('active');
     }
-    minusBtn.addEventListener('click', () => {
-      state.brightness = Math.max(0, state.brightness - 1);
-      brightnessInput.value = state.brightness;
-      updateBrightness();
-    });
-    plusBtn.addEventListener('click', () => {
-      state.brightness = Math.min(35, state.brightness + 1);
-      brightnessInput.value = state.brightness;
-      updateBrightness();
-    });
-    brightnessInput.addEventListener('input', () => {
-      state.brightness = Number(brightnessInput.value);
-      updateBrightness();
-    });
 
-    // --- Flash Mode & Settings ---
-    flashToggle.addEventListener('click', () => {
-      state.flashMode = !state.flashMode;
-      flashToggle.classList.toggle('flash-on', state.flashMode);
-      flashSettingsBtn.classList.toggle('hidden', !state.flashMode);
-    });
-    flashSettingsBtn.addEventListener('click', () => flashModal.classList.remove('hidden'));
-    flashCancel.addEventListener('click', () => flashModal.classList.add('hidden'));
-    flashApply.addEventListener('click', () => {
-      const on  = Number(flashOnInput.value);
-      const off = Number(flashOffInput.value);
-      if (isNaN(on) || isNaN(off) || on < 10 || on > 10000 || off < 10 || off > 10000) {
-        flashError.classList.remove('hidden');
-        showNotification("Enter valid numbers.");
-      } else {
-        state.flashOn  = on;
-        state.flashOff = off;
-        flashError.classList.add('hidden');
-        flashModal.classList.add('hidden');
-      }
-    });
-
-    // --- Theme Selection & Custom Colors ---
-    themes.forEach((t,i) => {
-      const opt = new Option(t.name, i);
-      themeSelect.add(opt);
-    });
-    themeSelect.addEventListener('change', e => {
-      state.selectedTheme = themes[e.target.value];
-      customColors.classList.toggle('hidden', !state.selectedTheme.custom);
-      applyTheme();
-    });
-    function pickColor() {
-      const fg = customPrimary.value;
-      const bg = customSecondary.value;
-      // simple contrast check
-      const dr = Math.abs(parseInt(fg.substr(1,2),16) - parseInt(bg.substr(1,2),16));
-      const dg = Math.abs(parseInt(fg.substr(3,2),16) - parseInt(bg.substr(3,2),16));
-      const db = Math.abs(parseInt(fg.substr(5,2),16) - parseInt(bg.substr(5,2),16));
-      const tooClose = dr<25&&dg<25&&db<25;
-      colorError.classList.toggle('hidden', !tooClose);
-      state.selectedTheme.bg = fg;
-      state.selectedTheme.fg = bg;
-      applyTheme();
+    function closeModal() {
+      document.getElementById('creditModal').classList.remove('active');
     }
-    customPrimary.addEventListener('input', pickColor);
-    customSecondary.addEventListener('input', pickColor);
 
-    // --- Settings Modal ---
-    settingsBtn.addEventListener('click', () => settingsModal.classList.remove('hidden'));
-    closeSettings.addEventListener('click', () => settingsModal.classList.add('hidden'));
-
-    // --- Initialize ---
-    applyTheme();
-    updateBrightness();
+    function adjustBrightness(delta) {
+      const slider = document.getElementById('brightnessSlider');
+      let value = parseInt(slider.value);
+      value = Math.min(100, Math.max(0, value + delta));
+      slider.value = value;
+    }
   </script>
 </body>
 </html>
