@@ -48,8 +48,7 @@
         inset 0 -4px 8px rgba(0,0,0,0.2),
         0 4px 10px rgba(0,0,0,0.3);
       display: flex; justify-content: center; align-items: center;
-      cursor: pointer;
-      transition: background 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer; transition: background 0.3s ease, box-shadow 0.3s ease;
     }
     #powerButton svg {
       width: 48px; height: 48px; fill: #fff;
@@ -118,6 +117,7 @@
   <!-- Power Button -->
   <div class="content">
     <div id="powerButton" aria-label="Power">
+      <!-- Standard power_settings_new icon -->
       <svg viewBox="0 0 24 24">
         <path d="M13 3h-2v10h2V3zm-1 18a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/>
       </svg>
@@ -147,6 +147,5 @@
     function overlayClick(e) { if (e.target === overlay) closeModal(); }
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
   </script>
-
 </body>
 </html>
