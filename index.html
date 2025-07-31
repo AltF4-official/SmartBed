@@ -1,151 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>SmartBed</n<title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SmartBed</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       height: 100%; width: 100vw;
       background: linear-gradient(to top, #1a1a1a, #000);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       overflow: hidden;
     }
-
     .top-bar {
-      position: fixed; top: 0; left: 0;
+      position: fixed; bottom: 0; left: 0;
       width: 100vw; height: 60px;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 1rem;
       background: rgba(20,20,20,0.85);
       backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-top: 1px solid rgba(255,255,255,0.1);
       z-index: 100;
     }
-
     .top-bar .icon-btn {
       background: none; border: none; cursor: pointer;
-      padding: 4px;
-      display: flex; align-items: center;
+      padding: 4px; display: flex; align-items: center;
     }
-
-    .top-bar svg {
-      width: 24px; height: 24px; fill: #ddd;
-      transition: fill 0.2s;
-    }
+    .top-bar svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s; }
     .top-bar svg:hover { fill: #fff; }
-
     .top-bar-title {
-      color: #fff; font-size: 1.2rem; font-weight: 600;
+      color: #fff; font-size: 1.1rem; font-weight: 500;
       pointer-events: none;
     }
-
     .content {
-      position: absolute; top: 60px; left: 0;
+      position: absolute; top: 0; left: 0;
       width: 100%; height: calc(100% - 60px);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
     }
-
     /* Power Button */
     #powerButton {
-      width: 100px; height: 100px;
-      border-radius: 50%; background: #222;
-      display: flex; align-items: center; justify-content: center;
+      width: 100px; height: 100px; border-radius: 50%;
+      background: #222; display: flex; align-items: center; justify-content: center;
       box-shadow: inset 0 0 6px #000, 0 0 12px rgba(0,0,0,0.5);
-      cursor: pointer;
-      transition: transform 0.3s;
+      cursor: pointer; transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
       margin-bottom: 20px;
     }
     #powerButton.on {
-      transform: scale(1.1);
+      transform: scale(1.05);
       background: #00c3ff;
       box-shadow: 0 0 20px #00c3ff, inset 0 0 8px #007a99;
     }
     .power-icon {
-      font-size: 3rem; color: #fff;
-      transition: color 0.3s;
+      font-size: 3rem; color: #fff; transition: color 0.3s;
     }
-
+    #powerButton.on .power-icon { color: #002e3d; }
     /* Controls */
     .controls {
-      position: absolute; bottom: 40px; width: 100%;
+      position: absolute; bottom: 80px; width: 100%;
       display: flex; justify-content: center;
       opacity: 0; transform: translateY(20px);
-      transition: all 0.5s ease;
+      transition: opacity 0.5s ease, transform 0.5s ease;
     }
     .controls.visible { opacity: 1; transform: translateY(0); }
-
     .brightness-control {
       display: flex; align-items: center; gap: 12px;
       background: rgba(255,255,255,0.05);
       padding: 8px 16px; border-radius: 20px;
     }
-
     .brightness-control button {
       background: none; border: none; padding: 4px;
-      cursor: pointer;
+      cursor: pointer; display: flex; align-items: center;
     }
-    .brightness-control svg {
-      width: 20px; height: 20px; fill: #ccc;
-      transition: fill 0.3s;
-    }
+    .brightness-control svg { width: 20px; height: 20px; fill: #ccc; transition: fill 0.3s; }
     .brightness-control svg:hover { fill: #fff; }
-
     .brightness-slider {
-      -webkit-appearance: none;
-      width: 150px; height: 4px;
-      background: #444; border-radius: 2px;
-      cursor: pointer;
+      -webkit-appearance: none; width: 150px; height: 4px;
+      background: #444; border-radius: 2px; cursor: pointer;
     }
     .brightness-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px; height: 14px;
-      background: #00c3ff; border-radius: 50%;
+      -webkit-appearance: none; width: 14px; height: 14px;
+      background: #00c3ff; border-radius: 50%; cursor: pointer;
     }
-
     .brightness-value {
-      color: #fff; font-size: 0.9rem;
-      width: 30px; text-align: right;
+      color: #fff; font-size: 0.9rem; width: 30px; text-align: right;
     }
-
     /* Modal */
-    .modal-bg {
-      display: none; position: fixed; inset: 0;
+    .modal-bg { display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
-      justify-content: center; align-items: center;
-      z-index: 200;
-    }
+      justify-content: center; align-items: center; z-index: 200; }
     .modal-bg.active { display: flex; }
-    .modal-box {
-      background: #111; padding: 20px 24px;
-      border-radius: 12px; text-align: center;
-      color: #eee; box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    .modal-box h2 { margin-bottom: 8px; }
-    .modal-box p { margin-bottom: 12px; }
+    .modal-box { background: #111; padding: 20px 24px;
+      border-radius: 12px; text-align: center; color: #eee;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    .modal-box h2 { margin-bottom: 8px; font-size: 1.2rem; }
+    .modal-box p { margin-bottom: 12px; font-size: 1rem; }
     .close-btn {
-      padding: 6px 12px; background: #222;
-      border: none; color: #ccc; border-radius: 6px;
-      cursor: pointer;
+      padding: 6px 12px; background: #222; border: none;
+      color: #ccc; border-radius: 6px; cursor: pointer;
     }
     .close-btn:hover { background: #333; color: #fff; }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button class="icon-btn" aria-label="Home">
-      <!-- Bed Icon -->
-      <svg viewBox="0 0 24 24"><path d="M3 11h18v2H3v-2zm0 4h18v2H3v-2zM5 7h14v2H5V7z"/></svg>
-    </button>
-    <div class="top-bar-title">SmartBed</div>
-    <button class="icon-btn" onclick="openModal()" aria-label="Credits">
-      <!-- Info Icon -->
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#ccc" stroke-width="2" fill="none"/><rect x="11" y="6" width="2" height="2" fill="#ccc"/><rect x="11" y="10" width="2" height="6" fill="#ccc"/></svg>
-    </button>
-  </div>
-
   <div class="content">
     <div id="powerButton" onclick="togglePower()">
       <span class="power-icon">⏻</span>
@@ -153,22 +110,34 @@
     <div class="controls" id="controls">
       <div class="brightness-control">
         <button onclick="adjustBrightness(-5)" aria-label="Decrease Brightness">
-          <!-- Dim Sun Icon -->
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><g stroke="#ccc" stroke-width="2"><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></g></svg>
+          <!-- Dim Sun -->
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="#ccc"/><g stroke="#ccc" stroke-width="2"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/></g></svg>
         </button>
         <input type="range" id="brightnessSlider" class="brightness-slider" min="0" max="100" value="50" oninput="updateBrightnessLabel()">
         <button onclick="adjustBrightness(5)" aria-label="Increase Brightness">
-          <!-- Bright Sun Icon -->
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/><g stroke="#ccc" stroke-width="2"><line x1="12" y1="1" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="23"/><line x1="1" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="23" y2="12"/></g></svg>
+          <!-- Bright Sun -->
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#ccc"/><g stroke="#ccc" stroke-width="2"><line x1="4" y1="4" x2="6" y2="6"/><line x1="18" y1="18" x2="20" y2="20"/></g></svg>
         </button>
         <span class="brightness-value" id="brightnessValue">50%</span>
       </div>
     </div>
   </div>
 
+  <div class="top-bar">
+    <button class="icon-btn" aria-label="Home">
+      <!-- Bed Icon -->
+      <svg viewBox="0 0 24 24"><path d="M2 13h20v2H2v-2zm0-4h20v2H2V9zm2-4h16v2H4V5z"/></svg>
+    </button>
+    <div class="top-bar-title">SmartBed</div>
+    <button class="icon-btn" onclick="openModal()" aria-label="Credits">
+      <!-- Info Icon -->
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#ccc" stroke-width="2" fill="none"/><circle cx="12" cy="8" r="1" fill="#ccc"/><rect x="11" y="11" width="2" height="6" fill="#ccc"/></svg>
+    </button>
+  </div>
+
   <div id="creditModal" class="modal-bg">
     <div class="modal-box">
-      <h2>SmartBed</n2>
+      <h2>SmartBed</h2>
       <p>Made by altf4-official on GitHub</p>
       <button class="close-btn" onclick="closeModal()">Close</button>
     </div>
@@ -179,8 +148,6 @@
       document.getElementById('powerButton').classList.toggle('on');
       document.getElementById('controls').classList.toggle('visible');
     }
-    function openModal() { document.getElementById('creditModal').classList.add('active'); }
-    function closeModal() { document.getElementById('creditModal').classList.remove('active'); }
     function adjustBrightness(delta) {
       const s = document.getElementById('brightnessSlider');
       let v = parseInt(s.value) + delta;
@@ -190,6 +157,8 @@
     function updateBrightnessLabel() {
       document.getElementById('brightnessValue').innerText = document.getElementById('brightnessSlider').value + '%';
     }
+    function openModal() { document.querySelector('.modal-bg').classList.add('active'); }
+    function closeModal() { document.querySelector('.modal-bg').classList.remove('active'); }
   </script>
 </body>
 </html>
