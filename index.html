@@ -5,44 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>SmartBed</title>
   <style>
-    html, body {
+    /* === Global Reset & Theme === */
+    * {
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
       width: 100vw;
       height: 100dvh;
       overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(to bottom, #000000, #2a2a2a);
-      color: #f0f0f0;
-      box-sizing: border-box;
+      background: linear-gradient(to bottom, #111, #2e2e2e);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #f2f2f2;
     }
 
+    /* === Top Bar === */
     .top-bar {
-      height: 60px;
-      width: 100vw;
-      box-sizing: border-box;
       position: fixed;
       top: 0;
       left: 0;
+      height: 60px;
+      width: 100vw;
+      padding: 0 1.2rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 1.2rem;
+      background: rgba(20, 20, 20, 0.8);
       backdrop-filter: blur(10px);
-      background: rgba(10, 10, 10, 0.7);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      z-index: 1000;
-    }
-
-    .top-bar .icon,
-    .top-bar button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      padding: 0.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      z-index: 999;
     }
 
     .top-bar svg {
@@ -52,19 +45,27 @@
       transition: fill 0.2s ease;
     }
 
+    .top-bar button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
     .top-bar button:hover svg {
       fill: #fff;
     }
 
     .top-bar .title {
       font-size: 1.1rem;
-      font-weight: 500;
+      font-weight: 600;
       text-align: center;
       flex: 1;
-      color: #ddd;
+      color: #e0e0e0;
       pointer-events: none;
     }
 
+    /* === Main Content === */
     .content {
       position: absolute;
       top: 60px;
@@ -72,21 +73,22 @@
       width: 100%;
       height: calc(100dvh - 60px);
       display: flex;
-      flex-direction: column;
       justify-content: center;
       align-items: center;
       text-align: center;
+      padding: 1rem;
     }
 
     h1 {
-      font-size: 2.8rem;
-      margin: 0;
+      font-size: 2.6rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: #ffffff;
     }
 
     p {
-      font-size: 1.2rem;
-      opacity: 0.8;
-      margin-top: 0.5rem;
+      font-size: 1.1rem;
+      opacity: 0.85;
     }
 
     @media (max-width: 600px) {
@@ -94,16 +96,16 @@
       p { font-size: 1rem; }
     }
 
-    /* Modal Overlay */
+    /* === Modal === */
     .modal-overlay {
       position: fixed;
       inset: 0;
       background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(3px);
+      backdrop-filter: blur(4px);
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 2000;
+      z-index: 1000;
       opacity: 0;
       transition: opacity 0.25s ease;
     }
@@ -113,46 +115,40 @@
       opacity: 1;
     }
 
-    /* Modal Content */
     .modal-content {
-      background: #1e1e1e;
-      border-radius: 14px;
-      padding: 1.5rem 2rem;
-      width: 320px;
+      background: #1c1c1c;
+      border-radius: 12px;
+      padding: 1.8rem 2.4rem;
       max-width: 90vw;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      width: 340px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+      text-align: center;
       color: #eee;
       position: relative;
-      text-align: center;
     }
 
     .modal-content h3 {
-      margin: 0 0 1rem 0;
-      font-weight: 600;
-      font-size: 1.4rem;
+      margin-bottom: 0.8rem;
+      font-size: 1.3rem;
       color: #fff;
     }
 
     .modal-content p {
       margin: 0.4rem 0;
-      font-size: 1rem;
       color: #ccc;
+      font-size: 0.95rem;
     }
 
-    /* Close Button */
     .close-btn {
       position: absolute;
-      top: 10px;
-      right: 14px;
-      background: transparent;
-      border: none;
+      top: 12px;
+      right: 16px;
       font-size: 1.6rem;
-      color: #bbb;
+      background: none;
+      border: none;
+      color: #aaa;
       cursor: pointer;
       transition: color 0.2s ease;
-      font-weight: bold;
-      line-height: 1;
-      padding: 0;
     }
 
     .close-btn:hover {
@@ -164,24 +160,24 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <div class="icon">
+    <button aria-label="Home">
       <!-- Bed Icon -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M3 5h18a1 1 0 0 1 1 1v13h-2v-2H4v2H2V6a1 1 0 0 1 1-1Zm1 6v3h16v-3H4Zm5-4a2 2 0 1 0 0 4h2V7H9Z"/>
       </svg>
-    </div>
+    </button>
 
     <div class="title">SmartBed</div>
 
-    <button onclick="openModal()" aria-label="Info">
-      <!-- Info Icon -->
+    <button onclick="openModal()" aria-label="Credits">
+      <!-- Info icon -->
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
         <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4h-2V7h2v6Z"/>
       </svg>
     </button>
   </div>
 
-  <!-- Main Content -->
+  <!-- Content -->
   <div class="content">
     <div>
       <h1>SmartBed</h1>
@@ -192,10 +188,10 @@
   <!-- Modal -->
   <div id="modalOverlay" class="modal-overlay" onclick="overlayClick(event)">
     <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
-      <button class="close-btn" aria-label="Close modal" onclick="closeModal()">×</button>
-      <h3 id="modalTitle">About This Project</h3>
-      <p>Made by Sammy Wammy</p>
-      <p>© 2025 SmartBed Project</p>
+      <button class="close-btn" onclick="closeModal()" aria-label="Close modal">&times;</button>
+      <h3 id="modalTitle">Created By</h3>
+      <p>Sammy Wammy</p>
+      <p>SmartBed Project © 2025</p>
     </div>
   </div>
 
@@ -204,7 +200,6 @@
 
     function openModal() {
       modalOverlay.classList.add('active');
-      // Focus the modal content for accessibility
       modalOverlay.querySelector('.modal-content').focus();
     }
 
@@ -212,18 +207,12 @@
       modalOverlay.classList.remove('active');
     }
 
-    // Close modal if clicked outside modal-content
-    function overlayClick(event) {
-      if(event.target === modalOverlay) {
-        closeModal();
-      }
+    function overlayClick(e) {
+      if (e.target === modalOverlay) closeModal();
     }
 
-    // Optional: close modal on ESC key press
-    document.addEventListener('keydown', (e) => {
-      if(e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-        closeModal();
-      }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
     });
   </script>
 
