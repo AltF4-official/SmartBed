@@ -1,216 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
   <title>SmartBed</title>
-  <style>
-    /* Reset and base styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    html, body {
-      height: 100%;
-      background: linear-gradient(to top, #1a1a1a, #000);
-      overflow: hidden;
-    }
-
-    .top-bar {
-      height: 60px;
-      width: 100vw;
-      position: fixed;
-      top: 0;
-      left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1.2rem;
-      box-sizing: border-box;
-      backdrop-filter: blur(10px);
-      background: rgba(10, 10, 10, 0.7);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      z-index: 1000;
-    }
-
-    .top-bar svg {
-      width: 26px;
-      height: 26px;
-      fill: #ccc;
-    }
-
-    .top-bar-title {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: #f0f0f0;
-    }
-
-    .content {
-      height: 100%;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #powerButton {
-      width: 90px;
-      height: 90px;
-      border-radius: 50%;
-      background: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      transition: background 0.3s ease;
-      box-shadow: inset 0 0 6px #000, 0 0 12px rgba(0,0,0,0.4);
-      cursor: pointer;
-    }
-
-    #powerButton:hover {
-      background: #3a3a3a;
-    }
-
-    #powerButton.on {
-      background: #00c3ff;
-      box-shadow: 0 0 20px #00c3ff, inset 0 0 8px #007a99;
-    }
-
-    .power-icon {
-      font-size: 2.5rem;
-      color: #ddd;
-      transition: color 0.3s ease;
-      user-select: none;
-    }
-
-    #powerButton.on .power-icon {
-      color: #002e3d;
-    }
-
-    /* Modal overlay */
-    .modal-bg {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 100vw;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal-bg.active {
-      display: flex;
-    }
-
-    .modal-box {
-      background: #121212;
-      color: #eee;
-      padding: 20px 24px;
-      border-radius: 12px;
-      text-align: center;
-      max-width: 300px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-
-    .modal-box h2 {
-      font-size: 1.2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .modal-box p {
-      font-size: 0.9rem;
-      opacity: 0.85;
-    }
-
-    .close-btn {
-      margin-top: 1rem;
-      background: none;
-      color: #aaa;
-      border: 1px solid #444;
-      padding: 6px 14px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .close-btn:hover {
-      background: #222;
-      color: #fff;
-      border-color: #666;
-    }
-
-    button {
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    @media (max-width: 500px) {
-      .top-bar-title {
-        font-size: 1rem;
-      }
-
-      #powerButton {
-        width: 70px;
-        height: 70px;
-      }
-
-      .power-icon {
-        font-size: 2rem;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-  <!-- Top Bar -->
-  <div class="top-bar">
-    <svg viewBox="0 0 24 24">
-      <path d="M4 10V7c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v3h-2V7H6v3H4Zm16 2c1.1 0 2 .9 2 2v5h-2v-2H4v2H2v-5c0-1.1.9-2 2-2h16Z"/>
-    </svg>
-    <div class="top-bar-title">SmartBed</div>
-    <button onclick="openModal()" aria-label="Credits">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2Zm1 15h-2v-6h2v6Zm0-8h-2V7h2v2Z"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Main Content -->
-  <div class="content">
-    <div id="powerButton" onclick="togglePower()">
-      <span class="power-icon">⏻</span>
-    </div>
-  </div>
-
-  <!-- Modal -->
-  <div id="creditModal" class="modal-bg">
-    <div class="modal-box">
+  <div id="app">
+    <div class="header">
+      <span class="icon">🛏️</span>
       <h2>SmartBed</h2>
-      <p>Made by altf4-official on GitHub</p>
-      <button class="close-btn" onclick="closeModal()">Close</button>
+      <button id="settings-btn">⚙️</button>
     </div>
+
+    <div class="center">
+      <button id="power-btn" class="power-button">⏻</button>
+    </div>
+
+    <div id="controls" class="controls hidden">
+      <div id="brightness-control" class="brightness">
+        <button id="minus-bright">–</button>
+        <input type="range" id="brightness" min="0" max="35" value="35">
+        <button id="plus-bright">+</button>
+        <div id="brightness-label">100%</div>
+      </div>
+      <div class="flash-controls">
+        <button id="flash-toggle">Flash Mode</button>
+        <button id="flash-settings-btn">⚙️</button>
+      </div>
+    </div>
+
+    <!-- Flash settings modal -->
+    <div id="flash-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Flash Settings</h3>
+        <label>On (ms): <input type="number" id="flash-on" value="100"></label>
+        <label>Off (ms): <input type="number" id="flash-off" value="100"></label>
+        <div class="modal-actions">
+          <button id="flash-cancel">Cancel</button>
+          <button id="flash-apply">Apply</button>
+        </div>
+        <div id="flash-error" class="error hidden">Enter valid values 10–10000 ms.</div>
+      </div>
+    </div>
+
+    <!-- Settings modal -->
+    <div id="settings-modal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Theme Settings</h3>
+        <select id="theme-select"></select>
+        <div id="custom-colors" class="hidden">
+          <label>Primary: <input type="color" id="custom-primary" value="#0000ff"></label>
+          <label>Secondary: <input type="color" id="custom-secondary" value="#ffffff"></label>
+          <div id="color-error" class="error hidden">Colors too similar.</div>
+        </div>
+        <button id="settings-close">Close</button>
+      </div>
+    </div>
+
+    <div id="notification" class="notification hidden"></div>
   </div>
 
-  <!-- Script -->
-  <script>
-    function togglePower() {
-      document.getElementById('powerButton').classList.toggle('on');
-    }
-
-    function openModal() {
-      document.getElementById('creditModal').classList.add('active');
-    }
-
-    function closeModal() {
-      document.getElementById('creditModal').classList.remove('active');
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
