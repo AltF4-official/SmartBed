@@ -22,12 +22,8 @@
       border-bottom: 1px solid rgba(255,255,255,0.1);
       z-index: 100;
     }
-    .icon-btn {
-      background: none; border: none; cursor: pointer; padding: 4px;
-    }
-    .icon-btn svg {
-      width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s;
-    }
+    .icon-btn { background: none; border: none; cursor: pointer; padding: 4px; }
+    .icon-btn svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s; }
     .icon-btn:hover svg { fill: #fff; }
     .top-bar-title { color: #fff; font-size: 1.2rem; font-weight: 600; }
 
@@ -59,18 +55,28 @@
     }
     .controls.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    /* Flash Toggle Button */
+    /* Flash Toggle and Settings */
+    .flash-container {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
     #flashToggle {
       width: 50px; height: 50px; border-radius: 50%;
       background: #444; display: flex; align-items: center; justify-content: center;
-      margin-bottom: 16px;
       cursor: pointer; transition: background 0.3s, transform 0.3s;
     }
     #flashToggle.on { background: #ffdd00; transform: scale(1.1); }
     #flashToggle svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.3s; }
     #flashToggle.on svg { fill: #333; }
+    #flashSettings {
+      width: 40px; height: 40px; border-radius: 6px;
+      background: #333; display: none; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.2s;
+    }
+    #flashSettings.visible { display: flex; }
+    #flashSettings svg { width: 20px; height: 20px; fill: #ccc; }
 
-    /* Brightness Bar - simplified */
+    /* Brightness */
     #brightnessContainer {
       display: flex; align-items: center; gap: 12px;
     }
@@ -79,7 +85,7 @@
       transition: transform 0.3s, fill 0.3s;
     }
     #brightnessSlider {
-      width: 180px; cursor: pointer;
+      width: 180px; cursor: pointer; background: transparent;
     }
     .brightness-value { color: #fff; font-size: 1rem; width: 30px; text-align: right; }
 
@@ -88,7 +94,8 @@
       justify-content: center; align-items: center; z-index: 200;
     }
     .modal-bg.active { display: flex; }
-    .modal-box { background: #111; padding: 24px 32px; border-radius: 12px;
+    .modal-box {
+      background: #111; padding: 24px 32px; border-radius: 12px;
       box-shadow: 0 0 20px rgba(0,0,0,0.5); text-align: center; color: #eee;
     }
     .modal-box h2 { margin-bottom: 12px; font-size: 1.3rem; }
@@ -115,11 +122,16 @@
       <span class="power-icon">⏻</span>
     </div>
     <div class="controls" id="controls">
-      <div id="flashToggle" onclick="toggleFlash()">
-        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+      <div class="flash-container">
+        <div id="flashToggle" onclick="toggleFlash()">
+          <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+        </div>
+        <div id="flashSettings" onclick="openFlashSettings()">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 4 4 8 7 8s7-4 7-8c0-3.87-3.13-7-7-7zm0 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        </div>
       </div>
       <div id="brightnessContainer">
-        <svg id="brightnessSun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+        <svg id="brightnessSun" viewBox="0 0 24 24"><path d="M12 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 15a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM4.5 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm15 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM6.22 6.22l-2.12-2.12 2.12-2.12 2.12 2.12-2.12 2.12zm11.56 11.56l-2.12-2.12 2.12-2.12 2.12 2.12-2.12 2.12zM6.22 17.78l-2.12 2.12 2.12 2.12 2.12-2.12-2.12-2.12zm11.56-11.56l-2.12 2.12 2.12 2.12 2.12-2.12-2.12-2.12zM12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>
         <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness()">
         <span class="brightness-value" id="brightnessValue">50%</span>
       </div>
@@ -136,16 +148,16 @@
 
   <script>
     function togglePower() {
-      const btn = document.getElementById('powerButton');
-      const controls = document.getElementById('controls');
-      btn.classList.toggle('on');
-      controls.classList.toggle('visible');
+      document.getElementById('powerButton').classList.toggle('on');
+      document.getElementById('controls').classList.toggle('visible');
     }
     function toggleFlash() {
       const flash = document.getElementById('flashToggle');
-      const controls = document.getElementById('controls');
       flash.classList.toggle('on');
-      controls.classList.toggle('visible', !flash.classList.contains('on'));
+      document.getElementById('controls').classList.toggle('visible', !flash.classList.contains('on'));
+    }
+    function openFlashSettings() {
+      alert('Open flash settings');
     }
     function updateBrightness() {
       const slider = document.getElementById('brightnessSlider');
