@@ -57,35 +57,52 @@
 
     /* Flash Toggle and Settings */
     .flash-container {
-      display: flex; align-items: center; gap: 12px;
+      display: flex; align-items: center; gap: 16px;
       margin-bottom: 16px;
     }
     #flashToggle {
       width: 50px; height: 50px; border-radius: 50%;
-      background: #444; display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(145deg, #555, #333);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 4px 4px 8px #111, -4px -4px 8px #666;
       cursor: pointer; transition: background 0.3s, transform 0.3s;
     }
-    #flashToggle.on { background: #ffdd00; transform: scale(1.1); }
-    #flashToggle svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.3s; }
+    #flashToggle.on {
+      background: linear-gradient(145deg, #ffea00, #cca800);
+      transform: scale(1.1);
+      box-shadow: 0 0 12px #ffea00;
+    }
+    #flashToggle svg { width: 28px; height: 28px; fill: #ccc; transition: fill 0.3s; }
     #flashToggle.on svg { fill: #333; }
+
     #flashSettings {
-      width: 40px; height: 40px; border-radius: 6px;
+      width: 40px; height: 40px; border-radius: 8px;
       background: #333; display: none; align-items: center; justify-content: center;
+      box-shadow: inset 2px 2px 4px #111, inset -2px -2px 4px #444;
       cursor: pointer; transition: background 0.2s;
     }
-    #flashSettings.visible { display: flex; }
+    #flashSettings.visible {
+      display: flex;
+    }
     #flashSettings svg { width: 20px; height: 20px; fill: #ccc; }
+    #flashSettings:hover { background: #444; }
 
     /* Brightness */
     #brightnessContainer {
       display: flex; align-items: center; gap: 12px;
     }
     #brightnessSun {
-      width: 24px; height: 24px; fill: #ccc;
+      width: 28px; height: 28px; fill: #ffeb3b;
       transition: transform 0.3s, fill 0.3s;
     }
     #brightnessSlider {
-      width: 180px; cursor: pointer; background: transparent;
+      -webkit-appearance: none; width: 180px; height: 6px;
+      background: #555; border-radius: 3px; cursor: pointer;
+    }
+    #brightnessSlider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px;
+      background: #ffeb3b; border-radius: 50%; cursor: pointer;
+      margin-top: -5px;
     }
     .brightness-value { color: #fff; font-size: 1rem; width: 30px; text-align: right; }
 
@@ -124,14 +141,14 @@
     <div class="controls" id="controls">
       <div class="flash-container">
         <div id="flashToggle" onclick="toggleFlash()">
-          <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+          <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7l6-12v7h4l-6 12z"/></svg>
         </div>
         <div id="flashSettings" onclick="openFlashSettings()">
           <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 4 4 8 7 8s7-4 7-8c0-3.87-3.13-7-7-7zm0 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
         </div>
       </div>
       <div id="brightnessContainer">
-        <svg id="brightnessSun" viewBox="0 0 24 24"><path d="M12 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 15a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM4.5 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm15 0a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM6.22 6.22l-2.12-2.12 2.12-2.12 2.12 2.12-2.12 2.12zm11.56 11.56l-2.12-2.12 2.12-2.12 2.12 2.12-2.12 2.12zM6.22 17.78l-2.12 2.12 2.12 2.12 2.12-2.12-2.12-2.12zm11.56-11.56l-2.12 2.12 2.12 2.12 2.12-2.12-2.12-2.12zM12 9a3 3 0 100 6 3 3 0 000-6z"/></svg>
+        <svg id="brightnessSun" viewBox="0 0 24 24"><path d="M12 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 15a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM4.5 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM19.5 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM12 6a6 6 0 100 12 6 6 0 000-12z"/></svg>
         <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness()">
         <span class="brightness-value" id="brightnessValue">50%</span>
       </div>
@@ -153,7 +170,9 @@
     }
     function toggleFlash() {
       const flash = document.getElementById('flashToggle');
+      const settings = document.getElementById('flashSettings');
       flash.classList.toggle('on');
+      settings.classList.toggle('visible', flash.classList.contains('on'));
       document.getElementById('controls').classList.toggle('visible', !flash.classList.contains('on'));
     }
     function openFlashSettings() {
