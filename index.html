@@ -85,7 +85,8 @@
       display: flex;
       transform: scale(1.05);
     }
-    #flashSettings svg { width: 24px; height: 24px; fill: #ccc; }
+    #flashSettings svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s; }
+    #flashSettings.visible svg { fill: #ffea00; }
     #flashSettings:hover { background: #444; }
 
     /* Brightness */
@@ -131,4 +132,63 @@
     </button>
     <div class="top-bar-title">SmartBed</div>
     <button class="icon-btn" onclick="openModal()" aria-label="Info">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#ccc" stroke-width="2" fill="none"/><circle cx="12" cy="8` error parsing replacement JSON
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#ccc" stroke-width="2" fill="none"/><circle cx="12" cy="8" r="1" fill="#ccc"/><rect x="11" y="11" width="2" height="6" fill="#ccc"/></svg>
+    </button>
+  </div>
+
+  <div class="content">
+    <div id="powerButton" onclick="togglePower()">
+      <span class="power-icon">⏻</span>
+    </div>
+    <div class="controls" id="controls">
+      <div class="flash-container">
+        <div id="flashToggle" onclick="toggleFlash()">
+          <svg viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7l6-12v7h4l-6 12z"/></svg>
+        </div>
+        <div id="flashSettings" onclick="openFlashSettings()">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 4 4 8 7 8s7-4 7-8c0-3.87-3.13-7-7-7zm0 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/></svg>
+        </div>
+      </div>
+      <div id="brightnessContainer">
+        <svg id="brightnessSun" viewBox="0 0 24 24"><path d="M12 4.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 15a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM4.5 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM19.5 12a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM12 6a6 6 0 100 12 6 6 0 000-12z"/></svg>
+        <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness()">
+        <span class="brightness-value" id="brightnessValue">50%</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="creditModal" class="modal-bg">
+    <div class="modal-box">
+      <h2>SmartBed</h2>
+      <p>Made by altf4-official on GitHub</p>
+      <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    function togglePower() {
+      document.getElementById('powerButton').classList.toggle('on');
+      document.getElementById('controls').classList.toggle('visible');
+    }
+    function toggleFlash() {
+      const flash = document.getElementById('flashToggle');
+      const settings = document.getElementById('flashSettings');
+      flash.classList.toggle('on');
+      settings.classList.toggle('visible', flash.classList.contains('on'));
+      document.getElementById('controls').classList.toggle('visible', !flash.classList.contains('on'));
+    }
+    function openFlashSettings() {
+      alert('Open flash settings');
+    }
+    function updateBrightness() {
+      const slider = document.getElementById('brightnessSlider');
+      const sun = document.getElementById('brightnessSun');
+      const val = slider.value;
+      sun.style.transform = `scale(${0.5 + val/200})`;
+      document.getElementById('brightnessValue').innerText = val + '%';
+    }
+    function openModal() { document.querySelector('.modal-bg').classList.add('active'); }
+    function closeModal() { document.querySelector('.modal-bg').classList.remove('active'); }
+  </script>
+</body>
+</html>
