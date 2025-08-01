@@ -22,8 +22,12 @@
       border-bottom: 1px solid rgba(255,255,255,0.1);
       z-index: 100;
     }
-    .icon-btn { background: none; border: none; cursor: pointer; padding: 4px; }
-    .icon-btn svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s; }
+    .icon-btn {
+      background: none; border: none; cursor: pointer; padding: 4px;
+    }
+    .icon-btn svg {
+      width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s;
+    }
     .icon-btn:hover svg { fill: #fff; }
     .top-bar-title { color: #fff; font-size: 1.2rem; font-weight: 600; }
 
@@ -37,8 +41,7 @@
       width: 100px; height: 100px; border-radius: 50%;
       background: #222; display: flex; align-items: center; justify-content: center;
       box-shadow: inset 0 0 6px #000, 0 0 12px rgba(0,0,0,0.5);
-      cursor: pointer;
-      transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
+      cursor: pointer; transition: transform 0.3s, background 0.3s, box-shadow 0.3s;
       margin-bottom: 20px;
     }
     #powerButton.on {
@@ -51,56 +54,58 @@
 
     .controls {
       position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px);
-      display: flex; justify-content: center;
+      display: flex; flex-direction: column; align-items: center;
       opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease;
     }
     .controls.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .brightness-control {
-      display: flex; align-items: center; gap: 16px;
-      background: rgba(255,255,255,0.07);
-      padding: 8px 20px; border-radius: 24px;
+    /* Flash Toggle Button */
+    #flashToggle {
+      width: 50px; height: 50px; border-radius: 50%;
+      background: #444; display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+      cursor: pointer; transition: background 0.3s, transform 0.3s;
     }
-    .brightness-control button { background: none; border: none; padding: 4px; }
-    .brightness-control svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.2s; }
-    .brightness-control svg:hover { fill: #fff; }
-    .brightness-slider {
-      -webkit-appearance: none; width: 180px; height: 6px;
-      background: #444; border-radius: 3px; cursor: pointer;
+    #flashToggle.on { background: #ffdd00; transform: scale(1.1); }
+    #flashToggle svg { width: 24px; height: 24px; fill: #ccc; transition: fill 0.3s; }
+    #flashToggle.on svg { fill: #333; }
+
+    /* Brightness Bar - simplified */
+    #brightnessContainer {
+      display: flex; align-items: center; gap: 12px;
     }
-    .brightness-slider::-webkit-slider-thumb {
-      -webkit-appearance: none; width: 16px; height: 16px;
-      background: #00c3ff; border-radius: 50%; cursor: pointer;
-      margin-top: -5px;
+    #brightnessSun {
+      width: 24px; height: 24px; fill: #ccc;
+      transition: transform 0.3s, fill 0.3s;
     }
-    .brightness-value { color: #fff; font-size: 1rem; }
+    #brightnessSlider {
+      width: 180px; cursor: pointer;
+    }
+    .brightness-value { color: #fff; font-size: 1rem; width: 30px; text-align: right; }
 
     .modal-bg { display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
       justify-content: center; align-items: center; z-index: 200;
     }
     .modal-bg.active { display: flex; }
-    .modal-box {
-      background: #111; padding: 24px 32px; border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5); text-align: center;
-      color: #eee;
+    .modal-box { background: #111; padding: 24px 32px; border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5); text-align: center; color: #eee;
     }
     .modal-box h2 { margin-bottom: 12px; font-size: 1.3rem; }
     .modal-box p { margin-bottom: 16px; font-size: 1rem; }
     .close-btn { padding: 8px 16px; background: #222; border: none;
-      color: #ccc; border-radius: 6px; cursor: pointer; }
+      color: #ccc; border-radius: 6px; cursor: pointer;
+    }
     .close-btn:hover { background: #333; color: #fff; }
   </style>
 </head>
 <body>
   <div class="top-bar">
     <button class="icon-btn" aria-label="Home">
-      <!-- Proper Bed Icon -->
       <svg viewBox="0 0 24 24"><path d="M3 11h18v6H3v-6zm0-4h18v2H3V7zm0-4h18v2H3V3z"/></svg>
     </button>
     <div class="top-bar-title">SmartBed</div>
     <button class="icon-btn" onclick="openModal()" aria-label="Info">
-      <!-- Info Icon -->
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#ccc" stroke-width="2" fill="none"/><circle cx="12" cy="8" r="1" fill="#ccc"/><rect x="11" y="11" width="2" height="6" fill="#ccc"/></svg>
     </button>
   </div>
@@ -110,16 +115,12 @@
       <span class="power-icon">⏻</span>
     </div>
     <div class="controls" id="controls">
-      <div class="brightness-control">
-        <button onclick="adjustBrightness(-5)" aria-label="Decrease Brightness">
-          <!-- Small Sun -->
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" fill="#ccc"/></svg>
-        </button>
-        <input type="range" id="brightnessSlider" class="brightness-slider" min="0" max="100" value="50" oninput="updateBrightnessLabel()">
-        <button onclick="adjustBrightness(5)" aria-label="Increase Brightness">
-          <!-- Large Sun -->
-          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="#ccc"/></svg>
-        </button>
+      <div id="flashToggle" onclick="toggleFlash()">
+        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
+      </div>
+      <div id="brightnessContainer">
+        <svg id="brightnessSun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="6"/></svg>
+        <input type="range" id="brightnessSlider" min="0" max="100" value="50" oninput="updateBrightness()">
         <span class="brightness-value" id="brightnessValue">50%</span>
       </div>
     </div>
@@ -135,17 +136,23 @@
 
   <script>
     function togglePower() {
-      document.getElementById('powerButton').classList.toggle('on');
-      document.getElementById('controls').classList.toggle('visible');
+      const btn = document.getElementById('powerButton');
+      const controls = document.getElementById('controls');
+      btn.classList.toggle('on');
+      controls.classList.toggle('visible');
     }
-    function adjustBrightness(delta) {
-      const s = document.getElementById('brightnessSlider');
-      let v = parseInt(s.value) + delta;
-      s.value = Math.max(0, Math.min(100, v));
-      updateBrightnessLabel();
+    function toggleFlash() {
+      const flash = document.getElementById('flashToggle');
+      const controls = document.getElementById('controls');
+      flash.classList.toggle('on');
+      controls.classList.toggle('visible', !flash.classList.contains('on'));
     }
-    function updateBrightnessLabel() {
-      document.getElementById('brightnessValue').innerText = document.getElementById('brightnessSlider').value + '%';
+    function updateBrightness() {
+      const slider = document.getElementById('brightnessSlider');
+      const sun = document.getElementById('brightnessSun');
+      const val = slider.value;
+      sun.style.transform = `scale(${0.5 + val/200})`;
+      document.getElementById('brightnessValue').innerText = val + '%';
     }
     function openModal() { document.querySelector('.modal-bg').classList.add('active'); }
     function closeModal() { document.querySelector('.modal-bg').classList.remove('active'); }
