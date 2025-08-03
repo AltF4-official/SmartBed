@@ -82,24 +82,39 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2rem;
     }
 
-    .control-button {
-      padding: 0.8rem 2rem;
+    .bottom-controls {
+      position: absolute;
+      bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      gap: 1rem;
+    }
+
+    .power-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: transparent;
+      color: var(--accent);
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .power-button:hover,
+    .toggle:hover {
+      background-color: rgba(0, 212, 255, 0.1);
+    }
+
+    .power-button.active {
       background: var(--accent);
       color: black;
-      font-size: 1.1rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .control-button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 10px var(--accent);
     }
 
     .toggle {
@@ -120,7 +135,7 @@
     }
 
     .slider-container {
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
@@ -128,11 +143,26 @@
     }
 
     .slider {
-      width: 200px;
+      width: 250px;
       accent-color: var(--accent);
     }
 
-    /* Modal */
+    .percentage {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .flash-settings-button {
+      display: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 6px;
+      background: var(--accent);
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
     .modal {
       position: fixed;
       top: 0; left: 0;
@@ -167,19 +197,13 @@
   </style>
 </head>
 <body>
-
-  <!-- Top Bar -->
   <div class="top-bar">
     <div class="left-icon">
-      <svg viewBox="0 0 24 24">
-        <path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/>
-      </svg>
+      <svg viewBox="0 0 24 24"><path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/></svg>
     </div>
-
     <div class="top-bar-title">SmartBed</div>
-
     <div class="right-icon">
-      <button class="icon-button" onclick="document.getElementById('infoModal').style.display='flex'">
+      <button class="icon-button" onclick="showModal('infoModal')">
         <svg viewBox="0 0 24 24">
           <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z" />
         </svg>
@@ -187,38 +211,70 @@
     </div>
   </div>
 
-  <!-- Controls UI -->
   <main>
-    <button class="control-button" onclick="togglePower()">Power</button>
+    <button class="power-button" id="powerBtn" onclick="togglePower()">Power</button>
+  </main>
 
+  <div class="bottom-controls">
     <button class="toggle" id="flashToggle" onclick="toggleFlash()">Flash Mode</button>
-
-    <div class="slider-container">
-      <label for="brightness">Brightness</label>
+    <button class="flash-settings-button" id="flashSettingsBtn" onclick="showModal('flashModal')">Flash Settings</button>
+    <div class="slider-container" id="brightnessControl">
+      <label for="brightness">Brightness: <span id="brightnessVal" class="percentage">50%</span></label>
       <input type="range" min="0" max="100" value="50" class="slider" id="brightness">
     </div>
-  </main>
+  </div>
 
   <!-- Info Modal -->
   <div class="modal" id="infoModal">
     <div class="modal-content">
       <h2>SmartBed</h2>
       <p>Made by Sammy Wammy</p>
-      <button onclick="document.getElementById('infoModal').style.display='none'">Close</button>
+      <button onclick="hideModal('infoModal')">Close</button>
     </div>
   </div>
 
-  <!-- Script -->
+  <!-- Flash Settings Modal -->
+  <div class="modal" id="flashModal">
+    <div class="modal-content">
+      <h2>Flash Settings</h2>
+      <p>Customize flash behavior here.</p>
+      <button onclick="hideModal('flashModal')">Close</button>
+    </div>
+  </div>
+
   <script>
-    function toggleFlash() {
-      const btn = document.getElementById("flashToggle");
-      btn.classList.toggle("active");
+    function togglePower() {
+      const powerBtn = document.getElementById("powerBtn");
+      const brightness = document.getElementById("brightnessControl");
+      const flash = document.getElementById("flashToggle");
+      const flashSettings = document.getElementById("flashSettingsBtn");
+
+      powerBtn.classList.toggle("active");
+      const isOn = powerBtn.classList.contains("active");
+      brightness.style.display = isOn ? "flex" : "none";
+      flash.style.display = isOn ? "inline-block" : "none";
+      if (!isOn) flashSettings.style.display = "none";
     }
 
-    function togglePower() {
-      alert("Power button toggled (simulate action)");
+    function toggleFlash() {
+      const flash = document.getElementById("flashToggle");
+      const flashSettings = document.getElementById("flashSettingsBtn");
+      flash.classList.toggle("active");
+      const isFlashOn = flash.classList.contains("active");
+      flashSettings.style.display = isFlashOn ? "inline-block" : "none";
+    }
+
+    document.getElementById("brightness").addEventListener("input", function() {
+      document.getElementById("brightnessVal").innerText = this.value + "%";
+    });
+
+    function showModal(id) {
+      document.getElementById(id).style.display = "flex";
+    }
+
+    function hideModal(id) {
+      document.getElementById(id).style.display = "none";
     }
   </script>
-
 </body>
 </html>
