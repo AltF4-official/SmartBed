@@ -13,7 +13,7 @@
     --glass-highlight: rgba(255,255,255,0.25);
     --text-light: #fff;
     --text-muted: #ccc;
-    --accent: #00f2ff;
+    --accent: var(--electric-blue);
   }
 
   * {
@@ -305,7 +305,7 @@
     }
   }
 
-  /* Custom Slider Styles from your provided slider */
+  /* Custom Slider Styles */
 
   .slider-container {
     position: relative;
@@ -332,10 +332,10 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #00f2ff 0%, #00b2cc 100%);
+    background: linear-gradient(145deg, var(--electric-blue) 0%, #007fbf 100%);
     box-shadow:
-      0 6px 18px var(--accent),
-      0 0 28px rgba(0, 255, 255, 0.7),
+      0 6px 18px var(--electric-blue),
+      0 0 28px rgba(0, 212, 255, 0.7),
       inset 0 0 14px rgba(255 255 255 / 0.7);
     transform: translateX(-50%) scale(1);
     transition: transform 0.15s ease-out;
@@ -346,8 +346,8 @@
     cursor: grabbing;
     transform: translateX(-50%) scale(1.1) rotate(4deg);
     box-shadow:
-      0 8px 28px var(--accent),
-      0 0 36px rgba(0, 255, 255, 0.85),
+      0 8px 28px var(--electric-blue),
+      0 0 36px rgba(0, 212, 255, 0.85),
       inset 0 0 18px rgba(255 255 255 / 0.85);
     transition: none;
   }
@@ -458,14 +458,30 @@
       aria-label="Flash settings"
       title="Flash Settings"
       type="button"
-      onclick="showModal('flashSettingsModal')"
+      onclick="showFlashSettings()"
       hidden
     >⚙︎</button>
 
     <!-- Custom Slider -->
-    <div class="slider-container" id="brightnessSliderContainer" role="slider" aria-label="Brightness slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50" tabindex="0">
+    <div
+      class="slider-container"
+      id="brightnessSliderContainer"
+      role="slider"
+      aria-label="Brightness slider"
+      aria-valuemin="0"
+      aria-valuemax="100"
+      aria-valuenow="50"
+      tabindex="0"
+    >
       <div class="slider-track"></div>
-      <div class="slider-thumb" id="sliderThumb" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <div
+        class="slider-thumb"
+        id="sliderThumb"
+        tabindex="0"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="50"
+      >
         <div class="percentage-label" id="percentageLabel">50%</div>
       </div>
     </div>
@@ -533,6 +549,9 @@
   const flashBtn = document.getElementById('flashBtn');
   const flashSettingsBtn = document.getElementById('flashSettingsBtn');
   const bottomControls = document.getElementById('bottomControls');
+  const brightnessSliderContainer = document.getElementById('brightnessSliderContainer');
+  const sliderThumb = document.getElementById('sliderThumb');
+  const percentageLabel = document.getElementById('percentageLabel');
 
   const infoModal = document.getElementById('infoModal');
   const flashSettingsModal = document.getElementById('flashSettingsModal');
@@ -546,9 +565,15 @@
   const FLASH_SETTINGS_KEY = 'smartbed_flash_settings';
   const BRIGHTNESS_KEY = 'smartbed_brightness';
 
+  // Logging helper
+  function logAction(action) {
+    console.log(`[SmartBed Action]: ${action}`);
+  }
+
   // Save/load flash settings
   function saveFlashSettingsToStorage(settings) {
     localStorage.setItem(FLASH_SETTINGS_KEY, JSON.stringify(settings));
+    logAction(`Flash settings saved: onTime=${settings.onTime}ms, offTime=${settings.offTime}ms`);
   }
   function loadFlashSettingsFromStorage() {
     const json = localStorage.getItem(FLASH_SETTINGS_KEY);
@@ -561,7 +586,7 @@
   }
 
   // Flash Settings UI
-  function openFlashSettings() {
+  function showFlashSettings() {
     const saved = loadFlashSettingsFromStorage();
     if (saved) {
       onTimeInput.value = saved.onTime ?? 500;
@@ -572,18 +597,28 @@
     }
     flashError.style.display = 'none';
     showModal('flashSettingsModal');
+    logAction('Opened flash settings modal');
   }
 
   // Power toggle
   function togglePower() {
     powerOn = !powerOn;
+    logAction(`Power toggled: ${powerOn ? 'ON' : 'OFF'}`);
+    if (!powerOn && flashOn) {
+      flashOn = false;
+      logAction('Flash automatically turned OFF because power is OFF');
+    }
     updateUI();
   }
 
   // Flash toggle
   function toggleFlash() {
-    if (!powerOn) return;
+    if (!powerOn) {
+      logAction('Attempted to toggle flash while power is OFF - ignored');
+      return;
+    }
     flashOn = !flashOn;
+    logAction(`Flash toggled: ${flashOn ? 'ON' : 'OFF'}`);
     updateUI();
   }
 
@@ -603,6 +638,15 @@
     } else {
       bottomControls.classList.remove('visible');
     }
+
+    // Show/hide brightness slider based on flash mode
+    if (flashOn) {
+      brightnessSliderContainer.style.display = 'none';
+      logAction('Brightness slider hidden because Flash is ON');
+    } else {
+      brightnessSliderContainer.style.display = 'block';
+      logAction('Brightness slider shown because Flash is OFF');
+    }
   }
 
   // Modal show/close helpers
@@ -618,6 +662,7 @@
     if (!modal) return;
     modal.classList.remove('active');
     flashError.style.display = 'none';
+    logAction(`Closed modal: ${id}`);
   }
 
   // Flash Settings Save
@@ -631,6 +676,7 @@
       offTime < 10 || offTime > 100000
     ) {
       flashError.style.display = 'block';
+      logAction('Invalid flash settings input; save aborted');
       setTimeout(() => { flashError.style.display = 'none'; }, 3000);
       return;
     }
@@ -651,17 +697,8 @@
     }
   }
 
-  // Initialize UI
-  updateUI();
-  loadFlashSettings();
-
   // Custom slider integration for brightness
   (function(){
-    const sliderContainer = document.getElementById('brightnessSliderContainer');
-    const thumb = document.getElementById('sliderThumb');
-    const label = document.getElementById('percentageLabel');
-
-    // Load saved brightness or default 50
     let value = parseInt(localStorage.getItem(BRIGHTNESS_KEY), 10);
     if (isNaN(value) || value < 0 || value > 100) value = 50;
 
@@ -673,31 +710,31 @@
     let snapTimeout = null;
 
     const snapPoints = [0, 50, 100];
-    const snapRadius = 5; // Reduced from 8
-    const lockForce = 0.15; // Reduced from 0.3
+    const snapRadius = 3; // Reduced snap radius for less powerful snapping
+    const lockForce = 0.15;
 
     function vibrate(pattern) {
       if (navigator.vibrate) navigator.vibrate(pattern);
     }
 
     function clearBounce() {
-      thumb.classList.remove('bounceback', 'edgeBounceLeft', 'edgeBounceRight');
+      sliderThumb.classList.remove('bounceback', 'edgeBounceLeft', 'edgeBounceRight');
       if (bounceTimeout) clearTimeout(bounceTimeout);
     }
 
     function clearSnap() {
-      thumb.classList.remove('snap-bounce');
+      sliderThumb.classList.remove('snap-bounce');
       if (snapTimeout) clearTimeout(snapTimeout);
     }
 
     function triggerBounce(side) {
       clearBounce();
       if (side === 'left') {
-        thumb.classList.add('edgeBounceLeft');
+        sliderThumb.classList.add('edgeBounceLeft');
       } else if (side === 'right') {
-        thumb.classList.add('edgeBounceRight');
+        sliderThumb.classList.add('edgeBounceRight');
       } else {
-        thumb.classList.add('bounceback');
+        sliderThumb.classList.add('bounceback');
       }
       vibrate([6, 18]);
       bounceTimeout = setTimeout(clearBounce, 1200);
@@ -708,6 +745,7 @@
       for (const sp of snapPoints) {
         if (Math.abs(snapped - sp) <= snapRadius) {
           vibrate(10);
+          logAction(`Slider snapped to ${sp}%`);
           return sp;
         }
       }
@@ -725,16 +763,16 @@
     }
 
     function updateUI() {
-      thumb.style.left = value + '%';
-      thumb.setAttribute('aria-valuenow', Math.round(value));
-      label.textContent = Math.round(value) + '%';
-      label.style.left = value + '%';
-      sliderContainer.setAttribute('aria-valuenow', Math.round(value));
+      sliderThumb.style.left = value + '%';
+      sliderThumb.setAttribute('aria-valuenow', Math.round(value));
+      percentageLabel.textContent = Math.round(value) + '%';
+      percentageLabel.style.left = value + '%';
+      brightnessSliderContainer.setAttribute('aria-valuenow', Math.round(value));
     }
 
     function physicsLoop() {
       if (dragging && pointerX !== null) {
-        const rect = sliderContainer.getBoundingClientRect();
+        const rect = brightnessSliderContainer.getBoundingClientRect();
         const desired = ((pointerX - rect.left) / rect.width) * 100;
         let diff = desired - value;
         velocity += diff * 0.12;
@@ -767,33 +805,35 @@
         e.preventDefault();
         dragging = true;
         pointerX = e.clientX;
-        thumb.classList.add('dragging');
+        sliderThumb.classList.add('dragging');
         window.addEventListener('pointermove', onPointerMove);
         window.addEventListener('pointerup', onPointerUp);
         window.addEventListener('pointercancel', onPointerUp);
         clearBounce();
         clearSnap();
         vibrate(8);
+        logAction('Slider drag started');
       }
     }
 
     function onPointerMove(e) {
       pointerX = e.clientX;
+      logAction(`Slider pointer moved to clientX=${pointerX}`);
     }
 
     function onPointerUp() {
       dragging = false;
       pointerX = null;
-      thumb.classList.remove('dragging');
+      sliderThumb.classList.remove('dragging');
       window.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('pointerup', onPointerUp);
       window.removeEventListener('pointercancel', onPointerUp);
 
       const snappedVal = snapToValue(value);
       if (Math.abs(snappedVal - value) > 0.01) {
-        thumb.classList.add('snap-bounce');
+        sliderThumb.classList.add('snap-bounce');
         snapTimeout = setTimeout(() => {
-          thumb.classList.remove('snap-bounce');
+          sliderThumb.classList.remove('snap-bounce');
         }, 400);
       }
       value = snappedVal;
@@ -802,28 +842,30 @@
 
       // Save brightness to localStorage
       localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
-
-      triggerBounce();
+      logAction(`Slider drag ended with value: ${Math.round(value)}%`);
     }
 
     // Keyboard support for accessibility
-    thumb.addEventListener('keydown', (e) => {
+    sliderThumb.addEventListener('keydown', (e) => {
+      let changed = false;
       if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
         e.preventDefault();
         value = Math.max(0, value - 1);
-        updateUI();
-        localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
-        vibrate(5);
+        changed = true;
       } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
         e.preventDefault();
         value = Math.min(100, value + 1);
+        changed = true;
+      }
+      if (changed) {
         updateUI();
         localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
         vibrate(5);
+        logAction(`Slider keyboard adjusted to ${Math.round(value)}%`);
       }
     });
 
-    thumb.addEventListener('pointerdown', onPointerDown);
+    sliderThumb.addEventListener('pointerdown', onPointerDown);
 
     updateUI();
     physicsLoop();
@@ -840,6 +882,10 @@
       });
     }
   });
+
+  // Initial load functions
+  updateUI();
+  loadFlashSettings();
 </script>
 
 </body>
