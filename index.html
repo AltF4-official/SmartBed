@@ -33,12 +33,8 @@
       padding: 0 1rem; z-index: 999;
     }
     .top-bar.glass { border-radius: 28px; }
-    .left-icon-container {
-      position: absolute; left: 1rem; display: flex; align-items: center;
-    }
-    .left-icon {
-      width: 24px; height: 24px; fill: var(--electric-blue);
-    }
+    .left-icon-container { position: absolute; left: 1rem; display: flex; align-items: center; }
+    .left-icon { width: 24px; height: 24px; fill: var(--electric-blue); }
     .top-bar-title {
       font-weight: 600; font-size: 1.3rem; color: var(--electric-blue);
       user-select: none;
@@ -129,8 +125,6 @@
     .error-message {
       color: #ff6b6b; margin-top: .6rem; font-size: .9rem; display: none;
     }
-
-    /* Slider styles */
     .slider-container {
       position: relative; width: 280px; height: 48px; cursor: pointer; user-select: none;
     }
@@ -154,19 +148,17 @@
       z-index: 2; cursor: grab;
     }
     .slider-thumb.dragging {
-      cursor: grabbing; transform: translateX(-50%) scale(1.1);
-      transition: none;
+      cursor: grabbing; transform: translateX(-50%) scale(1.1); transition: none;
     }
     .percentage-label {
       position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.3); color: white; font-weight: 600;
-      padding: 6px 12px; border-radius: 14px; backdrop-filter: blur(8px);
-      user-select: none; transition: opacity .4s ease, transform .4s ease;
+      background: rgba(0,0,0,0.3); color: white; font-weight: 600; padding: 6px 12px;
+      border-radius: 14px; backdrop-filter: blur(8px); user-select: none;
+      transition: opacity .4s ease, transform .4s ease;
     }
     .touch-indicator {
-      position: absolute; width: 80px; height: 80px;
-      border: 2px solid var(--electric-blue); border-radius: 50%;
-      pointer-events: none; transform: translate(-50%,-50%);
+      position: absolute; width: 80px; height: 80px; border: 2px solid var(--electric-blue);
+      border-radius: 50%; pointer-events: none; transform: translate(-50%,-50%);
       animation: pulse .6s ease-out forwards; z-index: 10001;
     }
     @keyframes pulse {
@@ -198,7 +190,7 @@
   <!-- Bottom Controls -->
   <div id="bottomControls" class="bottom-controls glass" role="region" aria-live="polite" aria-atomic="true">
     <button id="flashBtn" class="flash-button" aria-pressed="false" aria-label="Toggle flash mode" onclick="toggleFlash()">Flash</button>
-    <button id="flashSettingsBtn" class="flash-settings-button" aria-label="Flash settings" title="Flash Settings" onclick="showFlashSettings()" hidden>⚙︎</button>
+    <button id="flashSettingsBtn" class="flash-settings-button" aria-label="Flash settings" onclick="showFlashSettings()">⚙︎</button>
     <div id="brightnessSliderContainer" class="slider-container" role="slider" aria-label="Brightness slider" tabindex="0">
       <div class="slider-track"></div>
       <div id="sliderThumb" class="slider-thumb" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
@@ -233,7 +225,7 @@
     // Core state
     let powerOn = true, flashOn = false;
 
-    // Elements
+    // Element refs
     const powerBtn = document.getElementById('powerBtn');
     const flashBtn = document.getElementById('flashBtn');
     const flashSettingsBtn = document.getElementById('flashSettingsBtn');
@@ -248,20 +240,17 @@
     const onTimeInput = document.getElementById('onTimeInput');
     const offTimeInput = document.getElementById('offTimeInput');
 
-    // API helper
+    // ESP API helper
     let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
     async function callESP(path) {
-      try {
-        await fetch(`http://${ESP_IP}${path}`);
-      } catch (e) {
-        console.error('ESP call failed:', e);
-      }
+      try { await fetch(`http://${ESP_IP}${path}`); }
+      catch (e) { console.error('ESP call failed:', e); }
     }
     async function setPower(on) { return callESP(`/power?v=${on?1:0}`); }
     async function setFlash(on) { return callESP(`/flash?v=${on?1:0}`); }
     async function setBrightness(v) { return callESP(`/brightness?v=${v}`); }
 
-    // UI updates
+    // UI update
     function updateUI() {
       powerBtn.classList.toggle('active', powerOn);
       powerBtn.setAttribute('aria-pressed', powerOn);
@@ -286,27 +275,37 @@
       updateUI();
       await setFlash(flashOn);
     }
+
+    // Show/hide modals
     function showModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) {
-      const m = document.getElementById(id);
-      m.classList.remove('active');
+      document.getElementById(id).classList.remove('active');
       flashError.style.display = 'none';
     }
 
+    // Flash settings opener
+    function showFlashSettings() {
+      const saved = JSON.parse(localStorage.getItem('flashSettings')||'{}');
+      onTimeInput.value = saved.onTime ?? 500;
+      offTimeInput.value = saved.offTime ?? 500;
+      flashError.style.display = 'none';
+      showModal('flashSettingsModal');
+    }
+
+    // Save flash settings
     flashSaveBtn.addEventListener('click', () => {
       const onT = parseInt(onTimeInput.value,10), offT = parseInt(offTimeInput.value,10);
       if (isNaN(onT)||isNaN(offT)||onT<10||offT<10) {
-        flashError.style.display='block';
-        return;
+        flashError.style.display='block'; return;
       }
       localStorage.setItem('flashSettings', JSON.stringify({onTime:onT,offTime:offT}));
       closeModal('flashSettingsModal');
     });
 
-    // Brightness slider
+    // Brightness slider logic
     ;(function(){
       let value = Number(localStorage.getItem('brightness'))||50;
-      let dragging=false;
+      let dragging = false;
       function updateSlider() {
         sliderThumb.style.left = value + '%';
         percentageLabel.textContent = Math.round(value)+'%';
@@ -314,30 +313,30 @@
       }
       function onDown(e) {
         e.preventDefault(); dragging=true;
-        window.addEventListener('pointermove',onMove);
-        window.addEventListener('pointerup',onUp);
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
       }
       function onMove(e) {
         if(!dragging) return;
         const rect = brightnessContainer.getBoundingClientRect();
-        let v=((e.clientX-rect.left)/rect.width)*100;
-        value=Math.min(Math.max(v,0),100);
+        let v = ((e.clientX - rect.left)/rect.width)*100;
+        value = Math.min(Math.max(v,0),100);
         updateSlider();
       }
       async function onUp() {
         if(!dragging) return;
         dragging=false;
-        window.removeEventListener('pointermove',onMove);
-        window.removeEventListener('pointerup',onUp);
-        localStorage.setItem('brightness',Math.round(value));
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        localStorage.setItem('brightness', Math.round(value));
         await setBrightness(Math.round(value));
       }
-      sliderThumb.addEventListener('pointerdown',onDown);
-      brightnessContainer.addEventListener('pointerdown',onDown);
+      sliderThumb.addEventListener('pointerdown', onDown);
+      brightnessContainer.addEventListener('pointerdown', onDown);
       updateSlider();
     })();
 
-    // Escape to close modals
+    // Close modals on Escape
     document.addEventListener('keydown', e => {
       if(e.key === 'Escape') {
         ['infoModal','flashSettingsModal'].forEach(id => {
@@ -346,7 +345,7 @@
       }
     });
 
-    // Init
+    // Initialize UI
     updateUI();
   </script>
 </body>
