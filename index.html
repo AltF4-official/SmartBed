@@ -1,425 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>SmartBed</title>
-<style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartBed</title>
+  <link rel="icon" href="favicon.ico" />
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
-  :root {
-    --electric-blue: #00d4ff;
-    --bg-dark: rgba(30,30,30,0.8);
-    --bg-mid: rgba(45,45,45,0.4);
-    --glass-light: rgba(255,255,255,0.1);
-    --glass-highlight: rgba(255,255,255,0.25);
-    --text-light: #fff;
-    --text-muted: #ccc;
-    --accent: var(--electric-blue);
-  }
-
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
-  html, body {
-    height: 100%;
-    /* disable scrolling */
-    overflow: hidden;
-    background-color: #111; /* darker grey background */
-    font-family: 'Orbitron', sans-serif; /* dark grey background */
-    font-family: 'Orbitron', sans-serif;
-  }
-
-  /* Liquid Glass */
-  .glass {
-    background: var(--bg-mid);
-    border-radius: 16px;
-    border: 1.5px solid var(--glass-highlight);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-  }
-
-  /* Top bar */
-  .top-bar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1rem;
-    z-index: 999;
-  }
-
-  .top-bar.glass {
-    background: var(--bg-mid);
-    border-radius: 28px;
-    border: 1.5px solid var(--glass-highlight);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-    position: relative;
-  }
-
-  /* Left icon container */
-  .left-icon-container {
-    position: absolute;
-    left: 1rem;
-    display: flex;
-    align-items: center;
-    height: 100%;
-  }
-
-  /* Left icon SVG */
-  .left-icon {
-    width: 24px;
-    height: 24px;
-    fill: var(--electric-blue);
-    flex-shrink: 0;
-  }
-
-  .top-bar-title {
-    font-weight: 600;
-    font-size: 1.3rem;
-    color: var(--electric-blue);
-    user-select: none;
-  }
-
-  /* Right icon container */
-  .right-icon {
-    position: absolute;
-    right: 1rem;
-  }
-
-  /* Info icon */
-  .info-button {
-    background: none;
-    border: none;
-    color: var(--electric-blue);
-    font-size: 1.6rem;
-    font-weight: 700;
-    cursor: pointer;
-    user-select: none;
-    padding: 0;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .info-button:focus {
-    outline: 2px solid var(--electric-blue);
-    outline-offset: 2px;
-  }
-
-  /* Main content */
-  main {
-    padding-top: 80px;
-    height: calc(100% - 80px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
-  /* Power Button */
-  .power-button {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    border: 3px solid var(--electric-blue);
-    background: transparent;
-    color: var(--electric-blue);
-    font-size: 2.5rem;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
-    user-select: none;
-  }
-  .power-button:hover {
-    background-color: var(--glass-light);
-  }
-  .power-button:active {
-    transform: scale(0.9);
-  }
-  .power-button.active {
-    background-color: var(--electric-blue);
-    color: black;
-    box-shadow: 0 0 20px var(--electric-blue);
-  }
-
-  /* Bottom Controls */
-  .bottom-controls {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100vw;
-    background: var(--bg-mid);
-    border-top: 1.5px solid var(--glass-highlight);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    box-shadow: 0 -4px 30px rgba(0,0,0,0.3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 0.6rem 1rem;
-    user-select: none;
-    z-index: 998;
-
-    opacity: 0;
-    transform: translateY(100%);
-    pointer-events: none;
-
-    transition:
-      opacity 0.4s ease,
-      transform 0.4s ease,
-      pointer-events 0s linear 0.4s;
-  }
-  .bottom-controls.visible {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-    transition-delay: 0s;
-  }
-
-  /* Flash Button */
-  .flash-button {
-    border: 2px solid var(--electric-blue);
-    background: transparent;
-    color: var(--electric-blue);
-    padding: 0.4rem 1.1rem;
-    border-radius: 14px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
-    user-select: none;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-    transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
-  }
-  .flash-button:hover {
-    background-color: var(--glass-light);
-  }
-  .flash-button.active {
-    background-color: var(--electric-blue);
-    color: black;
-    box-shadow: 0 0 15px var(--electric-blue);
-  }
-
-  /* Flash Settings Button */
-  .flash-settings-button {
-    background: none;
-    border: none;
-    color: var(--electric-blue);
-    font-size: 1.6rem;
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.3s;
-    padding: 0;
-  }
-  .flash-settings-button:hover,
-  .flash-settings-button:focus {
-    color: #00a6cc;
-    outline: none;
-  }
-
-  /* Modal */
-  .modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-  }
-  .modal.active {
-    display: flex;
-  }
-  .modal-content {
-    background: var(--bg-mid);
-    border-radius: 16px;
-    border: 1.5px solid var(--glass-highlight);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    box-shadow: 0 4px 30px rgba(0,0,0,0.4);
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 360px;
-    text-align: left;
-    color: var(--text-light);
-    user-select: text;
-  }
-  .modal-content label {
-    font-weight: 600;
-    margin-top: 1rem;
-    display: block;
-    color: var(--text-muted);
-  }
-  .modal-content input {
-    width: 100%;
-    margin-top: 0.3rem;
-    padding: 0.5rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--electric-blue);
-    background: var(--bg-dark);
-    color: var(--text-light);
-  }
-  .modal-content button.close-btn {
-    margin-top: 1.5rem;
-    width: 100%;
-    background: var(--electric-blue);
-    border: none;
-    color: black;
-    padding: 0.7rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    user-select: none;
-  }
-  .modal-content button.close-btn:hover {
-    background: #00b0e6;
-  }
-
-  .error-message {
-    color: #ff6b6b;
-    margin-top: 0.6rem;
-    font-size: 0.9rem;
-    display: none;
-  }
-
-  /* Responsive */
-  @media (max-width: 400px) {
-    .bottom-controls {
-      padding: 0.6rem 0.5rem;
-      gap: 8px;
+    :root {
+      --electric-blue: #00d4ff;
+      --bg-dark: rgba(30,30,30,0.8);
+      --bg-mid: rgba(45,45,45,0.4);
+      --glass-light: rgba(255,255,255,0.1);
+      --glass-highlight: rgba(255,255,255,0.25);
+      --text-light: #fff;
+      --text-muted: #ccc;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html, body {
+      height:100%; overflow:hidden; background:#111;
+      font-family:'Orbitron',sans-serif;
+    }
+    .glass {
+      background:var(--bg-mid);
+      border-radius:16px;
+      border:1.5px solid var(--glass-highlight);
+      backdrop-filter:saturate(180%) blur(20px);
+      box-shadow:0 4px 30px rgba(0,0,0,0.3);
+    }
+    .top-bar {
+      position:fixed; top:0; left:0; right:0; height:56px;
+      display:flex; align-items:center; justify-content:center;
+      padding:0 1rem; z-index:999;
+    }
+    .top-bar.glass { border-radius:28px; }
+    .left-icon-container {
+      position:absolute; left:1rem; display:flex; align-items:center;
+    }
+    .left-icon {
+      width:24px; height:24px; fill:var(--electric-blue);
+    }
+    .top-bar-title {
+      font-weight:600; font-size:1.3rem; color:var(--electric-blue);
+      user-select:none;
+    }
+    .right-icon { position:absolute; right:1rem; }
+    .info-button {
+      background:none; border:none; color:var(--electric-blue);
+      font-size:1.6rem; font-weight:700; cursor:pointer;
+      user-select:none; padding:0; display:flex; align-items:center;
+    }
+    .info-button:focus { outline:2px solid var(--electric-blue); }
+    main {
+      padding-top:80px; height:calc(100% - 80px);
+      display:flex; justify-content:center; align-items:center;
+      flex-direction:column; gap:2rem;
     }
     .power-button {
-      width: 100px;
-      height: 100px;
-      font-size: 2rem;
+      width:120px; height:120px; border-radius:50%;
+      border:3px solid var(--electric-blue); background:transparent;
+      color:var(--electric-blue); font-size:2.5rem; cursor:pointer;
+      display:flex; justify-content:center; align-items:center;
+      transition:background-color .3s,box-shadow .3s,transform .1s;
+      user-select:none;
     }
-  }
+    .power-button:hover { background:var(--glass-light); }
+    .power-button:active { transform:scale(0.9); }
+    .power-button.active {
+      background:var(--electric-blue); color:black;
+      box-shadow:0 0 20px var(--electric-blue);
+    }
+    .bottom-controls {
+      position:fixed; bottom:0; left:0; width:100vw;
+      background:var(--bg-mid); border-top:1.5px solid var(--glass-highlight);
+      backdrop-filter:saturate(180%) blur(20px);
+      display:flex; align-items:center; justify-content:center;
+      gap:12px; padding:.6rem 1rem; user-select:none; z-index:998;
+      opacity:0; transform:translateY(100%);
+      pointer-events:none;
+      transition:opacity .4s ease,transform .4s ease,pointer-events 0s linear .4s;
+    }
+    .bottom-controls.visible {
+      opacity:1; transform:translateY(0); pointer-events:auto;
+      transition-delay:0s;
+    }
+    .flash-button {
+      border:2px solid var(--electric-blue);
+      background:transparent; color:var(--electric-blue);
+      padding:.4rem 1.1rem; border-radius:14px;
+      font-weight:600; font-size:1rem; cursor:pointer;
+      transition:background-color .3s,box-shadow .3s,color .3s;
+    }
+    .flash-button:hover { background:var(--glass-light); }
+    .flash-button.active {
+      background:var(--electric-blue); color:black;
+      box-shadow:0 0 15px var(--electric-blue);
+    }
+    .flash-settings-button {
+      background:none; border:none; color:var(--electric-blue);
+      font-size:1.6rem; cursor:pointer; user-select:none; padding:0;
+    }
+    .flash-settings-button:hover { color:#00a6cc; }
+    .modal {
+      position:fixed; inset:0; background:rgba(0,0,0,0.4);
+      display:none; align-items:center; justify-content:center; z-index:10000;
+    }
+    .modal.active { display:flex; }
+    .modal-content {
+      background:var(--bg-mid); border-radius:16px;
+      border:1.5px solid var(--glass-highlight);
+      backdrop-filter:saturate(180%) blur(20px);
+      box-shadow:0 4px 30px rgba(0,0,0,0.4);
+      padding:1.5rem; width:90%; max-width:360px; color:var(--text-light);
+    }
+    .modal-content label { font-weight:600; margin-top:1rem; display:block; color:var(--text-muted); }
+    .modal-content input {
+      width:100%; margin-top:.3rem; padding:.5rem; font-size:1rem;
+      border-radius:8px; border:1px solid var(--electric-blue);
+      background:var(--bg-dark); color:var(--text-light);
+    }
+    .modal-content button.close-btn {
+      margin-top:1.5rem; width:100%; background:var(--electric-blue);
+      border:none; color:black; padding:.7rem; font-weight:bold;
+      border-radius:8px; cursor:pointer;
+    }
+    .modal-content button.close-btn:hover { background:#00b0e6; }
+    .error-message { color:#ff6b6b; margin-top:.6rem; font-size:.9rem; display:none; }
 
-  /* Custom Slider Styles */
-
-  .slider-container {
-    position: relative;
-    width: 280px;
-    height: 48px;
-    cursor: pointer;
-    user-select: none;
-  }
-  .slider-track {
-    position: absolute;
-    top: 16px;
-    left: 0;
-    right: 0;
-    height: 16px;
-    border-radius: 8px;
-    background:
-      linear-gradient(135deg, rgba(255 255 255 / 0.18), rgba(255 255 255 / 0)),
-      linear-gradient(to right bottom, rgba(255 255 255 / 0.12), rgba(255 255 255 / 0));
-    box-shadow: 0 8px 32px rgba(0 0 0 / 0.1), inset 0 0 8px rgba(255 255 255 / 0.25);
-  }
-  .slider-thumb {
-    position: absolute;
-    top: 6px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(145deg, var(--electric-blue) 0%, #007fbf 100%);
-    box-shadow:
-      0 6px 18px var(--electric-blue),
-      0 0 28px rgba(0, 212, 255, 0.7),
-      inset 0 0 14px rgba(255 255 255 / 0.7);
-    transform: translateX(-50%) scale(1);
-    transition: transform 0.15s ease-out;
-    cursor: grab;
-    z-index: 2;
-  }
-  .slider-thumb.dragging {
-    cursor: grabbing;
-    transform: translateX(-50%) scale(1.1) rotate(4deg);
-    box-shadow:
-      0 8px 28px var(--electric-blue),
-      0 0 36px rgba(0, 212, 255, 0.85),
-      inset 0 0 18px rgba(255 255 255 / 0.85);
-    transition: none;
-  }
-  .percentage-label {
-    position: absolute;
-    top: -36px;
-    left: 50%;
-    transform: translateX(-50%) scale(1);
-    background: rgba(0, 0, 0, 0.3);
-    color: white;
-    font-weight: 600;
-    font-size: 16px;
-    padding: 6px 12px;
-    border-radius: 14px;
-    backdrop-filter: blur(8px);
-    user-select: none;
-    transition: opacity 0.4s ease, transform 0.4s ease;
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 3;
-  }
-  .snap-bounce {
-    animation: snapBounce 0.4s ease forwards;
-  }
-  .bounceback {
-    animation: bounceback 1.2s cubic-bezier(0.25, 0.75, 0.5, 1);
-  }
-  .edgeBounceLeft {
-    animation: edgeBounceLeft 1.2s cubic-bezier(0.25, 0.75, 0.5, 1);
-  }
-  .edgeBounceRight {
-    animation: edgeBounceRight 1.2s cubic-bezier(0.25, 0.75, 0.5, 1);
-  }
-  @keyframes snapBounce {
-    0% { transform: translateX(-50%) scale(1.4, 0.6) rotate(6deg); }
-    50% { transform: translateX(-50%) scale(0.9, 1.1) rotate(-4deg); }
-    100% { transform: translateX(-50%) scale(1, 1) rotate(0deg); }
-  }
-  @keyframes bounceback {
-    0% { transform: translateX(-50%) scale(1.15, 0.85) rotate(3deg); }
-    50% { transform: translateX(-50%) scale(0.95, 1.05) rotate(-2deg); }
-    100% { transform: translateX(-50%) scale(1, 1) rotate(0deg); }
-  }
-  @keyframes edgeBounceLeft {
-    0% { transform: translateX(-50%) scale(1.2, 0.7) translateX(0) rotate(-5deg); }
-    50% { transform: translateX(-50%) scale(1, 1) translateX(1px) rotate(3deg); }
-    100% { transform: translateX(-50%) scale(1, 1) translateX(0) rotate(0deg); }
-  }
-  @keyframes edgeBounceRight {
-    0% { transform: translateX(-50%) scale(1.2, 0.7) translateX(0) rotate(5deg); }
-    50% { transform: translateX(-50%) scale(1, 1) translateX(-1px) rotate(-3deg); }
-    100% { transform: translateX(-50%) scale(1, 1) translateX(0) rotate(0deg); }
-  }
-  .touch-indicator {
-    position: absolute;
-    width: 80px;
-    height: 80px;
-    border: 2px solid var(--electric-blue);
-    border-radius: 50%;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    animation: pulse 0.6s ease-out forwards;
-    z-index: 10001;
-  }
-
-  @keyframes pulse {
-    0% { opacity: 1; transform: translate(-50%, -50%) scale(0.3); }
-    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
-  }
-</style>
+    /* Slider */
+    .slider-container { position:relative; width:280px; height:48px; cursor:pointer; user-select:none; }
+    .slider-track {
+      position:absolute; top:16px; left:0; right:0; height:16px;
+      border-radius:8px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
+        linear-gradient(to right bottom, rgba(255,255,255,0.12), rgba(255,255,255,0));
+      box-shadow:0 8px 32px rgba(0,0,0,0.1), inset 0 0 8px rgba(255,255,255,0.25);
+    }
+    .slider-thumb {
+      position:absolute; top:6px; width:36px; height:36px; border-radius:50%;
+      background:linear-gradient(145deg, var(--electric-blue), #007fbf);
+      box-shadow:
+        0 6px 18px var(--electric-blue),
+        0 0 28px rgba(0,212,255,0.7),
+        inset 0 0 14px rgba(255,255,255,0.7);
+      transform:translateX(-50%);
+      transition:transform .15s ease-out;
+      z-index:2; cursor:grab;
+    }
+    .slider-thumb.dragging { cursor:grabbing; transform:translateX(-50%) scale(1.1); transition:none; }
+    .percentage-label {
+      position:absolute; top:-36px; left:50%; transform:translateX(-50%);
+      background:rgba(0,0,0,0.3); color:white; font-weight:600; padding:6px 12px;
+      border-radius:14px; backdrop-filter:blur(8px); user-select:none;
+      transition:opacity .4s ease,transform .4s ease;
+    }
+    .touch-indicator {
+      position:absolute; width:80px; height:80px; border:2px solid var(--electric-blue);
+      border-radius:50%; pointer-events:none; transform:translate(-50%,-50%);
+      animation:pulse .6s ease-out forwards; z-index:10001;
+    }
+    @keyframes pulse { 0%{opacity:1;transform:translate(-50%,-50%)scale(0.3);}100%{opacity:0;transform:translate(-50%,-50%)scale(1);} }
+  </style>
 </head>
 <body>
 
@@ -432,372 +174,52 @@
     </div>
     <div class="top-bar-title">SmartBed</div>
     <div class="right-icon">
-      <button
-        type="button"
-        class="info-button"
-        aria-label="About SmartBed"
-        onclick="showModal('infoModal')"
-      >ⓘ</button>
+      <button type="button" class="info-button" aria-label="About SmartBed" onclick="showModal('infoModal')">ⓘ</button>
     </div>
   </div>
 
   <!-- Main Content -->
   <main>
-    <button
-      id="powerBtn"
-      class="power-button glass"
-      aria-pressed="false"
-      aria-label="Toggle power"
-      type="button"
-      onclick="togglePower()"
-    >⏻</button>
+    <button id="powerBtn" class="power-button glass" aria-pressed="false" aria-label="Toggle power" type="button" onclick="togglePower()">⏻</button>
   </main>
 
   <!-- Bottom Controls -->
-  <div
-    class="bottom-controls glass"
-    role="region"
-    aria-live="polite"
-    aria-atomic="true"
-    id="bottomControls"
-  >
-    <button
-      id="flashBtn"
-      class="flash-button"
-      aria-pressed="false"
-      aria-label="Toggle flash mode"
-      type="button"
-      onclick="toggleFlash()"
-    >Flash</button>
-
-    <button
-      id="flashSettingsBtn"
-      class="flash-settings-button"
-      aria-label="Flash settings"
-      title="Flash Settings"
-      type="button"
-      onclick="showFlashSettings()"
-      hidden
-    >⚙︎</button>
-
-    <!-- Custom Slider -->
-    <div
-      class="slider-container"
-      id="brightnessSliderContainer"
-      role="slider"
-      aria-label="Brightness slider"
-      aria-valuemin="0"
-      aria-valuemax="100"
-      aria-valuenow="50"
-      tabindex="0"
-    >
+  <div id="bottomControls" class="bottom-controls glass" role="region" aria-live="polite" aria-atomic="true">
+    <button id="flashBtn" class="flash-button" aria-pressed="false" aria-label="Toggle flash mode" type="button" onclick="toggleFlash()">Flash</button>
+    <button id="flashSettingsBtn" class="flash-settings-button" aria-label="Flash settings" title="Flash Settings" type="button" onclick="showFlashSettings()" hidden>⚙︎</button>
+    <div id="brightnessSliderContainer" class="slider-container" role="slider" aria-label="Brightness slider" tabindex="0">
       <div class="slider-track"></div>
-      <div
-        class="slider-thumb"
-        id="sliderThumb"
-        tabindex="0"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        aria-valuenow="50"
-      >
-        <div class="percentage-label" id="percentageLabel">50%</div>
+      <div id="sliderThumb" class="slider-thumb" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <div id="percentageLabel" class="percentage-label">50%</div>
       </div>
     </div>
   </div>
 
   <!-- Info Modal -->
-  <div
-    id="infoModal"
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    tabindex="-1"
-    aria-labelledby="infoModalLabel"
-  >
+  <div id="infoModal" class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="infoModalLabel">
     <div class="modal-content">
       <p id="infoModalLabel">Made by Sammy Wammy</p>
-      <button
-        class="close-btn"
-        type="button"
-        onclick="closeModal('infoModal')"
-        aria-label="Close about modal"
-      >Close</button>
+      <button class="close-btn" type="button" onclick="closeModal('infoModal')" aria-label="Close">Close</button>
     </div>
   </div>
 
   <!-- Flash Settings Modal -->
-  <div
-    id="flashSettingsModal"
-    class="modal"
-    role="dialog"
-    aria-modal="true"
-    tabindex="-1"
-    aria-labelledby="flashSettingsModalLabel"
-  >
+  <div id="flashSettingsModal" class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="flashSettingsModalLabel">
     <div class="modal-content">
-      <h2 id="flashSettingsModalLabel" style="margin-bottom: 0.5rem;">Flash Settings</h2>
+      <h2 id="flashSettingsModalLabel">Flash Settings</h2>
       <label for="onTimeInput">On Time (ms):</label>
       <input type="number" id="onTimeInput" min="10" max="100000" step="10" />
       <label for="offTimeInput">Off Time (ms):</label>
       <input type="number" id="offTimeInput" min="10" max="100000" step="10" />
       <div id="flashError" class="error-message">Delay must be between 10 and 100000 ms</div>
-      <button
-        class="close-btn"
-        type="button"
-        id="flashSaveBtn"
-        aria-label="Save flash settings"
-      >Save</button>
-      <button
-        class="close-btn"
-        type="button"
-        onclick="closeModal('flashSettingsModal')"
-        aria-label="Cancel flash settings"
-        style="margin-top: 0.5rem; background: #444;"
-      >Cancel</button>
+      <button id="flashSaveBtn" class="close-btn" type="button" aria-label="Save">Save</button>
+      <button class="close-btn" type="button" onclick="closeModal('flashSettingsModal')" style="margin-top:0.5rem;background:#444;">Cancel</button>
     </div>
   </div>
 
-<script>
-  // Core state
-  let powerOn = true;
-  let flashOn = false;
-
-  // Elements
-  const powerBtn = document.getElementById('powerBtn');
-  const flashBtn = document.getElementById('flashBtn');
-  const flashSettingsBtn = document.getElementById('flashSettingsBtn');
-  const bottomControls = document.getElementById('bottomControls');
-  const brightnessSliderContainer = document.getElementById('brightnessSliderContainer');
-  const sliderThumb = document.getElementById('sliderThumb');
-  const percentageLabel = document.getElementById('percentageLabel');
-
-  const infoModal = document.getElementById('infoModal');
-  const flashSettingsModal = document.getElementById('flashSettingsModal');
-  const flashError = document.getElementById('flashError');
-  const flashSaveBtn = document.getElementById('flashSaveBtn');
-
-  const onTimeInput = document.getElementById('onTimeInput');
-  const offTimeInput = document.getElementById('offTimeInput');
-
-  // Local storage keys
-  const FLASH_SETTINGS_KEY = 'smartbed_flash_settings';
-  const BRIGHTNESS_KEY = 'smartbed_brightness';
-
-  // Logging helper
-  function logAction(action) {
-    console.log(`[SmartBed Action]: ${action}`);
-  }
-
-  // Save/load flash settings
-  function saveFlashSettingsToStorage(settings) {
-    localStorage.setItem(FLASH_SETTINGS_KEY, JSON.stringify(settings));
-    logAction(`Flash settings saved: onTime=${settings.onTime}ms, offTime=${settings.offTime}ms`);
-  }
-  function loadFlashSettingsFromStorage() {
-    const json = localStorage.getItem(FLASH_SETTINGS_KEY);
-    if (!json) return null;
-    try {
-      return JSON.parse(json);
-    } catch {
-      return null;
-    }
-  }
-
-  // Flash Settings UI
-  function showFlashSettings() {
-    const saved = loadFlashSettingsFromStorage();
-    if (saved) {
-      onTimeInput.value = saved.onTime ?? 500;
-      offTimeInput.value = saved.offTime ?? 500;
-    } else {
-      onTimeInput.value = 500;
-      offTimeInput.value = 500;
-    }
-    flashError.style.display = 'none';
-    showModal('flashSettingsModal');
-    logAction('Opened flash settings modal');
-  }
-
-  // Power toggle
-  function togglePower() {
-    powerOn = !powerOn;
-    logAction(`Power toggled: ${powerOn ? 'ON' : 'OFF'}`);
-    if (!powerOn && flashOn) {
-      flashOn = false;
-      logAction('Flash automatically turned OFF because power is OFF');
-    }
-    updateUI();
-  }
-
-  // Flash toggle
-  function toggleFlash() {
-    if (!powerOn) {
-      logAction('Attempted to toggle flash while power is OFF - ignored');
-      return;
-    }
-    flashOn = !flashOn;
-    logAction(`Flash toggled: ${flashOn ? 'ON' : 'OFF'}`);
-    updateUI();
-  }
-
-  // Update UI states
-  function updateUI() {
-    powerBtn.classList.toggle('active', powerOn);
-    powerBtn.setAttribute('aria-pressed', powerOn);
-    flashBtn.classList.toggle('active', flashOn);
-    flashBtn.setAttribute('aria-pressed', flashOn);
-
-    // Show flash settings button only if flash is ON and power is ON
-    flashSettingsBtn.hidden = !(flashOn && powerOn);
-
-    // Show/hide bottom controls based on power
-    if (powerOn) {
-      bottomControls.classList.add('visible');
-    } else {
-      bottomControls.classList.remove('visible');
-    }
-
-    // Show/hide brightness slider based on flash mode
-    if (flashOn) {
-      brightnessSliderContainer.style.display = 'none';
-      logAction('Brightness slider hidden because Flash is ON');
-    } else {
-      brightnessSliderContainer.style.display = 'block';
-      logAction('Brightness slider shown because Flash is OFF');
-    }
-  }
-
-  // Modal show/close helpers
-  function showModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.add('active');
-    modal.setAttribute('tabindex', '0');
-    modal.focus();
-  }
-  function closeModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    modal.classList.remove('active');
-    flashError.style.display = 'none';
-    logAction(`Closed modal: ${id}`);
-  }
-
-  // Flash Settings Save
-  flashSaveBtn.addEventListener('click', () => {
-    const onTime = parseInt(onTimeInput.value, 10);
-    const offTime = parseInt(offTimeInput.value, 10);
-
-    if (
-      isNaN(onTime) || isNaN(offTime) ||
-      onTime < 10 || onTime > 100000 ||
-      offTime < 10 || offTime > 100000
-    ) {
-      flashError.style.display = 'block';
-      logAction('Invalid flash settings input; save aborted');
-      setTimeout(() => { flashError.style.display = 'none'; }, 3000);
-      return;
-    }
-
-    saveFlashSettingsToStorage({ onTime, offTime });
-    closeModal('flashSettingsModal');
-  });
-
-  // Load initial flash settings on start
-  function loadFlashSettings() {
-    const settings = loadFlashSettingsFromStorage();
-    if (settings) {
-      onTimeInput.value = settings.onTime ?? 500;
-      offTimeInput.value = settings.offTime ?? 500;
-    } else {
-      onTimeInput.value = 500;
-      offTimeInput.value = 500;
-    }
-  }
-
-  // Custom slider integration for brightness
-(function(){
-  let value = parseInt(localStorage.getItem(BRIGHTNESS_KEY), 10);
-  if (isNaN(value) || value < 0 || value > 100) value = 50;
-
-  let dragging = false;
-  let lastLogged = Math.round(value);
-
-  function createTouchIndicator(x, y) {
-    const indicator = document.createElement('div');
-    indicator.className = 'touch-indicator';
-    indicator.style.left = x + 'px';
-    indicator.style.top = y + 'px';
-    document.body.appendChild(indicator);
-    setTimeout(() => indicator.remove(), 600);
-  }
-
-  function updateSliderUI() {
-    sliderThumb.style.left = value + '%';
-    sliderThumb.setAttribute('aria-valuenow', Math.round(value));
-    percentageLabel.textContent = Math.round(value) + '%';
-    percentageLabel.style.left = value + '%';
-  }
-
-  function onPointerDown(e) {
-    if (e.pointerType === 'mouse' || e.pointerType === 'touch') {
-      e.preventDefault();
-      dragging = true;
-      console.log('Slider drag start');
-      if (e.pointerType === 'touch') {
-        createTouchIndicator(e.clientX, e.clientY);
-      }
-      window.addEventListener('pointermove', onPointerMove);
-      window.addEventListener('pointerup', onPointerUp);
-    }
-  }
-
-  function onPointerMove(e) {
-    if (!dragging) return;
-    const rect = brightnessSliderContainer.getBoundingClientRect();
-    let newValue = ((e.clientX - rect.left) / rect.width) * 100;
-    newValue = Math.min(Math.max(newValue, 0), 100);
-    value = newValue;
-    updateSliderUI();
-    const rounded = Math.round(value);
-    if (rounded !== lastLogged) {
-      console.log('Slider value:', rounded);
-      lastLogged = rounded;
-    }
-  }
-
-  function onPointerUp() {
-    if (!dragging) return;
-    dragging = false;
-    window.removeEventListener('pointermove', onPointerMove);
-    window.removeEventListener('pointerup', onPointerUp);
-    localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
-    console.log('Slider drag end value:', Math.round(value));
-  }
-
-  sliderThumb.addEventListener('pointerdown', onPointerDown);
-  brightnessSliderContainer.addEventListener('pointerdown', onPointerDown);
-
-  // Initial UI
-  updateSliderUI();
-})();
-
-  // Accessibility: close modals on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      ['infoModal', 'flashSettingsModal'].forEach(id => {
-        const modal = document.getElementById(id);
-        if (modal && modal.classList.contains('active')) {
-          closeModal(id);
-        }
-      });
-    }
-  });
-
-  // Initial load functions
-  updateUI();
-  loadFlashSettings();
-</script>
-
+  <!-- ESP API -->
+  <script type="module" src="api.js"></script>
+  <!-- Main UI Logic -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
