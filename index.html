@@ -705,7 +705,16 @@
   if (isNaN(value) || value < 0 || value > 100) value = 50;
 
   let dragging = false;
-  let pointerX = null;
+  let lastLogged = Math.round(value);
+
+  function createTouchIndicator(x, y) {
+    const indicator = document.createElement('div');
+    indicator.className = 'touch-indicator';
+    indicator.style.left = x + 'px';
+    indicator.style.top = y + 'px';
+    document.body.appendChild(indicator);
+    setTimeout(() => indicator.remove(), 600);
+  }
 
   function updateSliderUI() {
     sliderThumb.style.left = value + '%';
@@ -719,6 +728,9 @@
       e.preventDefault();
       dragging = true;
       console.log('Slider drag start');
+      if (e.pointerType === 'touch') {
+        createTouchIndicator(e.clientX, e.clientY);
+      }
       window.addEventListener('pointermove', onPointerMove);
       window.addEventListener('pointerup', onPointerUp);
     }
@@ -731,7 +743,11 @@
     newValue = Math.min(Math.max(newValue, 0), 100);
     value = newValue;
     updateSliderUI();
-    console.log('Slider value:', Math.round(value));
+    const rounded = Math.round(value);
+    if (rounded !== lastLogged) {
+      console.log('Slider value:', rounded);
+      lastLogged = rounded;
+    }
   }
 
   function onPointerUp() {
