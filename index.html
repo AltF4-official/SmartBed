@@ -10,6 +10,7 @@
       --bg-dark: #1e1e1e;
       --bg-mid: #2a2a2a;
       --text-light: #ffffff;
+      --text-muted: #cccccc;
     }
 
     * {
@@ -20,7 +21,7 @@
 
     html, body {
       height: 100%;
-      overflow: hidden; /* Disable scrolling */
+      overflow: hidden;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, var(--bg-dark), var(--bg-mid));
       color: var(--text-light);
@@ -32,7 +33,7 @@
       left: 0;
       width: 100%;
       height: 3.5rem;
-      background: linear-gradient(to bottom, #242424, #1e1e1e); /* Seamless blend */
+      background: linear-gradient(to bottom, #242424, #1e1e1e);
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -68,25 +69,100 @@
       background: none;
       border: none;
       padding: 0;
-      margin: 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    header {
-      padding: 5rem 1rem 1rem;
-      font-size: 2.2rem;
-      font-weight: bold;
-      text-align: center;
-      color: var(--accent);
+    main {
+      padding-top: 4.5rem;
+      height: calc(100% - 4.5rem);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2rem;
     }
 
-    main {
-      padding: 1rem;
+    .control-button {
+      padding: 0.8rem 2rem;
+      background: var(--accent);
+      color: black;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .control-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 10px var(--accent);
+    }
+
+    .toggle {
+      padding: 0.6rem 1.5rem;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .toggle.active {
+      background: var(--accent);
+      color: black;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+    }
+
+    .slider {
+      width: 200px;
+      accent-color: var(--accent);
+    }
+
+    /* Modal */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #2c2c2c;
+      color: white;
+      padding: 2rem;
+      border-radius: 10px;
       text-align: center;
-      color: #ccc;
+      max-width: 300px;
+      box-shadow: 0 0 20px #000;
+    }
+
+    .modal-content button {
+      margin-top: 1rem;
+      padding: 0.5rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      background: var(--accent);
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -94,19 +170,16 @@
 
   <!-- Top Bar -->
   <div class="top-bar">
-    <!-- Left: Bed Icon -->
     <div class="left-icon">
       <svg viewBox="0 0 24 24">
         <path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/>
       </svg>
     </div>
 
-    <!-- Center Title -->
     <div class="top-bar-title">SmartBed</div>
 
-    <!-- Right: Info Icon -->
     <div class="right-icon">
-      <button class="icon-button" onclick="alert('Made by Sammy Wammy')">
+      <button class="icon-button" onclick="document.getElementById('infoModal').style.display='flex'">
         <svg viewBox="0 0 24 24">
           <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z" />
         </svg>
@@ -114,14 +187,38 @@
     </div>
   </div>
 
-  <!-- Page Header -->
-  <header>SmartBed</header>
-
-  <!-- Page Content -->
+  <!-- Controls UI -->
   <main>
-    <p>This is your SmartBed control interface.</p>
-    <p>More controls and features coming soon.</p>
+    <button class="control-button" onclick="togglePower()">Power</button>
+
+    <button class="toggle" id="flashToggle" onclick="toggleFlash()">Flash Mode</button>
+
+    <div class="slider-container">
+      <label for="brightness">Brightness</label>
+      <input type="range" min="0" max="100" value="50" class="slider" id="brightness">
+    </div>
   </main>
+
+  <!-- Info Modal -->
+  <div class="modal" id="infoModal">
+    <div class="modal-content">
+      <h2>SmartBed</h2>
+      <p>Made by Sammy Wammy</p>
+      <button onclick="document.getElementById('infoModal').style.display='none'">Close</button>
+    </div>
+  </div>
+
+  <!-- Script -->
+  <script>
+    function toggleFlash() {
+      const btn = document.getElementById("flashToggle");
+      btn.classList.toggle("active");
+    }
+
+    function togglePower() {
+      alert("Power button toggled (simulate action)");
+    }
+  </script>
 
 </body>
 </html>
