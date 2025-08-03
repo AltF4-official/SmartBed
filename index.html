@@ -20,7 +20,7 @@
 
     html, body {
       height: 100%;
-      overflow: hidden; /* 🚫 Disable scrolling */
+      overflow: hidden; /* Disable scrolling */
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, var(--bg-dark), var(--bg-mid));
       color: var(--text-light);
@@ -43,8 +43,8 @@
     }
 
     .top-bar svg {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       fill: var(--text-light);
       transition: fill 0.2s ease;
     }
@@ -57,7 +57,7 @@
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 600;
       color: var(--accent);
       white-space: nowrap;
@@ -97,12 +97,12 @@
     <!-- Left: Bed Icon -->
     <div class="left-icon">
       <svg viewBox="0 0 24 24">
-        <path d="M2 9h20v2H2V9zm0 4h20v9H2v-9zm2 2v5h16v-5H4zM7 7V5a3 3 0 1 1 6 0v2H7z" />
+        <path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/>
       </svg>
     </div>
 
     <!-- Center Title -->
-    <div class="top-bar-title">SmartBed LED Controller v1.0</div>
+    <div class="top-bar-title">SmartBed</div>
 
     <!-- Right: Info Icon -->
     <div class="right-icon">
@@ -117,7 +117,7 @@
   <!-- Page Header -->
   <header>SmartBed</header>
 
-  <!-- Page Content (fixed height; no scrolling) -->
+  <!-- Page Content -->
   <main>
     <p>This is your SmartBed control interface.</p>
     <p>More controls and features coming soon.</p>
