@@ -7,8 +7,10 @@
   <style>
     :root {
       --accent: #00d4ff;
-      --bg-dark: #1e1e1e;
-      --bg-mid: #2a2a2a;
+      --bg-dark: rgba(30,30,30,0.8);
+      --bg-mid: rgba(45,45,45,0.8);
+      --glass: rgba(255,255,255,0.1);
+      --glass-highlight: rgba(255,255,255,0.2);
       --text-light: #ffffff;
       --text-muted: #cccccc;
     }
@@ -17,84 +19,96 @@
     html, body {
       height: 100%; overflow: hidden;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom, var(--bg-dark), var(--bg-mid));
+      background: linear-gradient(to bottom, #111, #222);
       color: var(--text-light);
     }
 
-    .top-bar {
-      position: fixed; top: 0; left: 0; width: 100%; height: 3.5rem;
-      background: linear-gradient(to bottom, #242424, #1e1e1e);
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1rem;
-      box-shadow: inset 0 -1px 1px rgba(255,255,255,0.05), 0 1px 5px rgba(0,0,0,0.5);
-      z-index: 999;
+    /* Glass effect container */
+    .glass {
+      background: var(--bg-mid);
+      backdrop-filter: blur(15px) saturate(180%);
+      -webkit-backdrop-filter: blur(15px) saturate(180%);
+      border-radius: 16px;
+      border: 1px solid var(--glass-highlight);
     }
 
-    .top-bar svg { width: 26px; height: 26px; fill: var(--text-light); transition: fill 0.2s ease; }
+    .top-bar {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 4rem;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 1rem; z-index: 999;
+    }
+    .top-bar.glass { padding: 0.5rem; }
+
+    .top-bar svg { width: 28px; height: 28px; fill: var(--text-light);
+      transition: fill 0.2s ease;
+    }
     .top-bar svg:hover { fill: var(--accent); }
     .top-bar-title {
       position: absolute; left: 50%; transform: translateX(-50%);
-      font-size: 1.2rem; font-weight: 600; color: var(--accent);
-      white-space: nowrap; pointer-events: none;
+      font-size: 1.3rem; font-weight: 600; color: var(--accent);
+      pointer-events: none;
     }
 
-    .icon-button { background: none; border: none; padding: 0; cursor: pointer; }
-
     main {
-      padding-top: 4.5rem; height: calc(100% - 4.5rem);
+      padding-top: 5rem; height: calc(100% - 5rem);
       display: flex; align-items: center; justify-content: center;
     }
 
     .bottom-controls {
-      position: absolute; bottom: 1rem; width: 100%; display: flex;
-      flex-direction: column; align-items: center; gap: 1rem;
-      animation: fadeInUp 0.5s ease forwards;
+      position: absolute; bottom: 1.5rem; width: 100%; display: flex;
+      align-items: center; justify-content: center; gap: 2rem;
+      padding: 0.5rem 1rem; z-index: 998;
+    }
+    .bottom-controls.glass {
+      backdrop-filter: blur(15px) saturate(180%);
+      background: var(--bg-mid);
+      border-radius: 20px;
+      border: 1px solid var(--glass-highlight);
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
 
     .power-button {
-      width: 100px; height: 100px; border-radius: 50%;
+      width: 120px; height: 120px; border-radius: 50%;
       border: 3px solid var(--accent); background: transparent;
-      color: var(--accent); font-size: 2.5rem; display: flex;
-      align-items: center; justify-content: center; cursor: pointer;
-      transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
+      font-size: 2.5rem; color: var(--accent);
     }
-    .power-button:hover { background-color: rgba(0,212,255,0.1); }
+    .power-button:hover { background-color: var(--glass-highlight); }
     .power-button:active { transform: scale(0.9); }
-    .power-button.active { background: var(--accent); color: black; }
+    .power-button.active { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
 
-    .toggle {
-      padding: 0.6rem 1.5rem; font-size: 1rem; font-weight: bold;
-      border-radius: 8px; background: transparent;
-      border: 2px solid var(--accent); color: var(--accent);
-      cursor: pointer; transition: background 0.3s, transform 0.1s;
+    .toggle, .flash-icon {
+      background: none; border: none; cursor: pointer;
+      transition: background 0.3s, transform 0.1s;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0.5rem; border-radius: 12px;
     }
-    .toggle:hover { background-color: rgba(0,212,255,0.1); }
-    .toggle:active { transform: scale(0.95); }
-    .toggle.active { background: var(--accent); color: black; }
+    .toggle:hover, .flash-icon:hover { background-color: var(--glass-highlight); }
+    .toggle.active { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
+    .flash-icon { display: none; }
+    .flash-icon svg { width: 32px; height: 32px; fill: var(--accent); }
 
     .slider-container {
-      display: none; flex-direction: column; align-items: center; gap: 0.5rem;
-      color: var(--text-muted);
+      display: none; align-items: center; gap: 0.5rem;
+      color: var(--text-light);
     }
     .slider {
-      width: 250px; accent-color: var(--accent);
+      -webkit-appearance: none; width: 300px; height: 12px;
+      border-radius: 6px; background: var(--glass);
+      outline: none; accent-color: var(--accent);
       transition: width 0.3s;
     }
-    .slider:hover { width: 270px; }
-    .percentage { margin-left: 0.5rem; color: var(--accent); font-weight: bold; }
-
-    .flash-settings-button {
-      display: none; padding: 0.5rem 1.5rem;
-      border-radius: 6px; background: var(--accent);
-      color: black; font-weight: bold; cursor: pointer;
-      transition: transform 0.1s;
+    .slider:hover { width: 320px; }
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--accent); cursor: pointer;
+      box-shadow: 0 0 10px var(--accent);
     }
-    .flash-settings-button:hover { transform: scale(1.05); }
+    .percentage { font-size: 1rem; color: var(--accent); }
 
     .modal {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -102,23 +116,21 @@
       align-items: center; justify-content: center; z-index: 1000;
     }
     .modal-content {
-      background: #2c2c2c; color: white; padding: 1.5rem;
-      border-radius: 10px; text-align: center;
-      box-shadow: 0 0 20px #000; width: 90%; max-width: 320px;
+      background: var(--bg-dark); padding: 1.5rem;
+      border-radius: 16px; text-align: center;
+      backdrop-filter: blur(20px) saturate(200%);
+      border: 1px solid var(--glass-highlight);
+      width: 90%; max-width: 360px;
       animation: popIn 0.3s ease;
     }
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
     .modal-content input {
-      width: 80px; padding: 0.4rem; margin: 0.5rem;
-      border: 1px solid var(--accent); border-radius: 4px;
-      background: #1e1e1e; color: var(--text-light);
+      width: 100px; padding: 0.5rem; margin: 0.5rem;
+      border: 1px solid var(--accent); border-radius: 8px;
+      background: var(--bg-mid); color: var(--text-light);
     }
     .modal-content button {
-      margin-top: 1rem; padding: 0.5rem 1.5rem;
-      border: none; border-radius: 6px; background: var(--accent);
+      margin-top: 1rem; padding: 0.6rem 1.5rem;
+      border: none; border-radius: 8px; background: var(--accent);
       color: black; font-weight: bold; cursor: pointer;
       transition: background 0.2s;
     }
@@ -128,7 +140,7 @@
 <body>
 
   <!-- Top Bar -->
-  <div class="top-bar">
+  <div class="top-bar glass">
     <div class="left-icon">
       <svg viewBox="0 0 24 24"><path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/></svg>
     </div>
@@ -142,56 +154,10 @@
 
   <!-- Main -->
   <main>
-    <button class="power-button" id="powerBtn" onclick="togglePower()">⏻</button>
+    <button class="power-button glass" id="powerBtn" onclick="togglePower()">⏻</button>
   </main>
 
   <!-- Bottom Controls -->
-  <div class="bottom-controls">
-    <button class="toggle" id="flashToggle" onclick="toggleFlash()">Flash</button>
-    <button class="flash-settings-button" id="flashSettingsBtn" onclick="showModal('flashModal')">Settings</button>
-    <div class="slider-container" id="brightnessControl">
-      <input type="range" min="0" max="100" value="50" class="slider" id="brightness">
-      <span id="brightnessVal" class="percentage">50%</span>
-    </div>
-  </div>
-
-  <!-- Info Modal -->
-  <div class="modal" id="infoModal">
-    <div class="modal-content">
-      <p>Made by Sammy Wammy</p>
-      <button onclick="hideModal('infoModal')">Close</button>
-    </div>
-  </div>
-
-  <!-- Flash Settings Modal -->
-  <div class="modal" id="flashModal">
-    <div class="modal-content">
-      <div>
-        <input type="number" id="onTime" placeholder="On Time (ms)" min="10" max="10000">
-        <input type="number" id="offTime" placeholder="Off Time (ms)" min="10" max="10000">
-      </div>
-      <button onclick="hideModal('flashModal')">Close</button>
-    </div>
-  </div>
-
-  <script>
-    function togglePower() {
-      const p = document.getElementById('powerBtn');
-      const on = p.classList.toggle('active');
-      document.getElementById('brightnessControl').style.display = on ? 'flex' : 'none';
-      document.getElementById('flashToggle').style.display = on ? 'inline-block' : 'none';
-      if (!on) document.getElementById('flashSettingsBtn').style.display = 'none';
-    }
-    function toggleFlash() {
-      const f = document.getElementById('flashToggle');
-      const on = f.classList.toggle('active');
-      document.getElementById('flashSettingsBtn').style.display = on ? 'inline-block' : 'none';
-    }
-    document.getElementById('brightness').addEventListener('input', function() {
-      document.getElementById('brightnessVal').innerText = this.value + '%';
-    });
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
-  </script>
-</body>
-</html>
+  <div class="bottom-controls glass">
+    <button class="toggle" id="flashToggle" onclick="toggleFlash()">
+      <svg viewBox="0 0 24 24"><path d="M13
