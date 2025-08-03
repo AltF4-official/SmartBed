@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>SmartBed LED Controller</title>
   <style>
     :root {
-      --background: linear-gradient(to bottom, #2b2b2b, #121212);
+      --background: linear-gradient(to bottom, #2e2e2e, #111);
       --foreground: #ffffff;
       --accent: #00ffe7;
       --error: #ff4d4d;
@@ -26,12 +26,14 @@
       font-family: var(--font);
       color: var(--foreground);
       background: var(--background);
-      min-height: 100vh;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      -webkit-tap-highlight-color: transparent;
     }
 
     body {
@@ -44,6 +46,11 @@
       justify-content: center;
       flex-direction: column;
       gap: 1rem;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      flex-grow: 1;
     }
 
     .button {
@@ -71,13 +78,13 @@
     }
 
     .power-btn {
-      width: 100px;
-      height: 100px;
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       background: #444;
       border: none;
       color: #fff;
-      font-size: 2rem;
+      font-size: 2.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -143,6 +150,13 @@
       right: 1rem;
     }
 
+    header {
+      text-align: center;
+      padding: 0.5rem 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -150,6 +164,7 @@
   </style>
 </head>
 <body>
+  <header>SmartBed</header>
   <div class="centered">
     <button id="power" class="power-btn" aria-label="Power Toggle">⏻</button>
   </div>
@@ -180,7 +195,9 @@
       theme: {
         background: "#000000",
         foreground: "#ffffff",
-        accent: "#00ffe7"
+        accent: "#00ffe7",
+        error: "#ff4d4d",
+        success: "#4dff88"
       },
       defaultBrightness: 0.8,
       defaultFlashOn: false,
