@@ -1,178 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartBed LED Controller</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smart LED Controller</title>
   <style>
     :root {
-      --bg-start: #333;
-      --bg-end: #000;
-      --fg: #fff;
-      --accent: #0ff;
-      --radius: 8px;
-      --anim: 0.3s;
-      --font: Arial, sans-serif;
+      font-family: Arial, sans-serif;
     }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: linear-gradient(to top, var(--bg-start), var(--bg-end));
-      color: var(--fg);
-      font-family: var(--font);
-      display: flex; flex-direction: column;
-      min-height: 100vh;
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: linear-gradient(to bottom, #333, #000);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.5s;
     }
-    header {
-      display:flex; align-items:center; justify-content:space-between;
-      padding:1rem 2rem; background:rgba(20,20,20,0.8);
-      backdrop-filter:blur(10px);
+
+    #power-button {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: none;
+      font-size: 2.5rem;
+      color: #fff;
+      background-color: #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--animSpeed);
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
     }
-    .logo-title { display:flex; align-items:center; gap:0.5rem; }
-    .logo svg { width:32px; height:32px; fill:var(--accent); }
-    .title { font-size:1.5rem; font-weight:bold; }
-    .info-btn {
-      background:none; border:none; cursor:pointer;
-      width:32px; height:32px; color:var(--fg);
-      transition:transform var(--anim);
+
+    #power-button.on {
+      background-color: var(--accent);
+      transform: scale(1.05);
     }
-    .info-btn:hover { transform:scale(1.1); }
-    main {
-      flex:1; display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:2rem;
+
+    #controls {
+      display: none;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      width: 100%;
+      padding: 1rem;
+      position: fixed;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(4px);
     }
-    .btn {
-      display:flex; align-items:center; gap:0.5rem;
-      padding:0.75rem 1.25rem;
-      font-size:1rem;
-      border-radius:var(--radius);
-      cursor:pointer;
-      transition:all ease-in-out var(--anim);
-      font-family:var(--font);
+
+    .control-button {
+      background: transparent;
+      border: 2px solid #aaa;
+      border-radius: 8px;
+      padding: 0.7rem;
+      font-size: 1.5rem;
+      color: #fff;
+      transition: all var(--animSpeed);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
     }
-    .btn svg { width:20px; height:20px; fill:currentColor; }
-    .btn-primary {
-      background:var(--accent); color:#000; border:none;
-      box-shadow:0 2px 6px rgba(0,0,0,0.5);
+
+    .control-button:hover {
+      transform: scale(1.05);
+      border-color: var(--accent);
+      color: var(--accent);
     }
-    .btn-outline {
-      background:transparent; color:var(--accent);
-      border:2px solid var(--accent);
+
+    .control-button:active {
+      transform: scale(0.95);
     }
-    .btn:hover { transform:scale(1.05); }
-    .btn:active { transform:scale(0.95); }
-    .btn:focus { outline:2px solid var(--accent); outline-offset:2px; }
-    .controls { display:none; flex-direction:column; align-items:center; gap:1rem; }
-    .controls.active { display:flex; }
-    .slider-container { display:flex; align-items:center; gap:1rem; }
-    input[type=range] {
-      -webkit-appearance:none; width:200px; height:6px;
-      background:#222; border-radius:3px;
+
+    #config {
+      display: none;
+      position: fixed;
+      bottom: 70px;
+      background: #222;
+      padding: 1rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 10;
     }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance:none; width:16px; height:16px;
-      background:var(--accent); border-radius:50%; cursor:pointer;
-      transition:transform var(--anim);
+
+    #info-modal {
+      display: none;
+      position: fixed;
+      bottom: 70px;
+      background: #222;
+      padding: 1rem;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      z-index: 10;
     }
-    input[type=range]:active::-webkit-slider-thumb { transform:scale(1.2); }
-    .brightness-value { width:40px; text-align:right; font-size:1rem; }
-    .modal-bg {
-      display:none; position:fixed; inset:0;
-      background:rgba(0,0,0,0.8);
-      align-items:center; justify-content:center;
+
+    .modal-btn {
+      background: var(--accent);
+      border: none;
+      color: #000;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: all var(--animSpeed);
     }
-    .modal-bg.active { display:flex; }
-    .modal {
-      background:#111; padding:1.5rem;
-      border-radius:var(--radius); width:320px;
-      animation:fadeIn var(--anim) ease-in-out;
+
+    .modal-btn:hover {
+      transform: scale(1.05);
     }
-    .modal h3 { margin-bottom:1rem; font-size:1.25rem; }
-    .modal label { display:flex; flex-direction:column; margin-bottom:1rem; font-size:0.9rem; }
-    .modal input {
-      margin-top:0.25rem; padding:0.5rem;
-      background:#222; border:none; border-radius:var(--radius);
-      color:var(--fg);
+
+    .modal-btn:active {
+      transform: scale(0.95);
     }
-    .notifications {
-      position:fixed; top:1rem; right:1rem;
-      display:flex; flex-direction:column; gap:0.5rem;
+
+    @media (max-width: 600px) {
+      #controls {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding-bottom: 1.5rem;
+      }
     }
-    .toast {
-      background:#222; color:#fff;
-      padding:0.5rem 1rem; border-radius:var(--radius);
-      animation:slideIn var(--anim) ease-in-out;
-    }
-    .toast.error { border-left:4px solid #f55; }
-    .toast.success { border-left:4px solid #5f5; }
-    @keyframes fadeIn { from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);} }
-    @keyframes slideIn { from{opacity:0;transform:translateX(50px);}to{opacity:1;transform:translateX(0);} }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo-title">
-      <svg class="logo" viewBox="0 0 24 24"><path d="M4 11h16v6H4v-6zm0-4h16v2H4V7zm0-4h16v2H4V3z"/></svg>
-      <div class="title">SmartBed</div>
-    </div>
-    <button id="infoBtn" class="btn btn-outline" aria-label="Info">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="12" cy="8" r="1" fill="currentColor"/><rect x="11" y="11" width="2" height="6" fill="currentColor"/></svg>
-      Info
-    </button>
-  </header>
-  <main>
-    <button id="powerBtn" class="btn btn-primary" aria-label="Toggle Power">
-      <svg viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm-1 18a9 9 0 1 1 0-18 9 9 0 0 1 0 18z"/></svg>
-      Power
-    </button>
-    <div class="controls" id="controls">
-      <div class="slider-container">
-        <input type="range" id="brightnessSlider" min="0" max="1" step="0.01" aria-label="Brightness">
-        <span class="brightness-value" id="brightnessValue">80%</span>
-      </div>
-      <button id="flashToggleBtn" class="btn btn-outline" aria-label="Toggle Flash">
-        <svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg>
-        Flash
-      </button>
-      <button id="flashSettingsBtn" class="btn btn-primary" aria-label="Open Flash Settings">
-        <svg viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 3l-2.1-.4a7.8 7.8 0 0 0-1.3-2.2l1-1.8-2-2-1.8 1a7.8 7.8 0 0 0-2.2-1.3l-.4-2.1h-4l-.4 2.1a7.8 7.8 0 0 0-2.2 1.3l-1.8-1-2 2 1 1.8a7.8 7.8 0 0 0-1.3 2.2l-2.1.4v4l2.1.4c.3.8.7 1.5 1.3 2.2l-1 1.8 2 2 1.8-1c.6.5 1.3.9 2.2 1.3l.4 2.1h4l.4-2.1c.8-.3 1.5-.7 2.2-1.3l1.8 1 2-2-1-1.8c.6-.7 1-1.4 1.3-2.2l2.1-.4v-4z"/></svg>
-        Settings
-      </button>
-    </div>
-  </main>
-  <div class="modal-bg" id="flashModal" role="dialog" aria-modal="true">
-    <div class="modal">
-      <h3>Flash Settings</h3>
-      <label>On Time (ms)
-        <input type="number" id="flashOnInput" min="10" max="10000" step="10" aria-label="Flash On Time">
-      </label>
-      <label>Off Time (ms)
-        <input type="number" id="flashOffInput" min="10" max="10000" step="10" aria-label="Flash Off Time">
-      </label>
-      <button id="saveFlashBtn" class="btn btn-primary" aria-label="Save Flash Settings">
-        <svg viewBox="0 0 24 24"><path d="M9 16.2l-3.5-3.5 1.4-1.4L9 13.4l8.1-8.1 1.4 1.4z"/></svg>
-        Save
-      </button>
-    </div>
+  <button id="power-button" aria-label="Power Toggle">⏻</button>
+
+  <div id="controls">
+    <button class="control-button" id="flash-toggle" aria-label="Flash Toggle">⚡ Flash</button>
+    <button class="control-button" id="settings-btn" aria-label="Flash Settings">⚙️ Settings</button>
+    <button class="control-button" id="info-btn" aria-label="Info">ℹ️ Info</button>
   </div>
-  <div class="modal-bg" id="infoModal" role="dialog" aria-modal="true">
-    <div class="modal">
-      <h3>About</h3>
-      <p>Made by Sammy Wammy</p>
-      <button id="closeInfoBtn" class="btn btn-primary" aria-label="Close Info">
-        <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        Close
-      </button>
-    </div>
+
+  <div id="config">
+    <label>On Time (ms): <input type="number" id="onTime" min="10" max="10000" value="500" /></label><br />
+    <label>Off Time (ms): <input type="number" id="offTime" min="10" max="10000" value="500" /></label><br />
+    <button class="modal-btn" onclick="saveSettings()">✔️ Save</button>
   </div>
-  <div class="notifications" id="toasts"></div>
+
+  <div id="info-modal">
+    <p>Made by Sammy Wammy</p>
+    <button class="modal-btn" onclick="document.getElementById('info-modal').style.display='none'">✖️ Close</button>
+  </div>
+
   <script>
-    const CONFIG={theme:{background:'#000',foreground:'#fff',accent:'#0ff'},defaultBrightness:0.8,defaultFlashOn:false,defaultFlashSettings:{onTime:500,offTime:500},minFlashMs:10,maxFlashMs:10000,notificationsDuration:3000,brightnessSliderSteps:0.01,fontFamily:'Arial',roundedCorners:true,animationSpeed:'0.3s'};
-    const state={power:false,flash:false,brightness:CONFIG.defaultBrightness,flashSettings:{...CONFIG.defaultFlashSettings}};
-    const powerBtn=document.getElementById('powerBtn'),controls=document.getElementById('controls'),brightnessSlider=document.getElementById('brightnessSlider'),brightnessValue=document.getElementById('brightnessValue'),flashToggleBtn=document.getElementById('flashToggleBtn'),flashSettingsBtn=document.getElementById('flashSettingsBtn'),flashModal=document.getElementById('flashModal'),flashOnInput=document.getElementById('flashOnInput'),flashOffInput=document.getElementById('flashOffInput'),saveFlashBtn=document.getElementById('saveFlashBtn'),infoBtn=document.getElementById('infoBtn'),infoModal=document.getElementById('infoModal'),closeInfoBtn=document.getElementById('closeInfoBtn'),toasts=document.getElementById('toasts');
-    brightnessSlider.step=CONFIG.brightnessSliderSteps;brightnessSlider.value=state.brightness;brightnessValue.textContent=Math.round(state.brightness*100)+'%';flashOnInput.value=state.flashSettings.onTime;flashOffInput.value=state.flashSettings.offTime;updateUI();
-    powerBtn.onclick=()=>{state.power=!state.power;updateUI()};flashToggleBtn.onclick=()=>{state.flash=!state.flash;updateUI()};flashSettingsBtn.onclick=()=>flashModal.classList.add('active');saveFlashBtn.onclick=()=>{const o=+flashOnInput.value,f=+flashOffInput.value;if(o<CONFIG.minFlashMs||o>CONFIG.maxFlashMs||f<CONFIG.minFlashMs||f>CONFIG.maxFlashMs){notify(`Error: ${CONFIG.minFlashMs}-${CONFIG.maxFlashMs}ms`,`error`);return;}state.flashSettings={onTime:o,offTime:f};flashModal.classList.remove('active');notify('Saved','success')};brightnessSlider.oninput=()=>{state.brightness=parseFloat(brightnessSlider.value);brightnessValue.textContent=Math.round(state.brightness*100)+'%'};infoBtn.onclick=()=>infoModal.classList.add('active');closeInfoBtn.onclick=()=>infoModal.classList.remove('active');[flashModal,infoModal].forEach(m=>m.addEventListener('click',e=>e.target===m&&m.classList.remove('active')));document.addEventListener('keydown',e=>e.key==='Escape'&&document.querySelectorAll('.modal-bg.active').forEach(m=>m.classList.remove('active')));
-    function updateUI(){powerBtn.className=`btn ${state.power?'btn-primary':'btn-outline'}`;powerBtn.textContent=`${state.power?'⏻':'⏻'} Power`;controls.classList.toggle('active',state.power);flashToggleBtn.className=`btn ${state.flash?'btn-primary':'btn-outline'}`;flashToggleBtn.textContent=`${state.flash?'⚡':'⚡'} Flash`;flashSettingsBtn.style.display=state.flash?'inline-flex':'none'}
-    function notify(m,t){const d=document.createElement('div');d.className=`toast ${t}`;d.textContent=m;toasts.append(d);setTimeout(()=>d.remove(),CONFIG.notificationsDuration)}
+    const CONFIG = {
+      theme: {
+        background: "#000000",
+        foreground: "#ffffff",
+        accent: "#00ffff"
+      },
+      defaultBrightness: 0.8,
+      defaultFlashOn: false,
+      defaultFlashSettings: { onTime: 500, offTime: 500 },
+      minFlashMs: 10,
+      maxFlashMs: 10000,
+      notificationsDuration: 3000,
+      brightnessSliderSteps: 0.01,
+      fontFamily: "Arial, sans-serif",
+      roundedCorners: true,
+      animationSpeed: "0.3s"
+    };
+
+    document.documentElement.style.setProperty('--accent', CONFIG.theme.accent);
+    document.documentElement.style.setProperty('--animSpeed', CONFIG.animationSpeed);
+
+    const powerButton = document.getElementById("power-button");
+    const controls = document.getElementById("controls");
+    const flashToggle = document.getElementById("flash-toggle");
+    const settingsBtn = document.getElementById("settings-btn");
+    const configModal = document.getElementById("config");
+    const infoModal = document.getElementById("info-modal");
+
+    let powerOn = false;
+    let flashOn = CONFIG.defaultFlashOn;
+
+    powerButton.addEventListener("click", () => {
+      powerOn = !powerOn;
+      powerButton.classList.toggle("on", powerOn);
+      controls.style.display = powerOn ? "flex" : "none";
+    });
+
+    flashToggle.addEventListener("click", () => {
+      flashOn = !flashOn;
+      flashToggle.style.background = flashOn ? CONFIG.theme.accent : "transparent";
+      flashToggle.style.color = flashOn ? "#000" : "#fff";
+      configModal.style.display = flashOn ? "block" : "none";
+    });
+
+    settingsBtn.onclick = () => {
+      configModal.style.display = "block";
+    };
+
+    document.getElementById("info-btn").onclick = () => {
+      infoModal.style.display = "block";
+    };
+
+    function saveSettings() {
+      const on = parseInt(document.getElementById("onTime").value, 10);
+      const off = parseInt(document.getElementById("offTime").value, 10);
+      if (on < CONFIG.minFlashMs || on > CONFIG.maxFlashMs || off < CONFIG.minFlashMs || off > CONFIG.maxFlashMs) {
+        alert(`Flash times must be between ${CONFIG.minFlashMs} and ${CONFIG.maxFlashMs} ms.`);
+      } else {
+        alert("Flash settings saved.");
+        configModal.style.display = "none";
+      }
+    }
   </script>
 </body>
 </html>
