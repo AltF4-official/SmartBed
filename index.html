@@ -2,227 +2,156 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartBed LED Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SmartBed</title>
   <style>
     :root {
-      --bg: #000000;
-      --fg: #ffffff;
+      --bg: #000;
+      --fg: #fff;
       --accent: #00ffcc;
       --radius: 8px;
       --anim: 0.3s;
     }
+    * { margin:0; padding:0; box-sizing:border-box; }
     body {
-      margin: 0; padding: 0;
       background: var(--bg);
       color: var(--fg);
       font-family: Arial, sans-serif;
-      display: flex; flex-direction: column; height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      height:100vh;
     }
-    .top-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem; background: #111;
-      border-bottom: 1px solid #222;
+    .container {
+      display: flex; flex-direction: column; align-items: center; gap:1.5rem;
     }
-    button, input[type=range], input[type=number] {
-      border: none; outline: none;
-      background: none; color: var(--fg);
-      font: inherit;
+    .btn-group {
+      display: flex; gap:1rem;
     }
     .btn {
-      padding: 0.5rem 1rem;
+      padding:0.75rem 1.5rem;
       background: var(--accent);
-      color: #000;
+      color:#000;
+      border:none;
       border-radius: var(--radius);
-      cursor: pointer;
-      transition: background var(--anim);
+      cursor:pointer;
+      transition: background var(--anim), transform var(--anim);
+      font-size:1rem;
     }
-    .btn:hover { background: #00ddb3; }
-    .container {
-      flex: 1; display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 1rem;
+    .btn:hover { background:#00ddb3; transform: translateY(-2px); }
+    .led-preview {
+      width:100px; height:100px;
+      background: var(--accent);
+      border-radius: var(--radius);
+      opacity:0.8;
+      transition: opacity var(--anim);
     }
-    .controls { display: none; flex-direction: column; align-items: center; gap: 1rem; }
-    .controls.active { display: flex; }
-    .slider-container {
-      display: flex; align-items: center; gap: 1rem;
+    .controls {
+      display:flex; align-items:center; gap:1rem;
     }
-    input[type=range] {
-      width: 200px;
-      -webkit-appearance: none;
-      background: #222;
-      height: 6px;
-      border-radius: 3px;
-    }
-    input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 16px; height: 16px;
-      border-radius: 50%; background: var(--accent);
-      cursor: pointer;
+    .controls.hidden { display:none; }
+    .sun {
+      width:12px; height:12px;
+      border:2px solid var(--fg);
+      border-radius:50%;
+      position:relative;
       transition: transform var(--anim);
     }
-    input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); }
-    .flash-controls { display: none; flex-direction: column; gap: 0.5rem; }
-    .flash-controls.active { display: flex; }
-    .modal-bg {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8);
-      align-items: center; justify-content: center;
+    .sun::before, .sun::after {
+      content:''; position:absolute; background:var(--fg);
     }
-    .modal-bg.active { display: flex; }
-    .modal {
-      background: #111; padding: 1rem;
-      border-radius: var(--radius);
-      min-width: 300px;
-      animation: fadeIn var(--anim);
+    .sun::before {
+      top:-6px; left:50%; width:2px; height:6px; transform:translateX(-50%);
     }
-    .modal input { width: 100%; padding: 0.5rem; background: #222; border-radius: var(--radius); }
-    .notifications {
-      position: fixed; top: 1rem; right: 1rem; display: flex; flex-direction: column; gap: 0.5rem;
+    .sun::after {
+      left:-6px; top:50%; width:6px; height:2px; transform:translateY(-50%);
     }
-    .toast {
-      background: #222; padding: 0.5rem 1rem;
-      border-radius: var(--radius);
-      animation: slideIn var(--anim);
+    input[type=range] {
+      -webkit-appearance:none; width:180px; height:6px;
+      background:#222; border-radius:3px; cursor:pointer;
     }
-    .toast.error { border-left: 4px solid #ff5555; }
-    .toast.success { border-left: 4px solid #55ff55; }
-    @keyframes fadeIn { from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);} }
-    @keyframes slideIn { from{opacity:0;transform:translateX(50px);}to{opacity:1;transform:translateX(0);} }
-    .led-preview {
-      width: 100px; height: 100px;
-      background: var(--accent); border-radius: var(--radius);
-      opacity: 0.8; transition: opacity var(--anim);
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance:none; width:16px; height:16px;
+      background: var(--accent); border-radius:50%;
+      cursor:pointer;
+      transition: transform var(--anim);
     }
+    input[type=range]:active::-webkit-slider-thumb { transform:scale(1.2); }
+    .brightness-value { font-size:1rem; width:40px; text-align:right; }
+
+    /* Flash Modal */
+    .modal-bg { display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,0.8); align-items:center; justify-content:center;
+    }
+    .modal-bg.active { display:flex; }
+    .modal { background:#111; padding:1.5rem; border-radius:var(--radius);
+      animation:fadeIn var(--anim);
+      width:280px;
+    }
+    .modal h3 { margin-bottom:1rem; }
+    .modal input { width:100%; padding:0.5rem; margin-bottom:1rem;
+      background:#222; border:none; border-radius:var(--radius);
+      color:var(--fg);
+    }
+    .toast { background:#222; color:#fff; padding:0.5rem 1rem;
+      border-radius:var(--radius); margin-top:0.5rem;
+      animation:slideIn var(--anim);
+    }
+    .toast.success { border-left:4px solid #55ff55; }
+    .toast.error { border-left:4px solid #ff5555; }
+    .notifications { position:fixed; top:1rem; right:1rem; display:flex; flex-direction:column; }
+    @keyframes fadeIn { from{opacity:0;transform:scale(0.9);} to{opacity:1;transform:scale(1);} }
+    @keyframes slideIn { from{opacity:0;transform:translateX(50px);} to{opacity:1;transform:translateX(0);} }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button id="powerBtn" class="btn">Power OFF</button>
-    <button id="flashBtn" class="btn" style="display:none">Flash OFF</button>
-    <button id="flashSettingsBtn" class="btn" style="display:none">Flash Settings</button>
-  </div>
   <div class="container">
+    <div class="btn-group">
+      <button id="powerBtn" class="btn">Power OFF</button>
+      <button id="flashBtn" class="btn" style="display:none;">Flash OFF</button>
+      <button id="flashSettingsBtn" class="btn" style="display:none;">Flash Settings</button>
+    </div>
     <div class="led-preview" id="ledPreview"></div>
     <div class="controls" id="brightnessControls">
-      <div class="slider-container">
-        <input type="range" id="brightnessSlider">
-        <span id="brightnessValue"></span>
-      </div>
-    </div>
-    <div class="flash-controls" id="flashControls">
-      <!-- additional controls if needed -->
+      <div class="sun" id="sunIndicator"></div>
+      <input type="range" id="brightnessSlider" min="0" max="100" step="1">
+      <span class="brightness-value" id="brightnessValue">0%</span>
     </div>
   </div>
   <div class="modal-bg" id="flashModal">
     <div class="modal">
       <h3>Flash Settings</h3>
-      <label>On Time (ms)<input type="number" id="flashOnInput"></label>
-      <label>Off Time (ms)<input type="number" id="flashOffInput"></label>
+      <input type="number" id="flashOnInput" min="10" max="10000" placeholder="On Time ms">
+      <input type="number" id="flashOffInput" min="10" max="10000" placeholder="Off Time ms">
       <button id="saveFlashBtn" class="btn">Save</button>
     </div>
   </div>
   <div class="notifications" id="toasts"></div>
   <script>
-    const CONFIG = {
-      theme: { background: '#000000', foreground: '#ffffff', accent: '#00ffcc' },
-      defaultBrightness: 0.8,
-      defaultFlashOn: false,
-      defaultFlashSettings: { onTime: 500, offTime: 500 },
-      minFlashMs: 10,
-      maxFlashMs: 10000,
-      notificationsDuration: 3000,
-      brightnessSliderSteps: 0.01,
-      fontFamily: 'Arial, sans-serif',
-      roundedCorners: true,
-      animationSpeed: '0.3s'
-    };
-    // Apply theme
-    document.body.style.background = CONFIG.theme.background;
-    document.body.style.color = CONFIG.theme.foreground;
-
+    const CONFIG={theme:{background:'#000',foreground:'#fff',accent:'#0f8'},defaultBrightness:80,defaultFlashOn:false,
+      defaultFlashSettings:{onTime:500,offTime:500},minFlashMs:10,maxFlashMs:10000,
+      notificationsDuration:3000,brightnessSliderSteps:1,fontFamily:'Arial',roundedCorners:true,animationSpeed:'0.3s'};
     // Elements
-    const powerBtn = document.getElementById('powerBtn');
-    const flashBtn = document.getElementById('flashBtn');
-    const flashSettingsBtn = document.getElementById('flashSettingsBtn');
-    const brightnessControls = document.getElementById('brightnessControls');
-    const brightnessSlider = document.getElementById('brightnessSlider');
-    const brightnessValue = document.getElementById('brightnessValue');
-    const flashModal = document.getElementById('flashModal');
-    const flashOnInput = document.getElementById('flashOnInput');
-    const flashOffInput = document.getElementById('flashOffInput');
-    const saveFlashBtn = document.getElementById('saveFlashBtn');
-    const toasts = document.getElementById('toasts');
-    const ledPreview = document.getElementById('ledPreview');
-
-    // LocalStorage
-    let state = JSON.parse(localStorage.getItem('smartbed')) || {};
-    state.power = state.power ?? false;
-    state.flashOn = state.flashOn ?? CONFIG.defaultFlashOn;
-    state.flashSettings = state.flashSettings || { ...CONFIG.defaultFlashSettings };
-    state.brightness = state.brightness ?? CONFIG.defaultBrightness;
-
-    // Init UI
-    brightnessSlider.step = CONFIG.brightnessSliderSteps;
-    brightnessSlider.value = state.brightness;
-    brightnessValue.textContent = Math.round(state.brightness * 100) + '%';
-    flashOnInput.value = state.flashSettings.onTime;
-    flashOffInput.value = state.flashSettings.offTime;
-    updateUI();
-
-    // Power toggle
-    powerBtn.addEventListener('click', () => {
-      state.power = !state.power; saveState(); updateUI();
-    });
-    flashBtn.addEventListener('click', () => {
-      state.flashOn = !state.flashOn; saveState(); updateUI();
-      if(state.flashOn) startFlashing(); else stopFlashing();
-    });
-    flashSettingsBtn.addEventListener('click', () => flashModal.classList.add('active'));
-    saveFlashBtn.addEventListener('click', () => {
-      const onT = Number(flashOnInput.value), offT = Number(flashOffInput.value);
-      if(onT < CONFIG.minFlashMs || onT > CONFIG.maxFlashMs || offT < CONFIG.minFlashMs || offT > CONFIG.maxFlashMs) {
-        notify('Error: values '+CONFIG.minFlashMs+'-'+CONFIG.maxFlashMs+'ms','error'); return;
-      }
-      state.flashSettings = { onTime: onT, offTime: offT }; saveState(); flashModal.classList.remove('active');
-      notify('Flash settings saved','success');
-      if(state.flashOn) { stopFlashing(); startFlashing(); }
-    });
-    brightnessSlider.addEventListener('input', () => {
-      state.brightness = Number(brightnessSlider.value); saveState(); updateBrightness();
-    });
-
-    // Functions
-    function updateUI() {
-      powerBtn.textContent = state.power? 'Power ON':'Power OFF';
-      brightnessControls.classList.toggle('active', state.power && !state.flashOn);
-      flashBtn.style.display = state.power? 'inline-block':'none';
-      flashBtn.textContent = state.flashOn? 'Flash ON':'Flash OFF';
-      flashSettingsBtn.style.display = state.power && state.flashOn? 'inline-block':'none';
-      ledPreview.style.opacity = state.power? state.brightness : 0;
-    }
-    function updateBrightness() {
-      brightnessValue.textContent = Math.round(state.brightness*100)+'%';
-      ledPreview.style.opacity = state.brightness;
-    }
-    let flashInterval;
-    function startFlashing() {
-      clearInterval(flashInterval);
-      flashInterval = setInterval(()=>{
-        ledPreview.style.opacity = 1;
-        setTimeout(()=> ledPreview.style.opacity=0, state.flashSettings.onTime);
-      }, state.flashSettings.onTime+state.flashSettings.offTime);
-    }
-    function stopFlashing() { clearInterval(flashInterval); ledPreview.style.opacity = state.brightness; }
-    function notify(msg,type='info'){
-      const div=document.createElement('div'); div.className='toast '+type; div.textContent=msg; toasts.append(div);
-      setTimeout(()=>{ div.remove(); },CONFIG.notificationsDuration);
-    }
-    function saveState(){ localStorage.setItem('smartbed',JSON.stringify(state)); }
-    function closeModal(){ flashModal.classList.remove('active'); }
-    document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
-    updateBrightness();
+    const powerBtn=document.getElementById('powerBtn'),flashBtn=document.getElementById('flashBtn'),flashSettingsBtn=document.getElementById('flashSettingsBtn'),
+      brightnessControls=document.getElementById('brightnessControls'),brightnessSlider=document.getElementById('brightnessSlider'),
+      brightnessValue=document.getElementById('brightnessValue'),sunIndicator=document.getElementById('sunIndicator'),
+      flashModal=document.getElementById('flashModal'),flashOnInput=document.getElementById('flashOnInput'),flashOffInput=document.getElementById('flashOffInput'),
+      saveFlashBtn=document.getElementById('saveFlashBtn'),toasts=document.getElementById('toasts'),ledPreview=document.getElementById('ledPreview');
+    // State
+    let state=JSON.parse(localStorage.getItem('smartbed'))||{};
+    state.power=state.power||false;state.flashOn=state.flashOn||false;state.flashSettings=state.flashSettings||CONFIG.defaultFlashSettings;state.brightness=state.brightness!=null?state.brightness:CONFIG.defaultBrightness;
+    // Init
+    brightnessSlider.value=state.brightness;brightnessValue.textContent=state.brightness+'%';flashOnInput.value=state.flashSettings.onTime;flashOffInput.value=state.flashSettings.offTime;
+    updateUI();updateBrightness();
+    // Handlers
+    powerBtn.onclick=()=>{state.power=!state.power;save();updateUI();};
+    flashBtn.onclick=()=>{state.flashOn=!state.flashOn;save();updateUI();(state.flashOn?startFlashing:stopFlashing)();};
+    flashSettingsBtn.onclick=()=>flashModal.classList.add('active');
+    saveFlashBtn.onclick=()=>{const onT=+flashOnInput.value,offT=+flashOffInput.value; if(onT<CONFIG.minFlashMs||onT>CONFIG.maxFlashMs||offT<CONFIG.minFlashMs||offT>CONFIG.maxFlashMs){notify('Error: range '+CONFIG.minFlashMs+'-'+CONFIG.maxFlashMs,'error');return;} state.flashSettings={onTime:onT,offTime:offT};save();flashModal.classList.remove('active');notify('Saved','success');if(state.flashOn){stopFlashing();startFlashing();}};
+    brightnessSlider.oninput=()=>{state.brightness=+brightnessSlider.value;save();updateBrightness();};
+    function updateUI(){powerBtn.textContent=state.power?'Power ON':'Power OFF';flashBtn.style.display=state.power?'inline-block':'none';flashSettingsBtn.style.display=state.power&&state.flashOn?'inline-block':'none';brightnessControls.classList.toggle('hidden',!(state.power&&!state.flashOn));ledPreview.style.opacity=state.power?state.brightness/100:0;}
+    function updateBrightness(){brightnessValue.textContent=state.brightness+'%';sunIndicator.style.transform=`scale(${0.5+state.brightness/200})`;ledPreview.style.opacity=state.brightness/100;}
+    let flashInterval;function startFlashing(){clearInterval(flashInterval);flashInterval=setInterval(()=>{ledPreview.style.opacity=1;setTimeout(()=>ledPreview.style.opacity=0,state.flashSettings.onTime);},state.flashSettings.onTime+state.flashSettings.offTime);} function stopFlashing(){clearInterval(flashInterval);ledPreview.style.opacity=state.brightness/100;}
+    function notify(msg,type='info'){const d=document.createElement('div');d.className='toast '+type;d.textContent=msg;toasts.append(d);setTimeout(()=>d.remove(),CONFIG.notificationsDuration);}function save(){localStorage.setItem('smartbed',JSON.stringify(state));}
+    function closeModal(){flashModal.classList.remove('active');}document.addEventListener('keydown',e=>e.key==='Escape'&&closeModal());
   </script>
 </body>
 </html>
