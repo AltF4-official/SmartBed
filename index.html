@@ -698,178 +698,55 @@
   }
 
   // Custom slider integration for brightness
-  (function(){
-    let value = parseInt(localStorage.getItem(BRIGHTNESS_KEY), 10);
-    if (isNaN(value) || value < 0 || value > 100) value = 50;
+(function(){
+  let value = parseInt(localStorage.getItem(BRIGHTNESS_KEY), 10);
+  if (isNaN(value) || value < 0 || value > 100) value = 50;
 
-    let velocity = 0;
-    let dragging = false;
-    let pointerX = null;
-    let animationFrame = null;
-    let bounceTimeout = null;
-    let snapTimeout = null;
+  let dragging = false;
+  let pointerX = null;
 
-    const snapPoints = [0, 50, 100];
-    const snapRadius = 3; // Reduced snap radius for less powerful snapping
-    const lockForce = 0.15;
+  function updateSliderUI() {
+    sliderThumb.style.left = value + '%';
+    sliderThumb.setAttribute('aria-valuenow', Math.round(value));
+    percentageLabel.textContent = Math.round(value) + '%';
+    percentageLabel.style.left = value + '%';
+  }
 
-    function vibrate(pattern) {
-      if (navigator.vibrate) navigator.vibrate(pattern);
+  function onPointerDown(e) {
+    if (e.pointerType === 'mouse' || e.pointerType === 'touch') {
+      e.preventDefault();
+      dragging = true;
+      console.log('Slider drag start');
+      window.addEventListener('pointermove', onPointerMove);
+      window.addEventListener('pointerup', onPointerUp);
     }
+  }
 
-    function clearBounce() {
-      sliderThumb.classList.remove('bounceback', 'edgeBounceLeft', 'edgeBounceRight');
-      if (bounceTimeout) clearTimeout(bounceTimeout);
-    }
+  function onPointerMove(e) {
+    if (!dragging) return;
+    const rect = brightnessSliderContainer.getBoundingClientRect();
+    let newValue = ((e.clientX - rect.left) / rect.width) * 100;
+    newValue = Math.min(Math.max(newValue, 0), 100);
+    value = newValue;
+    updateSliderUI();
+    console.log('Slider value:', Math.round(value));
+  }
 
-    function clearSnap() {
-      sliderThumb.classList.remove('snap-bounce');
-      if (snapTimeout) clearTimeout(snapTimeout);
-    }
+  function onPointerUp() {
+    if (!dragging) return;
+    dragging = false;
+    window.removeEventListener('pointermove', onPointerMove);
+    window.removeEventListener('pointerup', onPointerUp);
+    localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
+    console.log('Slider drag end value:', Math.round(value));
+  }
 
-    function triggerBounce(side) {
-      clearBounce();
-      if (side === 'left') {
-        sliderThumb.classList.add('edgeBounceLeft');
-      } else if (side === 'right') {
-        sliderThumb.classList.add('edgeBounceRight');
-      } else {
-        sliderThumb.classList.add('bounceback');
-      }
-      vibrate([6, 18]);
-      bounceTimeout = setTimeout(clearBounce, 1200);
-    }
+  sliderThumb.addEventListener('pointerdown', onPointerDown);
+  brightnessSliderContainer.addEventListener('pointerdown', onPointerDown);
 
-    function snapToValue(val) {
-      let snapped = Math.round(val);
-      for (const sp of snapPoints) {
-        if (Math.abs(snapped - sp) <= snapRadius) {
-          vibrate(10);
-          logAction(`Slider snapped to ${sp}%`);
-          return sp;
-        }
-      }
-      return snapped;
-    }
-
-    function applyLockingForce(currentValue) {
-      for (const sp of snapPoints) {
-        const dist = currentValue - sp;
-        if (Math.abs(dist) < snapRadius) {
-          return -dist * lockForce;
-        }
-      }
-      return 0;
-    }
-
-    function updateUI() {
-      sliderThumb.style.left = value + '%';
-      sliderThumb.setAttribute('aria-valuenow', Math.round(value));
-      percentageLabel.textContent = Math.round(value) + '%';
-      percentageLabel.style.left = value + '%';
-      brightnessSliderContainer.setAttribute('aria-valuenow', Math.round(value));
-    }
-
-    function physicsLoop() {
-      if (dragging && pointerX !== null) {
-        const rect = brightnessSliderContainer.getBoundingClientRect();
-        const desired = ((pointerX - rect.left) / rect.width) * 100;
-        let diff = desired - value;
-        velocity += diff * 0.12;
-        velocity += applyLockingForce(value);
-        velocity *= 0.75;
-        velocity = Math.max(Math.min(velocity, 2), -2);
-      } else {
-        velocity *= 0.45;
-        if (Math.abs(velocity) < 0.005) velocity = 0;
-      }
-
-      value += velocity;
-
-      if (value < 0) {
-        value = 0;
-        velocity = -velocity * 0.25;
-        triggerBounce('left');
-      } else if (value > 100) {
-        value = 100;
-        velocity = -velocity * 0.25;
-        triggerBounce('right');
-      }
-
-      updateUI();
-      animationFrame = requestAnimationFrame(physicsLoop);
-    }
-
-    function onPointerDown(e) {
-      if (e.pointerType === 'mouse' || e.pointerType === 'touch') {
-        e.preventDefault();
-        dragging = true;
-        pointerX = e.clientX;
-        sliderThumb.classList.add('dragging');
-        window.addEventListener('pointermove', onPointerMove);
-        window.addEventListener('pointerup', onPointerUp);
-        window.addEventListener('pointercancel', onPointerUp);
-        clearBounce();
-        clearSnap();
-        vibrate(8);
-        logAction('Slider drag started');
-      }
-    }
-
-    function onPointerMove(e) {
-      pointerX = e.clientX;
-      logAction(`Slider pointer moved to clientX=${pointerX}`);
-    }
-
-    function onPointerUp() {
-      dragging = false;
-      pointerX = null;
-      sliderThumb.classList.remove('dragging');
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('pointerup', onPointerUp);
-      window.removeEventListener('pointercancel', onPointerUp);
-
-      const snappedVal = snapToValue(value);
-      if (Math.abs(snappedVal - value) > 0.01) {
-        sliderThumb.classList.add('snap-bounce');
-        snapTimeout = setTimeout(() => {
-          sliderThumb.classList.remove('snap-bounce');
-        }, 400);
-      }
-      value = snappedVal;
-      velocity = 0;
-      updateUI();
-
-      // Save brightness to localStorage
-      localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
-      logAction(`Slider drag ended with value: ${Math.round(value)}%`);
-    }
-
-    // Keyboard support for accessibility
-    sliderThumb.addEventListener('keydown', (e) => {
-      let changed = false;
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        value = Math.max(0, value - 1);
-        changed = true;
-      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        value = Math.min(100, value + 1);
-        changed = true;
-      }
-      if (changed) {
-        updateUI();
-        localStorage.setItem(BRIGHTNESS_KEY, Math.round(value));
-        vibrate(5);
-        logAction(`Slider keyboard adjusted to ${Math.round(value)}%`);
-      }
-    });
-
-    sliderThumb.addEventListener('pointerdown', onPointerDown);
-
-    updateUI();
-    physicsLoop();
-  })();
+  // Initial UI
+  updateSliderUI();
+})();
 
   // Accessibility: close modals on Escape
   document.addEventListener('keydown', (e) => {
