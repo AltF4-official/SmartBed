@@ -1,163 +1,542 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartBed</title>
-  <style>
-    :root {
-      --accent: #00d4ff;
-      --bg-dark: rgba(30,30,30,0.8);
-      --bg-mid: rgba(45,45,45,0.8);
-      --glass: rgba(255,255,255,0.1);
-      --glass-highlight: rgba(255,255,255,0.2);
-      --text-light: #ffffff;
-      --text-muted: #cccccc;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SmartBed</title>
+<style>
+  :root {
+    --electric-blue: #00d4ff;
+    --bg-dark: rgba(30,30,30,0.8);
+    --bg-mid: rgba(45,45,45,0.4);
+    --glass-light: rgba(255,255,255,0.1);
+    --glass-highlight: rgba(255,255,255,0.25);
+    --text-light: #fff;
+    --text-muted: #ccc;
+  }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      height: 100%; overflow: hidden;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(to bottom, #111, #222);
-      color: var(--text-light);
-    }
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+  }
+  html, body {
+    height: 100%;
+    background: linear-gradient(to bottom, #111, #222);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-light);
+    overflow-x: hidden;
+  }
 
-    /* Glass effect container */
-    .glass {
-      background: var(--bg-mid);
-      backdrop-filter: blur(15px) saturate(180%);
-      -webkit-backdrop-filter: blur(15px) saturate(180%);
-      border-radius: 16px;
-      border: 1px solid var(--glass-highlight);
-    }
+  /* Liquid Glass */
+  .glass {
+    background: var(--bg-mid);
+    border-radius: 16px;
+    border: 1.5px solid var(--glass-highlight);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+  }
 
-    .top-bar {
-      position: fixed; top: 0; left: 0;
-      width: 100%; height: 4rem;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 1rem; z-index: 999;
-    }
-    .top-bar.glass { padding: 0.5rem; }
+  /* Top bar */
+  .top-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    z-index: 999;
+  }
 
-    .top-bar svg { width: 28px; height: 28px; fill: var(--text-light);
-      transition: fill 0.2s ease;
-    }
-    .top-bar svg:hover { fill: var(--accent); }
-    .top-bar-title {
-      position: absolute; left: 50%; transform: translateX(-50%);
-      font-size: 1.3rem; font-weight: 600; color: var(--accent);
-      pointer-events: none;
-    }
+  .top-bar.glass {
+    background: var(--bg-mid);
+    border-radius: 28px;
+    border: 1.5px solid var(--glass-highlight);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    position: relative;
+  }
 
-    main {
-      padding-top: 5rem; height: calc(100% - 5rem);
-      display: flex; align-items: center; justify-content: center;
-    }
+  /* Bed icon container on far left */
+  .bed-icon-container {
+    position: absolute;
+    left: 1rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
+  }
 
+  /* Bed icon SVG */
+  .bed-icon {
+    width: 24px;
+    height: 24px;
+    fill: var(--electric-blue);
+    flex-shrink: 0;
+  }
+
+  .top-bar-title {
+    font-weight: 600;
+    font-size: 1.3rem;
+    color: var(--electric-blue);
+    user-select: none;
+  }
+
+  /* Right icon container */
+  .right-icon {
+    position: absolute;
+    right: 1rem;
+  }
+
+  /* Info icon - no animation or circle, simple text */
+  .info-button {
+    background: none;
+    border: none;
+    color: var(--electric-blue);
+    font-size: 1.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    padding: 0;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .info-button:focus {
+    outline: 2px solid var(--electric-blue);
+    outline-offset: 2px;
+  }
+
+  /* Main content */
+  main {
+    padding-top: 80px;
+    height: calc(100% - 80px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  /* Power Button */
+  .power-button {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid var(--electric-blue);
+    background: transparent;
+    color: var(--electric-blue);
+    font-size: 2.5rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
+    user-select: none;
+  }
+  .power-button:hover {
+    background-color: var(--glass-light);
+  }
+  .power-button:active {
+    transform: scale(0.9);
+  }
+  .power-button.active {
+    background-color: var(--electric-blue);
+    color: black;
+    box-shadow: 0 0 20px var(--electric-blue);
+  }
+
+  /* Bottom Controls - full width at bottom */
+  .bottom-controls {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: var(--bg-mid);
+    border-top: 1.5px solid var(--glass-highlight);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    box-shadow: 0 -4px 30px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0.6rem 1rem;
+    user-select: none;
+    z-index: 998;
+  }
+
+  /* Flash Button */
+  .flash-button {
+    border: 2px solid var(--electric-blue);
+    background: transparent;
+    color: var(--electric-blue);
+    padding: 0.4rem 1.1rem;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+    transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
+  }
+  .flash-button:hover {
+    background-color: var(--glass-light);
+  }
+  .flash-button.active {
+    background-color: var(--electric-blue);
+    color: black;
+    box-shadow: 0 0 15px var(--electric-blue);
+  }
+
+  /* Flash Settings Button */
+  .flash-settings-button {
+    background: none;
+    border: none;
+    color: var(--electric-blue);
+    font-size: 1.6rem;
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.3s;
+    padding: 0;
+  }
+  .flash-settings-button:hover,
+  .flash-settings-button:focus {
+    color: #00a6cc;
+    outline: none;
+  }
+
+  /* Brightness Slider */
+  .slider {
+    -webkit-appearance: none;
+    width: 200px;
+    height: 12px;
+    border-radius: 6px;
+    background: var(--glass-light);
+    outline: none;
+    accent-color: var(--electric-blue);
+    cursor: pointer;
+    transition: width 0.3s ease;
+    user-select: none;
+  }
+  .slider:hover {
+    width: 220px;
+  }
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--electric-blue);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--electric-blue);
+  }
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--electric-blue);
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--electric-blue);
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+  }
+  .modal.active {
+    display: flex;
+  }
+  .modal-content {
+    background: var(--bg-dark);
+    border-radius: 16px;
+    border: 1px solid var(--glass-highlight);
+    backdrop-filter: saturate(180%) blur(25px);
+    -webkit-backdrop-filter: saturate(180%) blur(25px);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+    padding: 1.5rem;
+    width: 90%;
+    max-width: 360px;
+    text-align: left;
+    color: var(--text-light);
+    user-select: text;
+  }
+  .modal-content label {
+    font-weight: 600;
+    margin-top: 1rem;
+    display: block;
+    color: var(--text-muted);
+  }
+  .modal-content input {
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--electric-blue);
+    background: var(--bg-mid);
+    color: var(--text-light);
+  }
+  .modal-content button.close-btn {
+    margin-top: 1.5rem;
+    width: 100%;
+    background: var(--electric-blue);
+    border: none;
+    color: black;
+    padding: 0.7rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    user-select: none;
+  }
+  .modal-content button.close-btn:hover {
+    background: #00b0e6;
+  }
+
+  /* Responsive */
+  @media (max-width: 400px) {
     .bottom-controls {
-      position: absolute; bottom: 1.5rem; width: 100%; display: flex;
-      align-items: center; justify-content: center; gap: 2rem;
-      padding: 0.5rem 1rem; z-index: 998;
-    }
-    .bottom-controls.glass {
-      backdrop-filter: blur(15px) saturate(180%);
-      background: var(--bg-mid);
-      border-radius: 20px;
-      border: 1px solid var(--glass-highlight);
-    }
-
-    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
-
-    .power-button {
-      width: 120px; height: 120px; border-radius: 50%;
-      border: 3px solid var(--accent); background: transparent;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; transition: background 0.3s, transform 0.1s, box-shadow 0.3s;
-      font-size: 2.5rem; color: var(--accent);
-    }
-    .power-button:hover { background-color: var(--glass-highlight); }
-    .power-button:active { transform: scale(0.9); }
-    .power-button.active { background: var(--accent); color: black; box-shadow: 0 0 20px var(--accent); }
-
-    .toggle, .flash-icon {
-      background: none; border: none; cursor: pointer;
-      transition: background 0.3s, transform 0.1s;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0.5rem; border-radius: 12px;
-    }
-    .toggle:hover, .flash-icon:hover { background-color: var(--glass-highlight); }
-    .toggle.active { background: var(--accent); color: black; box-shadow: 0 0 10px var(--accent); }
-    .flash-icon { display: none; }
-    .flash-icon svg { width: 32px; height: 32px; fill: var(--accent); }
-
-    .slider-container {
-      display: none; align-items: center; gap: 0.5rem;
-      color: var(--text-light);
+      padding: 0.6rem 0.5rem;
+      gap: 8px;
     }
     .slider {
-      -webkit-appearance: none; width: 300px; height: 12px;
-      border-radius: 6px; background: var(--glass);
-      outline: none; accent-color: var(--accent);
-      transition: width 0.3s;
+      width: 150px;
     }
-    .slider:hover { width: 320px; }
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none; appearance: none;
-      width: 24px; height: 24px; border-radius: 50%;
-      background: var(--accent); cursor: pointer;
-      box-shadow: 0 0 10px var(--accent);
+    .slider:hover {
+      width: 170px;
     }
-    .percentage { font-size: 1rem; color: var(--accent); }
-
-    .modal {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7); display: none;
-      align-items: center; justify-content: center; z-index: 1000;
+    .power-button {
+      width: 100px;
+      height: 100px;
+      font-size: 2rem;
     }
-    .modal-content {
-      background: var(--bg-dark); padding: 1.5rem;
-      border-radius: 16px; text-align: center;
-      backdrop-filter: blur(20px) saturate(200%);
-      border: 1px solid var(--glass-highlight);
-      width: 90%; max-width: 360px;
-      animation: popIn 0.3s ease;
-    }
-    .modal-content input {
-      width: 100px; padding: 0.5rem; margin: 0.5rem;
-      border: 1px solid var(--accent); border-radius: 8px;
-      background: var(--bg-mid); color: var(--text-light);
-    }
-    .modal-content button {
-      margin-top: 1rem; padding: 0.6rem 1.5rem;
-      border: none; border-radius: 8px; background: var(--accent);
-      color: black; font-weight: bold; cursor: pointer;
-      transition: background 0.2s;
-    }
-    .modal-content button:hover { background: #00b0e6; }
-  </style>
+  }
+</style>
 </head>
 <body>
 
   <!-- Top Bar -->
-  <div class="top-bar glass">
-    <div class="left-icon">
-      <svg viewBox="0 0 24 24"><path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/></svg>
+  <div class="top-bar glass" role="banner" aria-label="SmartBed Navigation">
+    <div class="bed-icon-container" aria-hidden="true">
+      <svg class="bed-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true" >
+        <path d="M20 7h-3V5a3 3 0 0 0-6 0v2H8a2 2 0 0 0-2 2v7H4v2h16v-2h-2v-7a2 2 0 0 0-2-2zM11 5a1 1 0 0 1 2 0v2h-2z"/>
+      </svg>
     </div>
     <div class="top-bar-title">SmartBed</div>
     <div class="right-icon">
-      <button class="icon-button" onclick="showModal('infoModal')">
-        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm.75 15h-1.5v-6h1.5v6zm0-8h-1.5V7h1.5v2z"/></svg>
-      </button>
+      <button
+        type="button"
+        class="info-button"
+        aria-label="About SmartBed"
+        onclick="showModal('infoModal')"
+      >ⓘ</button>
     </div>
   </div>
 
-  <!-- Main -->
+  <!-- Main Content -->
   <main>
-    <button class="power-button glass" id="powerBtn" onclick="togglePower()">⏻</button>
+    <button
+      id="powerBtn"
+      class="power-button glass"
+      aria-pressed="false"
+      aria-label="Toggle power"
+      type="button"
+      onclick="togglePower()"
+    >⏻</button>
   </main>
 
   <!-- Bottom Controls -->
-  <div class="bottom-controls glass">
-    <button class="toggle" id="flashToggle" onclick="toggleFlash()">
-      <svg viewBox="0 0 24 24"><path d="M13
+  <div class="bottom-controls glass" role="region" aria-live="polite" aria-atomic="true" hidden>
+    <button
+      id="flashBtn"
+      class="flash-button"
+      aria-pressed="false"
+      aria-label="Toggle flash mode"
+      type="button"
+      onclick="toggleFlash()"
+    >Flash</button>
+
+    <button
+      id="flashSettingsBtn"
+      class="flash-settings-button"
+      aria-label="Flash settings"
+      title="Flash Settings"
+      type="button"
+      onclick="showModal('flashSettingsModal')"
+      hidden
+    >⚙︎</button>
+
+    <input
+      type="range"
+      id="brightnessSlider"
+      class="slider"
+      min="0" max="100" step="1" value="50"
+      aria-label="Brightness slider"
+    />
+  </div>
+
+  <!-- Info Modal -->
+  <div
+    id="infoModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    aria-labelledby="infoModalLabel"
+  >
+    <div class="modal-content">
+      <p id="infoModalLabel">Made by Sammy Wammy</p>
+      <button
+        class="close-btn"
+        type="button"
+        onclick="closeModal('infoModal')"
+        aria-label="Close about modal"
+      >Close</button>
+    </div>
+  </div>
+
+  <!-- Flash Settings Modal -->
+  <div
+    id="flashSettingsModal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    aria-labelledby="flashSettingsModalLabel"
+  >
+    <div class="modal-content">
+      <h2 id="flashSettingsModalLabel" style="color: var(--electric-blue); font-weight: 700; margin-bottom: 1rem;">Flash Settings</h2>
+      <label for="onTimeInput">On time (ms)</label>
+      <input type="number" id="onTimeInput" min="0" value="1000" />
+      <label for="offTimeInput">Off time (ms)</label>
+      <input type="number" id="offTimeInput" min="0" value="1000" />
+      <button
+        class="close-btn"
+        type="button"
+        onclick="closeModal('flashSettingsModal')"
+        aria-label="Close flash settings modal"
+      >Close</button>
+    </div>
+  </div>
+
+<script>
+  const powerBtn = document.getElementById('powerBtn');
+  const flashBtn = document.getElementById('flashBtn');
+  const flashSettingsBtn = document.getElementById('flashSettingsBtn');
+  const brightnessSlider = document.getElementById('brightnessSlider');
+  const bottomControls = document.querySelector('.bottom-controls');
+
+  let powerOn = false;
+  let flashOn = false;
+
+  function togglePower() {
+    powerOn = !powerOn;
+    powerBtn.classList.toggle('active', powerOn);
+    powerBtn.setAttribute('aria-pressed', powerOn);
+    if (!powerOn) {
+      flashOn = false;
+      flashBtn.classList.remove('active');
+      flashBtn.setAttribute('aria-pressed', false);
+    }
+    updateUI();
+  }
+
+  function toggleFlash() {
+    flashOn = !flashOn;
+    flashBtn.classList.toggle('active', flashOn);
+    flashBtn.setAttribute('aria-pressed', flashOn);
+    updateUI();
+  }
+
+  function updateUI() {
+    if (powerOn) {
+      bottomControls.hidden = false;
+      flashBtn.hidden = false;
+      if (flashOn) {
+        flashSettingsBtn.hidden = false;
+        brightnessSlider.hidden = true;
+      } else {
+        flashSettingsBtn.hidden = true;
+        brightnessSlider.hidden = false;
+      }
+    } else {
+      bottomControls.hidden = true;
+    }
+  }
+
+  // Modal handling with focus trap
+  function showModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.add('active');
+    modal.setAttribute('tabindex', '-1');
+    modal.focus();
+    trapFocus(modal);
+  }
+
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    modal.classList.remove('active');
+    removeTrapFocus(modal);
+    if (id === 'infoModal') {
+      powerBtn.focus();
+    } else if (id === 'flashSettingsModal') {
+      flashSettingsBtn.focus();
+    }
+  }
+
+  let lastTrapHandler = null;
+  function trapFocus(modal) {
+    const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusableElements = modal.querySelectorAll(focusableSelectors);
+    if (focusableElements.length === 0) return;
+
+    const first = focusableElements[0];
+    const last = focusableElements[focusableElements.length - 1];
+
+    function handleTrap(e) {
+      if (e.key === 'Tab' || e.keyCode === 9) {
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      } else if (e.key === "Escape") {
+        closeModal(modal.id);
+      }
+    }
+    lastTrapHandler = handleTrap;
+    modal.addEventListener('keydown', lastTrapHandler);
+  }
+
+  function removeTrapFocus(modal) {
+    if (lastTrapHandler) {
+      modal.removeEventListener('keydown', lastTrapHandler);
+      lastTrapHandler = null;
+    }
+  }
+
+  // Initialize UI state on load
+  updateUI();
+</script>
+
+</body>
+</html>
