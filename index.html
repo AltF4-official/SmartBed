@@ -2,163 +2,194 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Smart LED Controller</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartBed LED Controller</title>
   <style>
     :root {
-      font-family: Arial, sans-serif;
+      --bg-gradient: linear-gradient(to bottom, #111111, #000000);
+      --color-accent: #00ccff;
+      --color-fg: #ffffff;
+      --color-bg: #000000;
+      --color-muted: #444444;
+      --radius: 1rem;
+      --speed: 0.3s;
+      --font: 'Arial', sans-serif;
     }
-    html, body {
+
+    * {
       margin: 0;
       padding: 0;
-      height: 100%;
-      background: linear-gradient(to bottom, #333, #000);
-      color: #fff;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg-gradient);
+      color: var(--color-fg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+    }
+
+    header {
+      width: 100%;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+
+    main {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: background 0.5s;
+      width: 100%;
     }
 
-    #power-button {
-      width: 100px;
-      height: 100px;
+    .power-button {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
-      border: none;
-      font-size: 2.5rem;
-      color: #fff;
-      background-color: #666;
-      cursor: pointer;
+      background: #444;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all var(--animSpeed);
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      font-size: 2.5rem;
+      cursor: pointer;
+      border: none;
+      transition: all var(--speed) ease-in-out;
     }
 
-    #power-button.on {
-      background-color: var(--accent);
-      transform: scale(1.05);
+    .power-button.on {
+      background: var(--color-accent);
     }
 
-    #controls {
+    .controls {
       display: none;
-      flex-direction: row;
-      justify-content: space-around;
+      flex-direction: column;
+      gap: 1rem;
       align-items: center;
       width: 100%;
-      padding: 1rem;
-      position: fixed;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.4);
-      box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(4px);
+      margin-top: 2rem;
     }
 
-    .control-button {
+    .controls.active {
+      display: flex;
+    }
+
+    .btn {
+      border: none;
+      padding: 0.75rem 1.5rem;
       background: transparent;
-      border: 2px solid #aaa;
-      border-radius: 8px;
-      padding: 0.7rem;
-      font-size: 1.5rem;
-      color: #fff;
-      transition: all var(--animSpeed);
+      border: 2px solid var(--color-fg);
+      color: var(--color-fg);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all var(--speed) ease-in-out;
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      transform: scale(1.05);
+      background-color: #222;
+    }
+
+    .btn:active {
+      transform: scale(0.95);
+    }
+
+    .btn.accent {
+      background-color: var(--color-accent);
+      color: #000;
+      border: none;
+    }
+
+    .slider-container {
+      width: 80%;
       display: flex;
       align-items: center;
-      gap: 0.4rem;
-      cursor: pointer;
+      gap: 0.5rem;
     }
 
-    .control-button:hover {
-      transform: scale(1.05);
-      border-color: var(--accent);
-      color: var(--accent);
+    .slider-container input {
+      flex: 1;
     }
 
-    .control-button:active {
-      transform: scale(0.95);
-    }
-
-    #config {
-      display: none;
+    .notification-container {
       position: fixed;
-      bottom: 70px;
-      background: #222;
-      padding: 1rem;
-      border-radius: 10px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      z-index: 10;
+      top: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
     }
 
-    #info-modal {
-      display: none;
+    .toast {
+      background: #222;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      min-width: 200px;
+      opacity: 0.95;
+      transition: all var(--speed) ease-in-out;
+    }
+
+    .modal {
       position: fixed;
-      bottom: 70px;
-      background: #222;
-      padding: 1rem;
-      border-radius: 10px;
-      text-align: center;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-      z-index: 10;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
     }
 
-    .modal-btn {
-      background: var(--accent);
-      border: none;
-      color: #000;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-      margin-top: 0.5rem;
-      transition: all var(--animSpeed);
-    }
-
-    .modal-btn:hover {
-      transform: scale(1.05);
-    }
-
-    .modal-btn:active {
-      transform: scale(0.95);
-    }
-
-    @media (max-width: 600px) {
-      #controls {
-        flex-direction: column;
-        gap: 0.5rem;
-        padding-bottom: 1.5rem;
-      }
+    .modal-content {
+      background: #111;
+      padding: 2rem;
+      border-radius: var(--radius);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      min-width: 300px;
     }
   </style>
 </head>
 <body>
-  <button id="power-button" aria-label="Power Toggle">⏻</button>
-
-  <div id="controls">
-    <button class="control-button" id="flash-toggle" aria-label="Flash Toggle">⚡ Flash</button>
-    <button class="control-button" id="settings-btn" aria-label="Flash Settings">⚙️ Settings</button>
-    <button class="control-button" id="info-btn" aria-label="Info">ℹ️ Info</button>
-  </div>
-
-  <div id="config">
-    <label>On Time (ms): <input type="number" id="onTime" min="10" max="10000" value="500" /></label><br />
-    <label>Off Time (ms): <input type="number" id="offTime" min="10" max="10000" value="500" /></label><br />
-    <button class="modal-btn" onclick="saveSettings()">✔️ Save</button>
-  </div>
-
-  <div id="info-modal">
-    <p>Made by Sammy Wammy</p>
-    <button class="modal-btn" onclick="document.getElementById('info-modal').style.display='none'">✖️ Close</button>
-  </div>
+  <header>
+    <h1>SmartBed LED Controller</h1>
+  </header>
+  <main>
+    <button class="power-button" id="powerBtn" aria-label="Power">⏻</button>
+    <div class="controls" id="controls">
+      <div class="slider-container" id="brightnessContainer">
+        <span title="Dim">🌙</span>
+        <input type="range" id="brightness" min="0" max="1" step="0.01" />
+        <span title="Bright">☀️</span>
+      </div>
+      <button class="btn" id="flashBtn">⚡ Flash</button>
+      <button class="btn" id="flashSettingsBtn" style="display: none;">🛠️ Flash Settings</button>
+      <button class="btn" id="infoBtn">ℹ️ Info</button>
+    </div>
+  </main>
+  <div class="notification-container" id="notifications"></div>
 
   <script>
     const CONFIG = {
-      theme: {
-        background: "#000000",
-        foreground: "#ffffff",
-        accent: "#00ffff"
-      },
+      theme: { background: "#000000", foreground: "#ffffff", accent: "#00ccff" },
       defaultBrightness: 0.8,
       defaultFlashOn: false,
       defaultFlashSettings: { onTime: 500, offTime: 500 },
@@ -168,53 +199,67 @@
       brightnessSliderSteps: 0.01,
       fontFamily: "Arial, sans-serif",
       roundedCorners: true,
-      animationSpeed: "0.3s"
+      animationSpeed: "0.3s",
     };
 
-    document.documentElement.style.setProperty('--accent', CONFIG.theme.accent);
-    document.documentElement.style.setProperty('--animSpeed', CONFIG.animationSpeed);
-
-    const powerButton = document.getElementById("power-button");
+    const powerBtn = document.getElementById("powerBtn");
     const controls = document.getElementById("controls");
-    const flashToggle = document.getElementById("flash-toggle");
-    const settingsBtn = document.getElementById("settings-btn");
-    const configModal = document.getElementById("config");
-    const infoModal = document.getElementById("info-modal");
+    const brightness = document.getElementById("brightness");
+    const brightnessContainer = document.getElementById("brightnessContainer");
+    const flashBtn = document.getElementById("flashBtn");
+    const flashSettingsBtn = document.getElementById("flashSettingsBtn");
+    const infoBtn = document.getElementById("infoBtn");
+    const notifications = document.getElementById("notifications");
 
-    let powerOn = false;
-    let flashOn = CONFIG.defaultFlashOn;
-
-    powerButton.addEventListener("click", () => {
-      powerOn = !powerOn;
-      powerButton.classList.toggle("on", powerOn);
-      controls.style.display = powerOn ? "flex" : "none";
-    });
-
-    flashToggle.addEventListener("click", () => {
-      flashOn = !flashOn;
-      flashToggle.style.background = flashOn ? CONFIG.theme.accent : "transparent";
-      flashToggle.style.color = flashOn ? "#000" : "#fff";
-      configModal.style.display = flashOn ? "block" : "none";
-    });
-
-    settingsBtn.onclick = () => {
-      configModal.style.display = "block";
+    let state = {
+      power: false,
+      flash: false,
+      brightness: CONFIG.defaultBrightness,
+      flashSettings: { ...CONFIG.defaultFlashSettings },
     };
 
-    document.getElementById("info-btn").onclick = () => {
-      infoModal.style.display = "block";
-    };
-
-    function saveSettings() {
-      const on = parseInt(document.getElementById("onTime").value, 10);
-      const off = parseInt(document.getElementById("offTime").value, 10);
-      if (on < CONFIG.minFlashMs || on > CONFIG.maxFlashMs || off < CONFIG.minFlashMs || off > CONFIG.maxFlashMs) {
-        alert(`Flash times must be between ${CONFIG.minFlashMs} and ${CONFIG.maxFlashMs} ms.`);
-      } else {
-        alert("Flash settings saved.");
-        configModal.style.display = "none";
-      }
+    function showNotification(msg, type = "info") {
+      const toast = document.createElement("div");
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      notifications.appendChild(toast);
+      setTimeout(() => toast.remove(), CONFIG.notificationsDuration);
     }
+
+    function updateUI() {
+      controls.classList.toggle("active", state.power);
+      brightnessContainer.style.display = state.power && !state.flash ? "flex" : "none";
+      flashSettingsBtn.style.display = state.flash ? "inline-block" : "none";
+      powerBtn.classList.toggle("on", state.power);
+    }
+
+    powerBtn.onclick = () => {
+      state.power = !state.power;
+      updateUI();
+    };
+
+    flashBtn.onclick = () => {
+      state.flash = !state.flash;
+      flashBtn.classList.toggle("accent", state.flash);
+      updateUI();
+    };
+
+    brightness.oninput = (e) => {
+      state.brightness = parseFloat(e.target.value);
+    };
+
+    infoBtn.onclick = () => {
+      const modal = document.createElement("div");
+      modal.className = "modal";
+      modal.innerHTML = `
+        <div class="modal-content">
+          <p>Made by Sammy Wammy</p>
+          <button class="btn" onclick="this.closest('.modal').remove()">Close</button>
+        </div>`;
+      document.body.appendChild(modal);
+    };
+
+    updateUI();
   </script>
 </body>
 </html>
