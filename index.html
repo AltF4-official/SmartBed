@@ -336,17 +336,24 @@
       updateSlider();
     })();
 
-    // Close modals on Escape
+    // Close modals on Escape key
     document.addEventListener('keydown', e => {
-      if(e.key === 'Escape') {
-        ['infoModal','flashSettingsModal'].forEach(id => {
-          document.getElementById(id).classList.remove('active');
+      if (e.key === 'Escape') {
+        ['infoModal', 'flashSettingsModal'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove('active');
         });
       }
     });
 
-    // Initialize UI
-    updateUI();
+    // Initialize UI safely
+    document.addEventListener('DOMContentLoaded', () => {
+      if (typeof updateUI === 'function') {
+        updateUI();
+      } else {
+        console.warn('updateUI() is not defined yet.');
+      }
+    });
   </script>
 </body>
 </html>
