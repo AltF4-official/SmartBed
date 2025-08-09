@@ -1,5 +1,5 @@
 // api.js
-export let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
+export let ESP_IP = localStorage.getItem('espIP') || '192.168.1.114';
 
 async function callESP(path) {
   try {
