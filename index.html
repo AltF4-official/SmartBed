@@ -337,69 +337,93 @@
     })();
 
 <script>
-  const ESP_IP = '192.168.1.114'; // Replace with your ESP32 IP
+const ESP_IP = '192.168.1.114'; // Replace with your ESP32 IP
 
-  // Utility to call ESP32 endpoint
-  async function callESP(path) {
-    try {
-      const response = await fetch(`http://${ESP_IP}/${path}`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      return await response.json();
-    } catch (error) {
-      console.error('ESP call failed:', error);
-      return null;
-    }
+// Utility to call ESP32 endpoint securely (use protocol-relative URL)
+async function callESP(path) {
+  try {
+    const url = `http://${ESP_IP}/${path}`; // Change to https:// if supported
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+  } catch (error) {
+    console.error('ESP call failed:', error);
+    return null;
   }
+}
 
-  // Update UI based on current states (implement as needed)
-  function updateUI() {
-    // Your UI update logic here
+// Local state variables for UI toggles
+let powerOn = false;
+let flashOn = false;
+let currentBrightness = 0;
+
+function updateUI() {
+  const powerButton = document.getElementById('powerButton');
+  const flashButton = document.getElementById('flashButton');
+  const brightnessSlider = document.getElementById('brightnessSlider');
+
+  if (powerButton) {
+    powerButton.classList.toggle('active', powerOn);
   }
+  if (flashButton) {
+    flashButton.classList.toggle('active', flashOn);
+  }
+  if (brightnessSlider) {
+    brightnessSlider.value = currentBrightness;
+  }
+}
 
-  // Initialize after DOM is loaded
-  document.addEventListener('DOMContentLoaded', () => {
-    const brightnessSlider = document.getElementById('brightnessSlider');
-    const powerButton = document.getElementById('powerButton');
-    const flashButton = document.getElementById('flashButton');
+document.addEventListener('DOMContentLoaded', () => {
+  const brightnessSlider = document.getElementById('brightnessSlider');
+  const powerButton = document.getElementById('powerButton');
+  const flashButton = document.getElementById('flashButton');
 
-    if (brightnessSlider) {
-      brightnessSlider.addEventListener('input', async (e) => {
-        const brightness = e.target.value;
-        updateUI();
-        await callESP(`brightness?value=${brightness}`);
-      });
-    }
-
-    if (powerButton) {
-      powerButton.addEventListener('click', async () => {
-        // Toggle power state in your code, e.g. powerOn = !powerOn;
-        const powerState = powerButton.classList.contains('active') ? 0 : 1;
-        updateUI();
-        await callESP(`power?state=${powerState}`);
-      });
-    }
-
-    if (flashButton) {
-      flashButton.addEventListener('click', async () => {
-        // Toggle flash state in your code, e.g. flashOn = !flashOn;
-        const flashState = flashButton.classList.contains('active') ? 0 : 1;
-        updateUI();
-        await callESP(`flash?state=${flashState}`);
-      });
-    }
-
-    // Close modals on Escape
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        ['infoModal', 'flashSettingsModal'].forEach(id => {
-          const modal = document.getElementById(id);
-          if (modal) modal.classList.remove('active');
-        });
+  if (brightnessSlider) {
+    brightnessSlider.addEventListener('input', async (e) => {
+      currentBrightness = e.target.value;
+      updateUI();
+      const result = await callESP(`brightness?value=${currentBrightness}`);
+      if (!result) {
+        console.warn('Failed to update brightness');
       }
     });
+  }
 
-    updateUI();
+  if (powerButton) {
+    powerButton.addEventListener('click', async () => {
+      powerOn = !powerOn;
+      updateUI();
+      const result = await callESP(`power?state=${powerOn ? 1 : 0}`);
+      if (!result) {
+        console.warn('Failed to toggle power');
+        powerOn = !powerOn; // revert state on failure
+        updateUI();
+      }
+    });
+  }
+
+  if (flashButton) {
+    flashButton.addEventListener('click', async () => {
+      flashOn = !flashOn;
+      updateUI();
+      const result = await callESP(`flash?state=${flashOn ? 1 : 0}`);
+      if (!result) {
+        console.warn('Failed to toggle flash');
+        flashOn = !flashOn; // revert state on failure
+        updateUI();
+      }
+    });
+  }
+
+  // Close modals on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      ['infoModal', 'flashSettingsModal'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.remove('active');
+      });
+    }
   });
-</script>
-</body>
-</html>
+
+  updateUI();
+});
