@@ -336,69 +336,70 @@
       updateSlider();
     })();
 
+<script>
+  const ESP_IP = '192.168.1.114'; // Replace with your ESP32 IP
+
+  // Utility to call ESP32 endpoint
+  async function callESP(path) {
+    try {
+      const response = await fetch(`http://${ESP_IP}/${path}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error('ESP call failed:', error);
+      return null;
+    }
+  }
+
+  // Update UI based on current states (implement as needed)
+  function updateUI() {
+    // Your UI update logic here
+  }
+
+  // Initialize after DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    const brightnessSlider = document.getElementById('brightnessSlider');
+    const powerButton = document.getElementById('powerButton');
+    const flashButton = document.getElementById('flashButton');
+
+    if (brightnessSlider) {
+      brightnessSlider.addEventListener('input', async (e) => {
+        const brightness = e.target.value;
+        updateUI();
+        await callESP(`brightness?value=${brightness}`);
+      });
+    }
+
+    if (powerButton) {
+      powerButton.addEventListener('click', async () => {
+        // Toggle power state in your code, e.g. powerOn = !powerOn;
+        const powerState = powerButton.classList.contains('active') ? 0 : 1;
+        updateUI();
+        await callESP(`power?state=${powerState}`);
+      });
+    }
+
+    if (flashButton) {
+      flashButton.addEventListener('click', async () => {
+        // Toggle flash state in your code, e.g. flashOn = !flashOn;
+        const flashState = flashButton.classList.contains('active') ? 0 : 1;
+        updateUI();
+        await callESP(`flash?state=${flashState}`);
+      });
+    }
+
     // Close modals on Escape
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
         ['infoModal', 'flashSettingsModal'].forEach(id => {
-          document.getElementById(id).classList.remove('active');
+          const modal = document.getElementById(id);
+          if (modal) modal.classList.remove('active');
         });
       }
     });
 
-    // Function to fetch and apply ESP32 status
-    function fetchESP32Status() {
-      fetch('http://<ESP32-IP>/status')
-        .then(response => response.json())
-        .then(data => {
-          powerOn = data.power;
-          flashOn = data.flash;
-          brightness = data.brightness;
-          updateUI();
-        })
-        .catch(err => console.error('ESP32 status fetch error:', err));
-    }
-
-    // Debounce helper
-    function debounce(func, delay) {
-      let timeout;
-      return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), delay);
-      };
-    }
-
-    // Brightness slider change (debounced)
-    const sendBrightness = debounce(value => {
-      fetch(`http://<ESP32-IP>/brightness?value=${value}`)
-        .catch(err => console.error('Brightness update failed:', err));
-    }, 100);
-
-    document.getElementById('brightnessSlider').addEventListener('input', e => {
-      brightness = e.target.value;
-      updateUI();
-      sendBrightness(brightness);
-    });
-
-    // Power button click
-    document.getElementById('powerButton').addEventListener('click', () => {
-      powerOn = !powerOn;
-      updateUI();
-      fetch(`http://<ESP32-IP>/power?state=${powerOn ? 1 : 0}`)
-        .catch(err => console.error('Power toggle failed:', err));
-    });
-
-    // Flash button click
-    document.getElementById('flashButton').addEventListener('click', () => {
-      flashOn = !flashOn;
-      updateUI();
-      fetch(`http://<ESP32-IP>/flash?state=${flashOn ? 1 : 0}`)
-        .catch(err => console.error('Flash toggle failed:', err));
-    });
-
-    // Initialize UI from ESP32 on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchESP32Status();
-    });
-  </script>
+    updateUI();
+  });
+</script>
 </body>
 </html>
