@@ -346,6 +346,33 @@
       }
     });
 
+    // ESP32 control logic
+    const ESP32_IP = "192.168.1.114";
+
+    function sendCommand(endpoint, params = {}) {
+      const url = new URL(`http://${ESP32_IP}/${endpoint}`);
+      Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+      fetch(url)
+        .then(res => res.text())
+        .then(data => console.log(`ESP32 response from ${endpoint}:`, data))
+        .catch(err => console.error(`ESP32 error for ${endpoint}:`, err));
+    }
+
+    // Power button
+    document.getElementById('powerBtn')?.addEventListener('click', () => {
+      sendCommand('power', { state: 'toggle' });
+    });
+
+    // Flash toggle
+    document.getElementById('flashBtn')?.addEventListener('click', () => {
+      sendCommand('flash', { state: 'toggle' });
+    });
+
+    // Brightness slider
+    document.getElementById('brightnessSlider')?.addEventListener('input', e => {
+      sendCommand('brightness', { value: e.target.value });
+    });
+
     // Initialize UI safely
     document.addEventListener('DOMContentLoaded', () => {
       if (typeof updateUI === 'function') {
