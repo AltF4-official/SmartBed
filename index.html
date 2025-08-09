@@ -348,22 +348,5 @@
     // Initialize UI
     updateUI();
   </script>
-
-  <!-- Load the module-based scripts (main.js imports api.js) -->
-  <script type="module" src="./main.js"></script>
-
-  <!-- Small helper: quick prompt to set ESP IP from the browser console or a bookmarklet.
-       Call setEspIpPrompt() in the console to change the saved ESP IP. -->
-  <script>
-    window.setEspIpPrompt = function () {
-      const current = localStorage.getItem('espIP') || '192.168.1.50';
-      const ip = prompt('Enter ESP IP address:', current);
-      if (!ip) return;
-      localStorage.setItem('espIP', ip);
-      location.reload();
-    };
-
-    console.info('SmartBed helper: call setEspIpPrompt() in the console to change the ESP IP.');
-  </script>
 </body>
 </html>
