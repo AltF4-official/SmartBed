@@ -16,253 +16,128 @@
       --text-muted: #ccc;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      height: 100%; overflow: hidden; background: #111;
-      font-family: 'Orbitron', sans-serif;
-    }
-    .glass {
-      background: var(--bg-mid);
-      border-radius: 16px;
-      border: 1.5px solid var(--glass-highlight);
-      backdrop-filter: saturate(180%) blur(20px);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
-    }
-    .top-bar {
-      position: fixed; top: 0; left: 0; right: 0; height: 56px;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0 1rem; z-index: 999;
-    }
+    html, body { height: 100%; overflow: hidden; background: #111; font-family: 'Orbitron', sans-serif; }
+    .glass { background: var(--bg-mid); border-radius: 16px; border: 1.5px solid var(--glass-highlight); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
+    .top-bar { position: fixed; top: 0; left: 0; right: 0; height: 56px; display: flex; align-items: center; justify-content: center; padding: 0 1rem; z-index: 999; }
     .top-bar.glass { border-radius: 28px; }
     .left-icon-container { position: absolute; left: 1rem; display: flex; align-items: center; }
     .left-icon { width: 24px; height: 24px; fill: var(--electric-blue); }
-    .top-bar-title {
-      font-weight: 600; font-size: 1.3rem; color: var(--electric-blue);
-      user-select: none;
-    }
+    .top-bar-title { font-weight: 600; font-size: 1.3rem; color: var(--electric-blue); user-select: none; }
     .right-icon { position: absolute; right: 1rem; }
-    .info-button {
-      background: none; border: none; color: var(--electric-blue);
-      font-size: 1.6rem; font-weight: 700; cursor: pointer;
-      user-select: none; padding: 0; line-height: 1;
-    }
+    .info-button { background: none; border: none; color: var(--electric-blue); font-size: 1.6rem; font-weight: 700; cursor: pointer; user-select: none; padding: 0; line-height: 1; }
     .info-button:focus { outline: 2px solid var(--electric-blue); }
-    main {
-      padding-top: 80px; height: calc(100% - 80px);
-      display: flex; justify-content: center; align-items: center;
-      flex-direction: column; gap: 2rem;
-    }
-    .power-button {
-      width: 120px; height: 120px; border-radius: 50%;
-      border: 3px solid var(--electric-blue); background: transparent;
-      color: var(--electric-blue); font-size: 2.5rem; cursor: pointer;
-      display: flex; justify-content: center; align-items: center;
-      transition: background-color .3s, box-shadow .3s, transform .1s;
-      user-select: none;
-    }
+    main { padding-top: 80px; height: calc(100% - 80px); display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 2rem; }
+    .power-button { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--electric-blue); background: transparent; color: var(--electric-blue); font-size: 2.5rem; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: background-color .3s, box-shadow .3s, transform .1s; user-select: none; }
     .power-button:hover { background: var(--glass-light); }
     .power-button:active { transform: scale(0.9); }
-    .power-button.active {
-      background: var(--electric-blue); color: black;
-      box-shadow: 0 0 20px var(--electric-blue);
-    }
-    .bottom-controls {
-      position: fixed; bottom: 0; left: 0; width: 100vw;
-      background: var(--bg-mid); border-top: 1.5px solid var(--glass-highlight);
-      backdrop-filter: saturate(180%) blur(20px);
-      display: flex; align-items: center; justify-content: center;
-      gap: 12px; padding: .6rem 1rem; user-select: none; z-index: 998;
-      opacity: 0; transform: translateY(100%);
-      pointer-events: none;
-      transition: opacity .4s ease, transform .4s ease, pointer-events 0s linear .4s;
-    }
-    .bottom-controls.visible {
-      opacity: 1; transform: translateY(0); pointer-events: auto;
-      transition-delay: 0s;
-    }
-    .flash-button {
-      border: 2px solid var(--electric-blue);
-      background: transparent; color: var(--electric-blue);
-      padding: .4rem 1.1rem; border-radius: 14px;
-      font-weight: 600; font-size: 1rem; cursor: pointer;
-      transition: background-color .3s, box-shadow .3s, color .3s;
-    }
+    .power-button.active { background: var(--electric-blue); color: black; box-shadow: 0 0 20px var(--electric-blue); }
+    .bottom-controls { position: fixed; bottom: 0; left: 0; width: 100vw; background: var(--bg-mid); border-top: 1.5px solid var(--glass-highlight); backdrop-filter: saturate(180%) blur(20px); display: flex; align-items: center; justify-content: center; gap: 12px; padding: .6rem 1rem; user-select: none; z-index: 998; opacity: 0; transform: translateY(100%); pointer-events: none; transition: opacity .4s ease, transform .4s ease, pointer-events 0s linear .4s; }
+    .bottom-controls.visible { opacity: 1; transform: translateY(0); pointer-events: auto; transition-delay: 0s; }
+    .flash-button { border: 2px solid var(--electric-blue); background: transparent; color: var(--electric-blue); padding: .4rem 1.1rem; border-radius: 14px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background-color .3s, box-shadow .3s, color .3s; }
     .flash-button:hover { background: var(--glass-light); }
-    .flash-button.active {
-      background: var(--electric-blue); color: black;
-      box-shadow: 0 0 15px var(--electric-blue);
-    }
-    .flash-settings-button {
-      background: none; border: none; color: var(--electric-blue);
-      font-size: 1.6rem; cursor: pointer; user-select: none; padding: 0;
-    }
+    .flash-button.active { background: var(--electric-blue); color: black; box-shadow: 0 0 15px var(--electric-blue); }
+    .flash-settings-button { background: none; border: none; color: var(--electric-blue); font-size: 1.6rem; cursor: pointer; user-select: none; padding: 0; }
     .flash-settings-button:hover { color: #00a6cc; }
-    .modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
-      display: none; align-items: center; justify-content: center; z-index: 10000;
-    }
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 10000; }
     .modal.active { display: flex; }
-    .modal-content {
-      background: var(--bg-mid); border-radius: 16px;
-      border: 1.5px solid var(--glass-highlight);
-      backdrop-filter: saturate(180%) blur(20px);
-      box-shadow: 0 4px 30px rgba(0,0,0,0.4);
-      padding: 1.5rem; width: 90%; max-width: 360px; color: var(--text-light);
-    }
-    .modal-content label {
-      font-weight: 600; margin-top: 1rem; display: block; color: var(--text-muted);
-    }
-    .modal-content input {
-      width: 100%; margin-top: .3rem; padding: .5rem; font-size: 1rem;
-      border-radius: 8px; border: 1px solid var(--electric-blue);
-      background: var(--bg-dark); color: var(--text-light);
-    }
-    .modal-content button.close-btn {
-      margin-top: 1.5rem; width: 100%; background: var(--electric-blue);
-      border: none; color: black; padding: .7rem; font-weight: bold;
-      border-radius: 8px; cursor: pointer;
-    }
+    .modal-content { background: var(--bg-mid); border-radius: 16px; border: 1.5px solid var(--glass-highlight); backdrop-filter: saturate(180%) blur(20px); box-shadow: 0 4px 30px rgba(0,0,0,0.4); padding: 1.5rem; width: 90%; max-width: 360px; color: var(--text-light); }
+    .modal-content label { font-weight: 600; margin-top: 1rem; display: block; color: var(--text-muted); }
+    .modal-content input { width: 100%; margin-top: .3rem; padding: .5rem; font-size: 1rem; border-radius: 8px; border: 1px solid var(--electric-blue); background: var(--bg-dark); color: var(--text-light); }
+    .modal-content button.close-btn { margin-top: 1.5rem; width: 100%; background: var(--electric-blue); border: none; color: black; padding: .7rem; font-weight: bold; border-radius: 8px; cursor: pointer; }
     .modal-content button.close-btn:hover { background: #00b0e6; }
-    .error-message {
-      color: #ff6b6b; margin-top: .6rem; font-size: .9rem; display: none;
-    }
-    .slider-container {
-      position: relative; width: 280px; height: 48px; cursor: pointer; user-select: none;
-    }
-    .slider-track {
-      position: absolute; top: 16px; left: 0; right: 0; height: 16px;
-      border-radius: 8px;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
-        linear-gradient(to right bottom, rgba(255,255,255,0.12), rgba(255,255,255,0));
-      box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 0 8px rgba(255,255,255,0.25);
-    }
-    .slider-thumb {
-      position: absolute; top: 6px; width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(145deg, var(--electric-blue), #007fbf);
-      box-shadow:
-        0 6px 18px var(--electric-blue),
-        0 0 28px rgba(0,212,255,0.7),
-        inset 0 0 14px rgba(255,255,255,0.7);
-      transform: translateX(-50%);
-      transition: transform .15s ease-out;
-      z-index: 2; cursor: grab;
-    }
-    .slider-thumb.dragging {
-      cursor: grabbing; transform: translateX(-50%) scale(1.1); transition: none;
-    }
-    .percentage-label {
-      position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
-      background: rgba(0,0,0,0.3); color: white; font-weight: 600; padding: 6px 12px;
-      border-radius: 14px; backdrop-filter: blur(8px); user-select: none;
-      transition: opacity .4s ease, transform .4s ease;
-    }
-    .touch-indicator {
-      position: absolute; width: 80px; height: 80px; border: 2px solid var(--electric-blue);
-      border-radius: 50%; pointer-events: none; transform: translate(-50%,-50%);
-      animation: pulse .6s ease-out forwards; z-index: 10001;
-    }
-    @keyframes pulse {
-      0% { opacity: 1; transform: translate(-50%,-50%) scale(0.3); }
-      100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
-    }
+    .error-message { color: #ff6b6b; margin-top: .6rem; font-size: .9rem; display: none; }
+    .slider-container { position: relative; width: 280px; height: 48px; cursor: pointer; user-select: none; }
+    .slider-track { position: absolute; top: 16px; left: 0; right: 0; height: 16px; border-radius: 8px; background: linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0)), linear-gradient(to right bottom, rgba(255,255,255,0.12), rgba(255,255,255,0)); box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 0 8px rgba(255,255,255,0.25); }
+    .slider-thumb { position: absolute; top: 6px; width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(145deg, var(--electric-blue), #007fbf); box-shadow: 0 6px 18px var(--electric-blue), 0 0 28px rgba(0,212,255,0.7), inset 0 0 14px rgba(255,255,255,0.7); transform: translateX(-50%); transition: transform .15s ease-out; z-index: 2; cursor: grab; }
+    .slider-thumb.dragging { cursor: grabbing; transform: translateX(-50%) scale(1.1); transition: none; }
+    .percentage-label { position: absolute; top: -36px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.3); color: white; font-weight: 600; padding: 6px 12px; border-radius: 14px; backdrop-filter: blur(8px); user-select: none; transition: opacity .4s ease, transform .4s ease; }
   </style>
 </head>
 <body>
 
   <!-- Top Bar -->
-  <div class="top-bar glass" role="banner" aria-label="SmartBed Navigation">
-    <div class="left-icon-container" aria-hidden="true">
-      <svg class="left-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-        <path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/>
-      </svg>
+  <div class="top-bar glass">
+    <div class="left-icon-container">
+      <svg class="left-icon" viewBox="0 0 24 24"><path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/></svg>
     </div>
     <div class="top-bar-title">SmartBed</div>
     <div class="right-icon">
-      <button type="button" class="info-button" aria-label="About SmartBed" onclick="showModal('infoModal')">ⓘ</button>
+      <button type="button" class="info-button" onclick="showModal('infoModal')">ⓘ</button>
     </div>
   </div>
 
-  <!-- Main Content -->
+  <!-- Main -->
   <main>
-    <button id="powerBtn" class="power-button glass" aria-pressed="false" aria-label="Toggle power" onclick="togglePower()">⏻</button>
+    <button id="powerBtn" class="power-button glass" onclick="togglePower()">⏻</button>
   </main>
 
   <!-- Bottom Controls -->
-  <div id="bottomControls" class="bottom-controls glass" role="region" aria-live="polite" aria-atomic="true">
-    <button id="flashBtn" class="flash-button" aria-pressed="false" aria-label="Toggle flash mode" onclick="toggleFlash()">Flash</button>
-    <button id="flashSettingsBtn" class="flash-settings-button" aria-label="Flash settings" onclick="showFlashSettings()">⚙︎</button>
-    <div id="brightnessSliderContainer" class="slider-container" role="slider" aria-label="Brightness slider" tabindex="0">
+  <div id="bottomControls" class="bottom-controls glass">
+    <button id="flashBtn" class="flash-button" onclick="toggleFlash()">Flash</button>
+    <button id="flashSettingsBtn" class="flash-settings-button" onclick="showFlashSettings()">⚙︎</button>
+    <div id="brightnessSliderContainer" class="slider-container">
       <div class="slider-track"></div>
-      <div id="sliderThumb" class="slider-thumb" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+      <div id="sliderThumb" class="slider-thumb">
         <div id="percentageLabel" class="percentage-label">50%</div>
       </div>
     </div>
   </div>
 
   <!-- Info Modal -->
-  <div id="infoModal" class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="infoModalLabel">
+  <div id="infoModal" class="modal">
     <div class="modal-content">
-      <p id="infoModalLabel">Made by Sammy Wammy</p>
+      <p>Made by Sammy Wammy</p>
       <button class="close-btn" onclick="closeModal('infoModal')">Close</button>
     </div>
   </div>
 
   <!-- Flash Settings Modal -->
-  <div id="flashSettingsModal" class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="flashSettingsModalLabel">
+  <div id="flashSettingsModal" class="modal">
     <div class="modal-content">
-      <h2 id="flashSettingsModalLabel">Flash Settings</h2>
+      <h2>Flash Settings</h2>
       <label for="onTimeInput">On Time (ms):</label>
-      <input type="number" id="onTimeInput" min="10" max="100000" step="10" />
+      <input type="number" id="onTimeInput" />
       <label for="offTimeInput">Off Time (ms):</label>
-      <input type="number" id="offTimeInput" min="10" max="100000" step="10" />
+      <input type="number" id="offTimeInput" />
       <div id="flashError" class="error-message">Delay must be between 10 and 100000 ms</div>
       <button id="flashSaveBtn" class="close-btn">Save</button>
       <button class="close-btn" onclick="closeModal('flashSettingsModal')" style="margin-top:0.5rem; background:#444;">Cancel</button>
     </div>
   </div>
 
-  <script>
-    // Core state
-    let powerOn = true, flashOn = false;
+<script>
+let powerOn = true, flashOn = false;
+const powerBtn = document.getElementById('powerBtn');
+const flashBtn = document.getElementById('flashBtn');
+const flashSettingsBtn = document.getElementById('flashSettingsBtn');
+const bottomControls = document.getElementById('bottomControls');
+const brightnessContainer = document.getElementById('brightnessSliderContainer');
+const sliderThumb = document.getElementById('sliderThumb');
+const percentageLabel = document.getElementById('percentageLabel');
+const flashError = document.getElementById('flashError');
+const flashSaveBtn = document.getElementById('flashSaveBtn');
+const onTimeInput = document.getElementById('onTimeInput');
+const offTimeInput = document.getElementById('offTimeInput');
 
-    // Element refs
-    const powerBtn = document.getElementById('powerBtn');
-    const flashBtn = document.getElementById('flashBtn');
-    const flashSettingsBtn = document.getElementById('flashSettingsBtn');
-    const bottomControls = document.getElementById('bottomControls');
-    const brightnessContainer = document.getElementById('brightnessSliderContainer');
-    const sliderThumb = document.getElementById('sliderThumb');
-    const percentageLabel = document.getElementById('percentageLabel');
-    const infoModal = document.getElementById('infoModal');
-    const flashSettingsModal = document.getElementById('flashSettingsModal');
-    const flashError = document.getElementById('flashError');
-    const flashSaveBtn = document.getElementById('flashSaveBtn');
-    const onTimeInput = document.getElementById('onTimeInput');
-    const offTimeInput = document.getElementById('offTimeInput');
+let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
+async function callESP(path) {
+  console.log(`Calling ESP: ${path}`);
+  try { await fetch(`http://${ESP_IP}${path}`); }
+  catch (e) { console.error('ESP call failed:', e); }
+}
+async function setPower(on) { return callESP(`/power?v=${on?1:0}`); }
+async function setFlash(on) { return callESP(`/flash?v=${on?1:0}`); }
+async function setBrightness(v) { return callESP(`/brightness?v=${v}`); }
 
-    // ESP API helper
-    let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
-    async function callESP(path) {
-      try { await fetch(http://${ESP_IP}${path}); }
-      catch (e) { console.error('ESP call failed:', e); }
-    }
-    async function setPower(on) { return callESP(/power?v=${on?1:0}); }
-    async function setFlash(on) { return callESP(/flash?v=${on?1:0}); }
-    async function setBrightness(v) { return callESP(/brightness?v=${v}); }
+function updateUI() {
+  powerBtn.classList.toggle('active', powerOn);
+  flashBtn.classList.toggle('active', flashOn);
+  flashSettingsBtn.hidden = !(flashOn && powerOn);
+  if (powerOn) bottomControls.classList.add('visible');
+  else bottomControls.classList.remove('visible');
+  brightnessContainer.style.display = (flashOn? 'none':'block');
+}
 
-    // UI update
-    function updateUI() {
-      powerBtn.classList.toggle('active', powerOn);
-      powerBtn.setAttribute('aria-pressed', powerOn);
-      flashBtn.classList.toggle('active', flashOn);
-      flashBtn.setAttribute('aria-pressed', flashOn);
-      flashSettingsBtn.hidden = !(flashOn && powerOn);
-      if (powerOn) bottomControls.classList.add('visible');
-      else bottomControls.classList.remove('visible');
-      brightnessContainer.style.display = (flashOn? 'none':'block');
-    }
-
-// Actions
 async function togglePower() {
   powerOn = !powerOn;
   console.log(`Power is now ${powerOn ? 'ON' : 'OFF'}`);
@@ -285,30 +160,45 @@ async function toggleFlash() {
   await setFlash(flashOn);
 }
 
-// Save flash settings
+function showModal(id) {
+  console.log(`Modal "${id}" opened`);
+  document.getElementById(id).classList.add('active');
+}
+function closeModal(id) {
+  console.log(`Modal "${id}" closed`);
+  document.getElementById(id).classList.remove('active');
+  flashError.style.display = 'none';
+}
+
+function showFlashSettings() {
+  const saved = JSON.parse(localStorage.getItem('flashSettings')||'{}');
+  onTimeInput.value = saved.onTime ?? 500;
+  offTimeInput.value = saved.offTime ?? 500;
+  flashError.style.display = 'none';
+  showModal('flashSettingsModal');
+}
+
 flashSaveBtn.addEventListener('click', () => {
-  const onT = parseInt(onTimeInput.value, 10),
-        offT = parseInt(offTimeInput.value, 10);
-  if (isNaN(onT) || isNaN(offT) || onT < 10 || offT < 10) {
-    flashError.style.display = 'block';
+  const onT = parseInt(onTimeInput.value,10), offT = parseInt(offTimeInput.value,10);
+  if (isNaN(onT)||isNaN(offT)||onT<10||offT<10) {
+    flashError.style.display='block';
     console.log("Error: Flash settings must be between 10 and 100000 ms");
     return;
   }
-  localStorage.setItem('flashSettings', JSON.stringify({ onTime: onT, offTime: offT }));
+  localStorage.setItem('flashSettings', JSON.stringify({onTime:onT,offTime:offT}));
   console.log(`Flash settings saved: ON time = ${onT}ms, OFF time = ${offT}ms`);
   closeModal('flashSettingsModal');
 });
 
-// Brightness slider logic
-;(function(){
-  let value = Number(localStorage.getItem('brightness')) || 50;
+(function(){
+  let value = Number(localStorage.getItem('brightness'))||50;
   let dragging = false;
   let lastLoggedValue = Math.round(value);
 
   function updateSlider() {
     sliderThumb.style.left = value + '%';
-    percentageLabel.textContent = Math.round(value) + '%';
-    percentageLabel.style.left = value + '%';
+    percentageLabel.textContent = Math.round(value)+'%';
+    percentageLabel.style.left = value+'%';
     let currentValue = Math.round(value);
     if (currentValue !== lastLoggedValue) {
       console.log(`Brightness is at ${currentValue}%`);
@@ -317,106 +207,42 @@ flashSaveBtn.addEventListener('click', () => {
   }
 
   function onDown(e) {
-    e.preventDefault();
-    dragging = true;
+    e.preventDefault(); dragging=true;
     window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', onUp);
   }
-
   function onMove(e) {
-    if (!dragging) return;
+    if(!dragging) return;
     const rect = brightnessContainer.getBoundingClientRect();
-    let v = ((e.clientX - rect.left) / rect.width) * 100;
-    value = Math.min(Math.max(v, 0), 100);
+    let v = ((e.clientX - rect.left)/rect.width)*100;
+    value = Math.min(Math.max(v,0),100);
     updateSlider();
   }
-
   async function onUp() {
-    if (!dragging) return;
-    dragging = false;
+    if(!dragging) return;
+    dragging=false;
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', onUp);
     localStorage.setItem('brightness', Math.round(value));
     console.log(`Brightness set to ${Math.round(value)}% (final)`);
     await setBrightness(Math.round(value));
   }
-
   sliderThumb.addEventListener('pointerdown', onDown);
   brightnessContainer.addEventListener('pointerdown', onDown);
   updateSlider();
 })();
 
-    // Show/hide modals
-    function showModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-      flashError.style.display = 'none';
-    }
-
-    // Flash settings opener
-    function showFlashSettings() {
-      const saved = JSON.parse(localStorage.getItem('flashSettings')||'{}');
-      onTimeInput.value = saved.onTime ?? 500;
-      offTimeInput.value = saved.offTime ?? 500;
-      flashError.style.display = 'none';
-      showModal('flashSettingsModal');
-    }
-
-    // Save flash settings
-    flashSaveBtn.addEventListener('click', () => {
-      const onT = parseInt(onTimeInput.value,10), offT = parseInt(offTimeInput.value,10);
-      if (isNaN(onT)||isNaN(offT)||onT<10||offT<10) {
-        flashError.style.display='block'; return;
-      }
-      localStorage.setItem('flashSettings', JSON.stringify({onTime:onT,offTime:offT}));
-      closeModal('flashSettingsModal');
-    });
-
-    // Brightness slider logic
-    ;(function(){
-      let value = Number(localStorage.getItem('brightness'))||50;
-      let dragging = false;
-      function updateSlider() {
-        sliderThumb.style.left = value + '%';
-        percentageLabel.textContent = Math.round(value)+'%';
-        percentageLabel.style.left = value+'%';
-      }
-      function onDown(e) {
-        e.preventDefault(); dragging=true;
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-      }
-      function onMove(e) {
-        if(!dragging) return;
-        const rect = brightnessContainer.getBoundingClientRect();
-        let v = ((e.clientX - rect.left)/rect.width)*100;
-        value = Math.min(Math.max(v,0),100);
-        updateSlider();
-      }
-      async function onUp() {
-        if(!dragging) return;
-        dragging=false;
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        localStorage.setItem('brightness', Math.round(value));
-        await setBrightness(Math.round(value));
-      }
-      sliderThumb.addEventListener('pointerdown', onDown);
-      brightnessContainer.addEventListener('pointerdown', onDown);
-      updateSlider();
-    })();
-
-    // Close modals on Escape
-    document.addEventListener('keydown', e => {
-      if(e.key === 'Escape') {
-        ['infoModal','flashSettingsModal'].forEach(id => {
-          document.getElementById(id).classList.remove('active');
-        });
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') {
+    ['infoModal','flashSettingsModal'].forEach(id => {
+      if (document.getElementById(id).classList.contains('active')) {
+        closeModal(id);
       }
     });
+  }
+});
 
-    // Initialize UI
-    updateUI();
-  </script>
+updateUI();
+</script>
 </body>
 </html>
