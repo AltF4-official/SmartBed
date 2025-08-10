@@ -221,207 +221,267 @@
     </div>
   </div>
 
-  <script>
-    // Core state
-    let powerOn = true, flashOn = false;
+ <script>
+/*
+  SmartBed UI -> ESP32 bridge
+  - Replaces console placeholders with actual HTTP calls to ESP.
+  - Default ESP IP is 192.168.1.114 (use setEspIpPrompt() below to change).
+  - If your page is HTTPS, browser will block http:// requests (Mixed Content).
+    Workarounds: open the page locally via http://, use a secure tunnel (ngrok), or host an HTTPS reverse proxy on your LAN.
+*/
 
-    // Element refs
-    const powerBtn = document.getElementById('powerBtn');
-    const flashBtn = document.getElementById('flashBtn');
-    const flashSettingsBtn = document.getElementById('flashSettingsBtn');
-    const bottomControls = document.getElementById('bottomControls');
-    const brightnessContainer = document.getElementById('brightnessSliderContainer');
-    const sliderThumb = document.getElementById('sliderThumb');
-    const percentageLabel = document.getElementById('percentageLabel');
-    const infoModal = document.getElementById('infoModal');
-    const flashSettingsModal = document.getElementById('flashSettingsModal');
-    const flashError = document.getElementById('flashError');
-    const flashSaveBtn = document.getElementById('flashSaveBtn');
-    const onTimeInput = document.getElementById('onTimeInput');
-    const offTimeInput = document.getElementById('offTimeInput');
+let ESP_IP = localStorage.getItem('espIP') || '192.168.1.114';
 
-    // NOTE: All ESP32/ESP calls have been removed. This file is now fully front-end only.
-    console.log('NOTICE: ESP32 calls removed — running as front-end UI only.');
-
-    // UI update (keeps visual state in sync)
-    function updateUI() {
-      powerBtn.classList.toggle('active', powerOn);
-      powerBtn.setAttribute('aria-pressed', powerOn);
-      flashBtn.classList.toggle('active', flashOn);
-      flashBtn.setAttribute('aria-pressed', flashOn);
-      flashSettingsBtn.hidden = !(flashOn && powerOn);
-
-      if (powerOn) {
-        bottomControls.classList.add('visible');
-      } else {
-        bottomControls.classList.remove('visible');
-      }
-
-      // hide brightness when flash mode is active
-      brightnessContainer.style.display = (flashOn ? 'none' : 'block');
-
-      console.log(`UI updated — powerOn: ${powerOn}, flashOn: ${flashOn}, brightnessControlVisible: ${!flashOn}`);
+// Helper: GET to ESP with basic error handling
+async function sendCommandToESP(path) {
+  const url = `http://${ESP_IP}${path}`;
+  try {
+    const res = await fetch(url, { method: 'GET' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // optional: read text (some endpoints may return plain text)
+    const text = await res.text();
+    console.info(`ESP OK: GET ${url} -> ${text}`);
+    return { ok: true, text };
+  } catch (err) {
+    console.error(`ESP error for ${path}:`, err);
+    if (location.protocol === 'https:' && url.startsWith('http://')) {
+      console.error(
+        'Blocked by browser (Mixed Content). Your site is HTTPS but the ESP is HTTP.\n' +
+        'Workarounds: serve UI over plain HTTP, use a secure tunnel (ngrok), or use an HTTPS proxy.'
+      );
     }
+    return { ok: false, error: err };
+  }
+}
 
-    // Actions
-    function togglePower() {
-      powerOn = !powerOn;
-      console.log(`Action: togglePower() -> Power is now ${powerOn ? 'ON' : 'OFF'}`);
+// Convenience wrappers
+async function espSetPower(on) {
+  return sendCommandToESP(`/power?v=${on ? 1 : 0}`);
+}
+async function espSetFlash(on) {
+  return sendCommandToESP(`/flash?v=${on ? 1 : 0}`);
+}
+async function espSetBrightness(val) {
+  return sendCommandToESP(`/brightness?v=${val}`);
+}
+async function espSetFlashSettings(onMs, offMs) {
+  return sendCommandToESP(`/flashSettings?on=${onMs}&off=${offMs}`);
+}
 
-      if (!powerOn && flashOn) {
-        flashOn = false;
-        console.log('Action: togglePower() -> Flash was ON, turned OFF because power turned OFF');
-      }
+/* -------------------------
+   UI code (mostly unchanged)
+   ------------------------- */
 
-      updateUI();
-      // no network calls
+// Core state
+let powerOn = true, flashOn = false;
+
+// Element refs
+const powerBtn = document.getElementById('powerBtn');
+const flashBtn = document.getElementById('flashBtn');
+const flashSettingsBtn = document.getElementById('flashSettingsBtn');
+const bottomControls = document.getElementById('bottomControls');
+const brightnessContainer = document.getElementById('brightnessSliderContainer');
+const sliderThumb = document.getElementById('sliderThumb');
+const percentageLabel = document.getElementById('percentageLabel');
+const infoModal = document.getElementById('infoModal');
+const flashSettingsModal = document.getElementById('flashSettingsModal');
+const flashError = document.getElementById('flashError');
+const flashSaveBtn = document.getElementById('flashSaveBtn');
+const onTimeInput = document.getElementById('onTimeInput');
+const offTimeInput = document.getElementById('offTimeInput');
+
+// UI update (keeps visual state in sync)
+function updateUI() {
+  powerBtn.classList.toggle('active', powerOn);
+  powerBtn.setAttribute('aria-pressed', powerOn);
+  flashBtn.classList.toggle('active', flashOn);
+  flashBtn.setAttribute('aria-pressed', flashOn);
+  flashSettingsBtn.hidden = !(flashOn && powerOn);
+
+  if (powerOn) {
+    bottomControls.classList.add('visible');
+  } else {
+    bottomControls.classList.remove('visible');
+  }
+
+  // hide brightness when flash mode is active
+  brightnessContainer.style.display = (flashOn ? 'none' : 'block');
+}
+
+// Actions (now call ESP)
+
+// Toggle power, update UI, tell ESP
+async function togglePower() {
+  powerOn = !powerOn;
+
+  // If power turned off, also force flash off locally
+  if (!powerOn && flashOn) {
+    flashOn = false;
+  }
+
+  updateUI();
+
+  // Tell ESP
+  const r = await espSetPower(powerOn);
+  if (!r.ok) {
+    console.warn('Failed to set power on ESP. UI shows local state.');
+  }
+}
+
+// Toggle flash, update UI, tell ESP
+async function toggleFlash() {
+  if (!powerOn) {
+    // do nothing if power off
+    return;
+  }
+  flashOn = !flashOn;
+  updateUI();
+
+  const r = await espSetFlash(flashOn);
+  if (!r.ok) {
+    console.warn('Failed to set flash on ESP. UI shows local state.');
+  }
+}
+
+// Show/hide modals
+function showModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.remove('active');
+  flashError.style.display = 'none';
+}
+
+// Flash settings opener
+function showFlashSettings() {
+  const saved = JSON.parse(localStorage.getItem('flashSettings') || '{}');
+  onTimeInput.value = saved.onTime ?? 500;
+  offTimeInput.value = saved.offTime ?? 500;
+  flashError.style.display = 'none';
+  showModal('flashSettingsModal');
+}
+
+// Save flash settings and send to ESP
+flashSaveBtn.addEventListener('click', async () => {
+  const onT = parseInt(onTimeInput.value, 10), offT = parseInt(offTimeInput.value, 10);
+  if (isNaN(onT) || isNaN(offT) || onT < 10 || offT < 10 || onT > 100000 || offT > 100000) {
+    flashError.style.display = 'block';
+    return;
+  }
+  localStorage.setItem('flashSettings', JSON.stringify({ onTime: onT, offTime: offT }));
+  closeModal('flashSettingsModal');
+
+  // Send settings to ESP
+  const r = await espSetFlashSettings(onT, offT);
+  if (!r.ok) {
+    console.warn('Failed to save flash settings on ESP. Local settings saved.');
+  }
+});
+
+// Brightness slider logic -> send final value to ESP
+;(function(){
+  let stored = localStorage.getItem('brightness');
+  let value = (stored !== null) ? Number(stored) : 50;
+  let dragging = false;
+  let lastLoggedValue = Math.round(value);
+
+  function updateSlider() {
+    sliderThumb.style.left = value + '%';
+    percentageLabel.textContent = Math.round(value) + '%';
+    percentageLabel.style.left = value + '%';
+    sliderThumb.setAttribute('aria-valuenow', Math.round(value));
+    lastLoggedValue = Math.round(value);
+  }
+
+  function onDown(e) {
+    e.preventDefault();
+    dragging = true;
+    sliderThumb.classList.add('dragging');
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const rect = brightnessContainer.getBoundingClientRect();
+    let v = ((e.clientX - rect.left) / rect.width) * 100;
+    value = Math.min(Math.max(v, 0), 100);
+    updateSlider();
+  }
+
+  async function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    sliderThumb.classList.remove('dragging');
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+
+    const final = Math.round(value);
+    localStorage.setItem('brightness', final);
+
+    // Send brightness to ESP
+    const r = await espSetBrightness(final);
+    if (!r.ok) {
+      console.warn('Failed to set brightness on ESP. Local value saved.');
     }
+  }
 
-    function toggleFlash() {
-      if (!powerOn) {
-        console.log('Action: toggleFlash() blocked — power is OFF');
-        return;
-      }
-      flashOn = !flashOn;
-      console.log(`Action: toggleFlash() -> Flash mode is now ${flashOn ? 'ON' : 'OFF'}`);
+  sliderThumb.addEventListener('pointerdown', onDown);
+  brightnessContainer.addEventListener('pointerdown', onDown);
 
-      updateUI();
-      // no network calls
-    }
-
-    // Show/hide modals (with logging)
-    function showModal(id) {
-      const el = document.getElementById(id);
-      if (!el) { console.warn(`showModal: element "${id}" not found`); return; }
-      el.classList.add('active');
-      console.log(`Modal opened -> ${id}`);
-    }
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      if (!el) { console.warn(`closeModal: element "${id}" not found`); return; }
-      el.classList.remove('active');
-      flashError.style.display = 'none';
-      console.log(`Modal closed -> ${id}`);
-    }
-
-    // Flash settings opener (with logging)
-    function showFlashSettings() {
-      const saved = JSON.parse(localStorage.getItem('flashSettings') || '{}');
-      onTimeInput.value = saved.onTime ?? 500;
-      offTimeInput.value = saved.offTime ?? 500;
-      flashError.style.display = 'none';
-      console.log(`Action: showFlashSettings() -> loaded settings ON:${onTimeInput.value}ms OFF:${offTimeInput.value}ms`);
-      showModal('flashSettingsModal');
-    }
-
-    // Save flash settings (with validation + logs)
-    flashSaveBtn.addEventListener('click', () => {
-      const onT = parseInt(onTimeInput.value, 10), offT = parseInt(offTimeInput.value, 10);
-      if (isNaN(onT) || isNaN(offT) || onT < 10 || offT < 10 || onT > 100000 || offT > 100000) {
-        flashError.style.display = 'block';
-        console.log('Action: flashSave -> Validation failed. Values must be between 10 and 100000 ms');
-        return;
-      }
-      localStorage.setItem('flashSettings', JSON.stringify({ onTime: onT, offTime: offT }));
-      console.log(`Action: flashSave -> Flash settings saved: ON=${onT}ms, OFF=${offT}ms`);
-      closeModal('flashSettingsModal');
-    });
-
-    // Brightness slider logic (logs every integer % change and final value)
-    ;(function(){
-      // use explicit null check so 0 is allowed
-      let stored = localStorage.getItem('brightness');
-      let value = (stored !== null) ? Number(stored) : 50;
-      let dragging = false;
-      let lastLoggedValue = Math.round(value);
-
-      function updateSlider() {
-        sliderThumb.style.left = value + '%';
-        percentageLabel.textContent = Math.round(value) + '%';
-        percentageLabel.style.left = value + '%';
-        sliderThumb.setAttribute('aria-valuenow', Math.round(value));
-
-        const currentValue = Math.round(value);
-        if (currentValue !== lastLoggedValue) {
-          console.log(`Action: brightnessUpdate -> Brightness is at ${currentValue}%`);
-          lastLoggedValue = currentValue;
-        }
-      }
-
-      function onDown(e) {
-        e.preventDefault();
-        dragging = true;
-        sliderThumb.classList.add('dragging');
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-        console.log('Action: brightness drag started');
-      }
-
-      function onMove(e) {
-        if (!dragging) return;
-        const rect = brightnessContainer.getBoundingClientRect();
-        let v = ((e.clientX - rect.left) / rect.width) * 100;
-        value = Math.min(Math.max(v, 0), 100);
-        updateSlider();
-      }
-
-      function onUp() {
-        if (!dragging) return;
-        dragging = false;
-        sliderThumb.classList.remove('dragging');
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        localStorage.setItem('brightness', Math.round(value));
-        console.log(`Action: brightnessSet -> Brightness set to ${Math.round(value)}% (final)`);
-        // no network calls
-      }
-
-      sliderThumb.addEventListener('pointerdown', onDown);
-      brightnessContainer.addEventListener('pointerdown', onDown);
-
-      // Keyboard accessibility: left/right arrows adjust by 1%
-      brightnessContainer.addEventListener('keydown', (e) => {
-        const key = e.key;
-        if (key === 'ArrowLeft' || key === 'ArrowDown') {
-          value = Math.max(0, value - 1);
-          updateSlider();
-          localStorage.setItem('brightness', Math.round(value));
-          console.log(`Action: brightnessKeyboard -> Brightness is at ${Math.round(value)}%`);
-        } else if (key === 'ArrowRight' || key === 'ArrowUp') {
-          value = Math.min(100, value + 1);
-          updateSlider();
-          localStorage.setItem('brightness', Math.round(value));
-          console.log(`Action: brightnessKeyboard -> Brightness is at ${Math.round(value)}%`);
-        } else if (key === 'Home') {
-          value = 0; updateSlider(); localStorage.setItem('brightness', 0); console.log('Action: brightnessKeyboard -> Brightness is at 0%');
-        } else if (key === 'End') {
-          value = 100; updateSlider(); localStorage.setItem('brightness', 100); console.log('Action: brightnessKeyboard -> Brightness is at 100%');
-        }
-      });
-
+  // Keyboard accessibility: left/right etc. send to ESP on change
+  brightnessContainer.addEventListener('keydown', async (e) => {
+    const key = e.key;
+    if (key === 'ArrowLeft' || key === 'ArrowDown') {
+      value = Math.max(0, value - 1);
       updateSlider();
-    })();
+    } else if (key === 'ArrowRight' || key === 'ArrowUp') {
+      value = Math.min(100, value + 1);
+      updateSlider();
+    } else if (key === 'Home') {
+      value = 0; updateSlider();
+    } else if (key === 'End') {
+      value = 100; updateSlider();
+    } else return;
 
-    // Close modals on Escape (with logging)
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        ['infoModal','flashSettingsModal'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el && el.classList.contains('active')) {
-            closeModal(id);
-            console.log(`Action: Escape pressed -> closed modal ${id}`);
-          }
-        });
+    const v = Math.round(value);
+    localStorage.setItem('brightness', v);
+    const r = await espSetBrightness(v);
+    if (!r.ok) {
+      console.warn('Failed to set brightness on ESP (keyboard).');
+    }
+  });
+
+  updateSlider();
+})();
+
+// Close modals on Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['infoModal','flashSettingsModal'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.classList.contains('active')) {
+        closeModal(id);
       }
     });
+  }
+});
 
-    // Initialize UI and log initial state
-    updateUI();
-    console.log(`Initial state -> powerOn: ${powerOn}, flashOn: ${flashOn}`);
-    const storedBrightness = localStorage.getItem('brightness');
-    console.log(`Initial: stored brightness = ${storedBrightness !== null ? storedBrightness + '%' : 'none (default 50%)'}`);
-    const storedFlashSettings = localStorage.getItem('flashSettings');
-    console.log(`Initial: stored flash settings = ${storedFlashSettings ?? 'none'}`);
-  </script>
-</body>
-</html>
+// Small helper: quick prompt to set ESP IP
+window.setEspIpPrompt = function () {
+  const current = localStorage.getItem('espIP') || ESP_IP;
+  const ip = prompt('Enter ESP IP address:', current);
+  if (!ip) return;
+  localStorage.setItem('espIP', ip);
+  ESP_IP = ip;
+  alert(`Saved ESP IP: ${ip}. Reloading page.`);
+  location.reload();
+};
+
+// Init
+updateUI();
+</script>
