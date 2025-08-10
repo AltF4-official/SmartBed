@@ -221,48 +221,162 @@
     </div>
   </div>
 
+  <script>
+    // Core state
+    let powerOn = true, flashOn = false;
+
+    // Element refs
+    const powerBtn = document.getElementById('powerBtn');
+    const flashBtn = document.getElementById('flashBtn');
+    const flashSettingsBtn = document.getElementById('flashSettingsBtn');
+    const bottomControls = document.getElementById('bottomControls');
+    const brightnessContainer = document.getElementById('brightnessSliderContainer');
+    const sliderThumb = document.getElementById('sliderThumb');
+    const percentageLabel = document.getElementById('percentageLabel');
+    const infoModal = document.getElementById('infoModal');
+    const flashSettingsModal = document.getElementById('flashSettingsModal');
+    const flashError = document.getElementById('flashError');
+    const flashSaveBtn = document.getElementById('flashSaveBtn');
+    const onTimeInput = document.getElementById('onTimeInput');
+    const offTimeInput = document.getElementById('offTimeInput');
+
+    // ESP API helper
+    let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
+    async function callESP(path) {
+      try { await fetch(http://${ESP_IP}${path}); }
+      catch (e) { console.error('ESP call failed:', e); }
+    }
+    async function setPower(on) { return callESP(/power?v=${on?1:0}); }
+    async function setFlash(on) { return callESP(/flash?v=${on?1:0}); }
+    async function setBrightness(v) { return callESP(/brightness?v=${v}); }
+
+    // UI update
+    function updateUI() {
+      powerBtn.classList.toggle('active', powerOn);
+      powerBtn.setAttribute('aria-pressed', powerOn);
+      flashBtn.classList.toggle('active', flashOn);
+      flashBtn.setAttribute('aria-pressed', flashOn);
+      flashSettingsBtn.hidden = !(flashOn && powerOn);
+      if (powerOn) bottomControls.classList.add('visible');
+      else bottomControls.classList.remove('visible');
+      brightnessContainer.style.display = (flashOn? 'none':'block');
+    }
+
+    // Actions
+    async function togglePower() {
+      powerOn = !powerOn;
+      if (!powerOn && flashOn) flashOn = false;
+      updateUI();
+      await setPower(powerOn);
+    }
+    async function toggleFlash() {
+      if (!powerOn) return;
+      flashOn = !flashOn;
+      updateUI();
+      await setFlash(flashOn);
+    }
+
+    // Show/hide modals
+    function showModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+      flashError.style.display = 'none';
+    }
+
+    // Flash settings opener
+    function showFlashSettings() {
+      const saved = JSON.parse(localStorage.getItem('flashSettings')||'{}');
+      onTimeInput.value = saved.onTime ?? 500;
+      offTimeInput.value = saved.offTime ?? 500;
+      flashError.style.display = 'none';
+      showModal('flashSettingsModal');
+    }
+
+    // Save flash settings
+    flashSaveBtn.addEventListener('click', () => {
+      const onT = parseInt(onTimeInput.value,10), offT = parseInt(offTimeInput.value,10);
+      if (isNaN(onT)||isNaN(offT)||onT<10||offT<10) {
+        flashError.style.display='block'; return;
+      }
+      localStorage.setItem('flashSettings', JSON.stringify({onTime:onT,offTime:offT}));
+      closeModal('flashSettingsModal');
+    });
+
+    // Brightness slider logic
+    ;(function(){
+      let value = Number(localStorage.getItem('brightness'))||50;
+      let dragging = false;
+      function updateSlider() {
+        sliderThumb.style.left = value + '%';
+        percentageLabel.textContent = Math.round(value)+'%';
+        percentageLabel.style.left = value+'%';
+      }
+      function onDown(e) {
+        e.preventDefault(); dragging=true;
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+      }
+      function onMove(e) {
+        if(!dragging) return;
+        const rect = brightnessContainer.getBoundingClientRect();
+        let v = ((e.clientX - rect.left)/rect.width)*100;
+        value = Math.min(Math.max(v,0),100);
+        updateSlider();
+      }
+      async function onUp() {
+        if(!dragging) return;
+        dragging=false;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        localStorage.setItem('brightness', Math.round(value));
+        await setBrightness(Math.round(value));
+      }
+      sliderThumb.addEventListener('pointerdown', onDown);
+      brightnessContainer.addEventListener('pointerdown', onDown);
+      updateSlider();
+    })();
+
+    <!-- Bottom script -->
     <script>
-      // ====== UI Functions ======
+      // Show modal by ID
       function showModal(id) {
         document.getElementById(id).classList.add('active');
       }
 
-      function closeModal(id) {
+      // Hide modal by ID
+      function hideModal(id) {
         document.getElementById(id).classList.remove('active');
       }
 
-      // ====== SmartBed Control ======
+      // Toggle power state (placeholder ESP32 request)
       function togglePower() {
-        // Example: send power toggle to ESP32
-        fetch('/power', { method: 'POST' })
+        console.log("Toggling power...");
+        // Send request to ESP32
+        fetch('/togglePower')
           .then(res => res.text())
-          .then(console.log)
-          .catch(console.error);
+          .then(data => console.log("ESP32 Response:", data))
+          .catch(err => console.error("ESP32 Error:", err));
+
+        // Update UI locally
+        updateUI();
       }
 
-      function toggleFlash() {
-        // Example: send flash toggle to ESP32
-        fetch('/flash', { method: 'POST' })
-          .then(res => res.text())
-          .then(console.log)
-          .catch(console.error);
+      // Example: update UI function
+      function updateUI() {
+        console.log("UI updated");
+        // You can add LED status, brightness updates, etc.
       }
 
-      // ====== Key Events ======
+      // Close modals on Escape
       document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
           ['infoModal', 'flashSettingsModal'].forEach(id => {
-            closeModal(id);
+            document.getElementById(id).classList.remove('active');
           });
         }
       });
 
-      // ====== Initialize UI ======
-      function updateUI() {
-        console.log('UI updated');
-        // Add your slider / brightness update calls here
-      }
-
+      // Initialize UI
       updateUI();
     </script>
   </body>
