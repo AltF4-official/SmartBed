@@ -1,155 +1,444 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SmartBed UI</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
-<style>
-  body {
-    font-family: 'Orbitron', sans-serif;
-    margin: 0;
-    background: linear-gradient(135deg, #1a1a1a, #333);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-  }
-  h1 { margin-bottom: 20px; }
-  .controls {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    width: 90%;
-    max-width: 400px;
-  }
-  button {
-    padding: 12px;
-    font-size: 1.1em;
-    border: 2px solid #00ff99;
-    border-radius: 12px;
-    background: transparent;
-    color: white;
-    cursor: pointer;
-    transition: all 0.25s ease;
-  }
-  button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 10px #00ff99;
-  }
-  .active {
-    background: #00ff99;
-    color: black;
-  }
-  .slider {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 12px;
-    border-radius: 8px;
-    background: #444;
-    outline: none;
-    transition: opacity 0.2s;
-  }
-  .slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #00ff99;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .slider::-webkit-slider-thumb:hover {
-    box-shadow: 0 0 15px #00ff99;
-  }
-  /* Modal styling */
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.7);
-    justify-content: center;
-    align-items: center;
-  }
-  .modal-content {
-    background: #222;
-    padding: 20px;
-    border-radius: 12px;
-    text-align: center;
-    max-width: 300px;
-    box-shadow: 0 0 15px #00ff99;
-  }
-  .close {
-    margin-top: 15px;
-    padding: 8px 15px;
-    background: #00ff99;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SmartBed</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap');
+    :root {
+      --electric-blue: #00d4ff;
+      --bg-dark: rgba(30,30,30,0.8);
+      --bg-mid: rgba(45,45,45,0.4);
+      --glass-light: rgba(255,255,255,0.1);
+      --glass-highlight: rgba(255,255,255,0.25);
+      --text-light: #fff;
+      --text-muted: #ccc;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%; overflow: hidden; background: #111;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .glass {
+      background: var(--bg-mid);
+      border-radius: 16px;
+      border: 1.5px solid var(--glass-highlight);
+      backdrop-filter: saturate(180%) blur(20px);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+    }
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 1rem; z-index: 999;
+    }
+    .top-bar.glass { border-radius: 28px; }
+    .left-icon-container { position: absolute; left: 1rem; display: flex; align-items: center; }
+    .left-icon { width: 24px; height: 24px; fill: var(--electric-blue); }
+    .top-bar-title {
+      font-weight: 600; font-size: 1.3rem; color: var(--electric-blue);
+      user-select: none;
+    }
+    .right-icon { position: absolute; right: 1rem; }
+    .info-button {
+      background: none; border: none; color: var(--electric-blue);
+      font-size: 1.6rem; font-weight: 700; cursor: pointer;
+      user-select: none; padding: 0; line-height: 1;
+    }
+    .info-button:focus { outline: 2px solid var(--electric-blue); }
+    main {
+      padding-top: 80px; height: calc(100% - 80px);
+      display: flex; justify-content: center; align-items: center;
+      flex-direction: column; gap: 2rem;
+    }
+    .power-button {
+      width: 120px; height: 120px; border-radius: 50%;
+      border: 3px solid var(--electric-blue); background: transparent;
+      color: var(--electric-blue); font-size: 2.5rem; cursor: pointer;
+      display: flex; justify-content: center; align-items: center;
+      transition: background-color .3s, box-shadow .3s, transform .1s;
+      user-select: none;
+    }
+    .power-button:hover { background: var(--glass-light); }
+    .power-button:active { transform: scale(0.9); }
+    .power-button.active {
+      background: var(--electric-blue); color: black;
+      box-shadow: 0 0 20px var(--electric-blue);
+    }
+    .bottom-controls {
+      position: fixed; bottom: 0; left: 0; width: 100vw;
+      background: var(--bg-mid); border-top: 1.5px solid var(--glass-highlight);
+      backdrop-filter: saturate(180%) blur(20px);
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; padding: .6rem 1rem; user-select: none; z-index: 998;
+      opacity: 0; transform: translateY(100%);
+      pointer-events: none;
+      transition: opacity .4s ease, transform .4s ease, pointer-events 0s linear .4s;
+    }
+    .bottom-controls.visible {
+      opacity: 1; transform: translateY(0); pointer-events: auto;
+      transition-delay: 0s;
+    }
+    .flash-button {
+      border: 2px solid var(--electric-blue);
+      background: transparent; color: var(--electric-blue);
+      padding: .4rem 1.1rem; border-radius: 14px;
+      font-weight: 600; font-size: 1rem; cursor: pointer;
+      transition: background-color .3s, box-shadow .3s, color .3s;
+    }
+    .flash-button:hover { background: var(--glass-light); }
+    .flash-button.active {
+      background: var(--electric-blue); color: black;
+      box-shadow: 0 0 15px var(--electric-blue);
+    }
+    .flash-settings-button {
+      background: none; border: none; color: var(--electric-blue);
+      font-size: 1.6rem; cursor: pointer; user-select: none; padding: 0;
+    }
+    .flash-settings-button:hover { color: #00a6cc; }
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+      display: none; align-items: center; justify-content: center; z-index: 10000;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--bg-mid); border-radius: 16px;
+      border: 1.5px solid var(--glass-highlight);
+      backdrop-filter: saturate(180%) blur(20px);
+      box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+      padding: 1.5rem; width: 90%; max-width: 360px; color: var(--text-light);
+    }
+    .modal-content label {
+      font-weight: 600; margin-top: 1rem; display: block; color: var(--text-muted);
+    }
+    .modal-content input {
+      width: 100%; margin-top: .3rem; padding: .5rem; font-size: 1rem;
+      border-radius: 8px; border: 1px solid var(--electric-blue);
+      background: var(--bg-dark); color: var(--text-light);
+    }
+    .modal-content button.close-btn {
+      margin-top: 1.5rem; width: 100%; background: var(--electric-blue);
+      border: none; color: black; padding: .7rem; font-weight: bold;
+      border-radius: 8px; cursor: pointer;
+    }
+    .modal-content button.close-btn:hover { background: #00b0e6; }
+    .error-message {
+      color: #ff6b6b; margin-top: .6rem; font-size: .9rem; display: none;
+    }
+    .slider-container {
+      position: relative; width: 280px; height: 48px; cursor: pointer; user-select: none;
+    }
+    .slider-track {
+      position: absolute; top: 16px; left: 0; right: 0; height: 16px;
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0)),
+        linear-gradient(to right bottom, rgba(255,255,255,0.12), rgba(255,255,255,0));
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1), inset 0 0 8px rgba(255,255,255,0.25);
+    }
+    .slider-thumb {
+      position: absolute; top: 6px; width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(145deg, var(--electric-blue), #007fbf);
+      box-shadow:
+        0 6px 18px var(--electric-blue),
+        0 0 28px rgba(0,212,255,0.7),
+        inset 0 0 14px rgba(255,255,255,0.7);
+      transform: translateX(-50%);
+      transition: transform .15s ease-out;
+      z-index: 2; cursor: grab;
+    }
+    .slider-thumb.dragging {
+      cursor: grabbing; transform: translateX(-50%) scale(1.1); transition: none;
+    }
+    .percentage-label {
+      position: absolute; top: -36px; left: 50%; transform: translateX(-50%);
+      background: rgba(0,0,0,0.3); color: white; font-weight: 600; padding: 6px 12px;
+      border-radius: 14px; backdrop-filter: blur(8px); user-select: none;
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .touch-indicator {
+      position: absolute; width: 80px; height: 80px; border: 2px solid var(--electric-blue);
+      border-radius: 50%; pointer-events: none; transform: translate(-50%,-50%);
+      animation: pulse .6s ease-out forwards; z-index: 10001;
+    }
+    @keyframes pulse {
+      0% { opacity: 1; transform: translate(-50%,-50%) scale(0.3); }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(1); }
+    }
+  </style>
 </head>
 <body>
 
-<h1>SmartBed Controller</h1>
-<div class="controls">
-  <button id="powerBtn">Power</button>
-  <button id="flashBtn">Flash Mode</button>
-  <input type="range" id="brightnessSlider" class="slider" min="0" max="100" value="50">
-  <button id="infoBtn">Info</button>
-</div>
-
-<!-- Modal -->
-<div id="infoModal" class="modal">
-  <div class="modal-content">
-    <p>Made by Sammy Wammy</p>
-    <button class="close" id="closeModal">Close</button>
+  <!-- Top Bar -->
+  <div class="top-bar glass" role="banner" aria-label="SmartBed Navigation">
+    <div class="left-icon-container" aria-hidden="true">
+      <svg class="left-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+        <path d="M20 10h-8V7a2 2 0 0 0-4 0v3H4c-1.1 0-2 .9-2 2v6h2v-2h16v2h2v-6c0-1.1-.9-2-2-2zm-10 0V7a1 1 0 0 1 2 0v3h-2z"/>
+      </svg>
+    </div>
+    <div class="top-bar-title">SmartBed</div>
+    <div class="right-icon">
+      <button type="button" class="info-button" aria-label="About SmartBed" onclick="showModal('infoModal')">ⓘ</button>
+    </div>
   </div>
-</div>
 
-<script>
-  const powerBtn = document.getElementById('powerBtn');
-  const flashBtn = document.getElementById('flashBtn');
-  const brightnessSlider = document.getElementById('brightnessSlider');
-  const infoBtn = document.getElementById('infoBtn');
-  const modal = document.getElementById('infoModal');
-  const closeModal = document.getElementById('closeModal');
+  <!-- Main Content -->
+  <main>
+    <button id="powerBtn" class="power-button glass" aria-pressed="false" aria-label="Toggle power" onclick="togglePower()">⏻</button>
+  </main>
 
-  let powerOn = false;
-  let flashOn = false;
+  <!-- Bottom Controls -->
+  <div id="bottomControls" class="bottom-controls glass" role="region" aria-live="polite" aria-atomic="true">
+    <button id="flashBtn" class="flash-button" aria-pressed="false" aria-label="Toggle flash mode" onclick="toggleFlash()">Flash</button>
+    <button id="flashSettingsBtn" class="flash-settings-button" aria-label="Flash settings" onclick="showFlashSettings()">⚙︎</button>
+    <div id="brightnessSliderContainer" class="slider-container" role="slider" aria-label="Brightness slider" tabindex="0">
+      <div class="slider-track"></div>
+      <div id="sliderThumb" class="slider-thumb" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <div id="percentageLabel" class="percentage-label">50%</div>
+      </div>
+    </div>
+  </div>
 
-  powerBtn.addEventListener('click', () => {
-    powerOn = !powerOn;
-    powerBtn.classList.toggle('active', powerOn);
-  });
+  <!-- Info Modal -->
+  <div id="infoModal" class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="infoModalLabel">
+    <div class="modal-content">
+      <p id="infoModalLabel">Made by Sammy Wammy</p>
+      <button class="close-btn" onclick="closeModal('infoModal')">Close</button>
+    </div>
+  </div>
 
-  flashBtn.addEventListener('click', () => {
-    flashOn = !flashOn;
-    flashBtn.classList.toggle('active', flashOn);
-    brightnessSlider.disabled = flashOn;
-  });
+  <!-- Flash Settings Modal -->
+  <div id="flashSettingsModal" class="modal" role="dialog" aria-modal="true" tabindex="-1" aria-labelledby="flashSettingsModalLabel">
+    <div class="modal-content">
+      <h2 id="flashSettingsModalLabel">Flash Settings</h2>
+      <label for="onTimeInput">On Time (ms):</label>
+      <input type="number" id="onTimeInput" min="10" max="100000" step="10" />
+      <label for="offTimeInput">Off Time (ms):</label>
+      <input type="number" id="offTimeInput" min="10" max="100000" step="10" />
+      <div id="flashError" class="error-message">Delay must be between 10 and 100000 ms</div>
+      <button id="flashSaveBtn" class="close-btn">Save</button>
+      <button class="close-btn" onclick="closeModal('flashSettingsModal')" style="margin-top:0.5rem; background:#444;">Cancel</button>
+    </div>
+  </div>
 
-  infoBtn.addEventListener('click', () => modal.style.display = 'flex');
-  closeModal.addEventListener('click', () => modal.style.display = 'none');
-  window.addEventListener('click', e => {
-    if (e.target === modal) modal.style.display = 'none';
-  });
+  <script>
+    // Core state
+    let powerOn = true, flashOn = false;
 
-  // Console log every 1% brightness change
-  let lastValue = brightnessSlider.value;
-  brightnessSlider.addEventListener('input', () => {
-    if (Math.abs(brightnessSlider.value - lastValue) >= 1) {
-      lastValue = brightnessSlider.value;
-      console.log("Brightness:", lastValue + "%");
+    // Element refs
+    const powerBtn = document.getElementById('powerBtn');
+    const flashBtn = document.getElementById('flashBtn');
+    const flashSettingsBtn = document.getElementById('flashSettingsBtn');
+    const bottomControls = document.getElementById('bottomControls');
+    const brightnessContainer = document.getElementById('brightnessSliderContainer');
+    const sliderThumb = document.getElementById('sliderThumb');
+    const percentageLabel = document.getElementById('percentageLabel');
+    const infoModal = document.getElementById('infoModal');
+    const flashSettingsModal = document.getElementById('flashSettingsModal');
+    const flashError = document.getElementById('flashError');
+    const flashSaveBtn = document.getElementById('flashSaveBtn');
+    const onTimeInput = document.getElementById('onTimeInput');
+    const offTimeInput = document.getElementById('offTimeInput');
+
+    // ESP API helper (left in place) — logs every call
+    let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
+    async function callESP(path) {
+      const url = `http://${ESP_IP}${path}`;
+      console.log(`ESP: calling -> ${url}`);
+      try {
+        await fetch(url);
+        console.log(`ESP: request succeeded -> ${url}`);
+      } catch (e) {
+        console.error('ESP call failed:', e);
+      }
     }
-  });
-</script>
+    async function setPower(on) { return callESP(`/power?v=${on ? 1 : 0}`); }
+    async function setFlash(on) { return callESP(`/flash?v=${on ? 1 : 0}`); }
+    async function setBrightness(v) { return callESP(`/brightness?v=${v}`); }
 
+    // UI update (keeps visual state in sync)
+    function updateUI() {
+      powerBtn.classList.toggle('active', powerOn);
+      powerBtn.setAttribute('aria-pressed', powerOn);
+      flashBtn.classList.toggle('active', flashOn);
+      flashBtn.setAttribute('aria-pressed', flashOn);
+      flashSettingsBtn.hidden = !(flashOn && powerOn);
+
+      if (powerOn) {
+        bottomControls.classList.add('visible');
+      } else {
+        bottomControls.classList.remove('visible');
+      }
+
+      // hide brightness when flash mode is active
+      brightnessContainer.style.display = (flashOn ? 'none' : 'block');
+
+      console.log(`UI updated — powerOn: ${powerOn}, flashOn: ${flashOn}, brightnessControlVisible: ${!flashOn}`);
+    }
+
+    // Actions
+    async function togglePower() {
+      powerOn = !powerOn;
+      console.log(`Action: togglePower() -> Power is now ${powerOn ? 'ON' : 'OFF'}`);
+
+      if (!powerOn && flashOn) {
+        flashOn = false;
+        console.log('Action: togglePower() -> Flash was ON, turned OFF because power turned OFF');
+      }
+
+      updateUI();
+      // call ESP (kept in code)
+      await setPower(powerOn);
+    }
+
+    async function toggleFlash() {
+      if (!powerOn) {
+        console.log('Action: toggleFlash() blocked — power is OFF');
+        return;
+      }
+      flashOn = !flashOn;
+      console.log(`Action: toggleFlash() -> Flash mode is now ${flashOn ? 'ON' : 'OFF'}`);
+
+      updateUI();
+      await setFlash(flashOn);
+    }
+
+    // Show/hide modals (with logging)
+    function showModal(id) {
+      const el = document.getElementById(id);
+      if (!el) { console.warn(`showModal: element "${id}" not found`); return; }
+      el.classList.add('active');
+      console.log(`Modal opened -> ${id}`);
+    }
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (!el) { console.warn(`closeModal: element "${id}" not found`); return; }
+      el.classList.remove('active');
+      flashError.style.display = 'none';
+      console.log(`Modal closed -> ${id}`);
+    }
+
+    // Flash settings opener (with logging)
+    function showFlashSettings() {
+      const saved = JSON.parse(localStorage.getItem('flashSettings') || '{}');
+      onTimeInput.value = saved.onTime ?? 500;
+      offTimeInput.value = saved.offTime ?? 500;
+      flashError.style.display = 'none';
+      console.log(`Action: showFlashSettings() -> loaded settings ON:${onTimeInput.value}ms OFF:${offTimeInput.value}ms`);
+      showModal('flashSettingsModal');
+    }
+
+    // Save flash settings (with validation + logs)
+    flashSaveBtn.addEventListener('click', () => {
+      const onT = parseInt(onTimeInput.value, 10), offT = parseInt(offTimeInput.value, 10);
+      if (isNaN(onT) || isNaN(offT) || onT < 10 || offT < 10 || onT > 100000 || offT > 100000) {
+        flashError.style.display = 'block';
+        console.log('Action: flashSave -> Validation failed. Values must be between 10 and 100000 ms');
+        return;
+      }
+      localStorage.setItem('flashSettings', JSON.stringify({ onTime: onT, offTime: offT }));
+      console.log(`Action: flashSave -> Flash settings saved: ON=${onT}ms, OFF=${offT}ms`);
+      closeModal('flashSettingsModal');
+    });
+
+    // Brightness slider logic (logs every integer % change and final value)
+    ;(function(){
+      // use explicit null check so 0 is allowed
+      let stored = localStorage.getItem('brightness');
+      let value = (stored !== null) ? Number(stored) : 50;
+      let dragging = false;
+      let lastLoggedValue = Math.round(value);
+
+      function updateSlider() {
+        sliderThumb.style.left = value + '%';
+        percentageLabel.textContent = Math.round(value) + '%';
+        percentageLabel.style.left = value + '%';
+        sliderThumb.setAttribute('aria-valuenow', Math.round(value));
+
+        const currentValue = Math.round(value);
+        if (currentValue !== lastLoggedValue) {
+          console.log(`Action: brightnessUpdate -> Brightness is at ${currentValue}%`);
+          lastLoggedValue = currentValue;
+        }
+      }
+
+      function onDown(e) {
+        e.preventDefault();
+        dragging = true;
+        sliderThumb.classList.add('dragging');
+        window.addEventListener('pointermove', onMove);
+        window.addEventListener('pointerup', onUp);
+        console.log('Action: brightness drag started');
+      }
+
+      function onMove(e) {
+        if (!dragging) return;
+        const rect = brightnessContainer.getBoundingClientRect();
+        let v = ((e.clientX - rect.left) / rect.width) * 100;
+        value = Math.min(Math.max(v, 0), 100);
+        updateSlider();
+      }
+
+      async function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        sliderThumb.classList.remove('dragging');
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        localStorage.setItem('brightness', Math.round(value));
+        console.log(`Action: brightnessSet -> Brightness set to ${Math.round(value)}% (final)`);
+        await setBrightness(Math.round(value));
+      }
+
+      sliderThumb.addEventListener('pointerdown', onDown);
+      brightnessContainer.addEventListener('pointerdown', onDown);
+
+      // Keyboard accessibility: left/right arrows adjust by 1%
+      brightnessContainer.addEventListener('keydown', async (e) => {
+        const key = e.key;
+        if (key === 'ArrowLeft' || key === 'ArrowDown') {
+          value = Math.max(0, value - 1);
+          updateSlider();
+          localStorage.setItem('brightness', Math.round(value));
+          console.log(`Action: brightnessKeyboard -> Brightness is at ${Math.round(value)}%`);
+          await setBrightness(Math.round(value));
+        } else if (key === 'ArrowRight' || key === 'ArrowUp') {
+          value = Math.min(100, value + 1);
+          updateSlider();
+          localStorage.setItem('brightness', Math.round(value));
+          console.log(`Action: brightnessKeyboard -> Brightness is at ${Math.round(value)}%`);
+          await setBrightness(Math.round(value));
+        } else if (key === 'Home') {
+          value = 0; updateSlider(); localStorage.setItem('brightness', 0); console.log('Action: brightnessKeyboard -> Brightness is at 0%'); await setBrightness(0);
+        } else if (key === 'End') {
+          value = 100; updateSlider(); localStorage.setItem('brightness', 100); console.log('Action: brightnessKeyboard -> Brightness is at 100%'); await setBrightness(100);
+        }
+      });
+
+      updateSlider();
+    })();
+
+    // Close modals on Escape (with logging)
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        ['infoModal','flashSettingsModal'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.classList.contains('active')) {
+            closeModal(id);
+            console.log(`Action: Escape pressed -> closed modal ${id}`);
+          }
+        });
+      }
+    });
+
+    // Initialize UI and log initial state
+    updateUI();
+    console.log(`Initial state -> powerOn: ${powerOn}, flashOn: ${flashOn}`);
+    // report stored brightness & flash settings (if any)
+    const storedBrightness = localStorage.getItem('brightness');
+    console.log(`Initial: stored brightness = ${storedBrightness !== null ? storedBrightness + '%' : 'none (default 50%)'}`);
+    const storedFlashSettings = localStorage.getItem('flashSettings');
+    console.log(`Initial: stored flash settings = ${storedFlashSettings ?? 'none'}`);
+  </script>
 </body>
 </html>
