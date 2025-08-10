@@ -221,153 +221,49 @@
     </div>
   </div>
 
-  <script>
-    // Core state
-    let powerOn = true, flashOn = false;
+    <script>
+      // ====== UI Functions ======
+      function showModal(id) {
+        document.getElementById(id).classList.add('active');
+      }
 
-    // Element refs
-    const powerBtn = document.getElementById('powerBtn');
-    const flashBtn = document.getElementById('flashBtn');
-    const flashSettingsBtn = document.getElementById('flashSettingsBtn');
-    const bottomControls = document.getElementById('bottomControls');
-    const brightnessContainer = document.getElementById('brightnessSliderContainer');
-    const sliderThumb = document.getElementById('sliderThumb');
-    const percentageLabel = document.getElementById('percentageLabel');
-    const infoModal = document.getElementById('infoModal');
-    const flashSettingsModal = document.getElementById('flashSettingsModal');
-    const flashError = document.getElementById('flashError');
-    const flashSaveBtn = document.getElementById('flashSaveBtn');
-    const onTimeInput = document.getElementById('onTimeInput');
-    const offTimeInput = document.getElementById('offTimeInput');
+      function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+      }
 
-    // ESP API helper
-    let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
-    async function callESP(path) {
-      try { await fetch(`http://${ESP_IP}${path}`); }
-      catch (e) { console.error('ESP call failed:', e); }
-    }
-    async function setPower(on) { return callESP(`/power?v=${on?1:0}`); }
-    async function setFlash(on) { return callESP(`/flash?v=${on?1:0}`); }
-    async function setBrightness(v) { return callESP(`/brightness?v=${v}`); }
+      // ====== SmartBed Control ======
+      function togglePower() {
+        // Example: send power toggle to ESP32
+        fetch('/power', { method: 'POST' })
+          .then(res => res.text())
+          .then(console.log)
+          .catch(console.error);
+      }
 
-    // UI update
-    function updateUI() {
-      powerBtn.classList.toggle('active', powerOn);
-      powerBtn.setAttribute('aria-pressed', powerOn);
-      flashBtn.classList.toggle('active', flashOn);
-      flashBtn.setAttribute('aria-pressed', flashOn);
-      flashSettingsBtn.hidden = !(flashOn && powerOn);
-      if (powerOn) bottomControls.classList.add('visible');
-      else bottomControls.classList.remove('visible');
-      brightnessContainer.style.display = (flashOn? 'none':'block');
-    }
+      function toggleFlash() {
+        // Example: send flash toggle to ESP32
+        fetch('/flash', { method: 'POST' })
+          .then(res => res.text())
+          .then(console.log)
+          .catch(console.error);
+      }
 
-    // Actions
-    async function togglePower() {
-      powerOn = !powerOn;
-      if (!powerOn && flashOn) flashOn = false;
+      // ====== Key Events ======
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          ['infoModal', 'flashSettingsModal'].forEach(id => {
+            closeModal(id);
+          });
+        }
+      });
+
+      // ====== Initialize UI ======
+      function updateUI() {
+        console.log('UI updated');
+        // Add your slider / brightness update calls here
+      }
+
       updateUI();
-      await setPower(powerOn);
-    }
-    async function toggleFlash() {
-      if (!powerOn) return;
-      flashOn = !flashOn;
-      updateUI();
-      await setFlash(flashOn);
-    }
-
-    // Show/hide modals
-    function showModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) {
-      document.getElementById(id).classList.remove('active');
-      flashError.style.display = 'none';
-    }
-
-    // Flash settings opener
-    function showFlashSettings() {
-      const saved = JSON.parse(localStorage.getItem('flashSettings')||'{}');
-      onTimeInput.value = saved.onTime ?? 500;
-      offTimeInput.value = saved.offTime ?? 500;
-      flashError.style.display = 'none';
-      showModal('flashSettingsModal');
-    }
-
-    // Save flash settings
-    flashSaveBtn.addEventListener('click', () => {
-      const onT = parseInt(onTimeInput.value,10), offT = parseInt(offTimeInput.value,10);
-      if (isNaN(onT)||isNaN(offT)||onT<10||offT<10) {
-        flashError.style.display='block'; return;
-      }
-      localStorage.setItem('flashSettings', JSON.stringify({onTime:onT,offTime:offT}));
-      closeModal('flashSettingsModal');
-    });
-
-    // Brightness slider logic
-    ;(function(){
-      let value = Number(localStorage.getItem('brightness'))||50;
-      let dragging = false;
-      function updateSlider() {
-        sliderThumb.style.left = value + '%';
-        percentageLabel.textContent = Math.round(value)+'%';
-        percentageLabel.style.left = value+'%';
-      }
-      function onDown(e) {
-        e.preventDefault(); dragging=true;
-        window.addEventListener('pointermove', onMove);
-        window.addEventListener('pointerup', onUp);
-      }
-      function onMove(e) {
-        if(!dragging) return;
-        const rect = brightnessContainer.getBoundingClientRect();
-        let v = ((e.clientX - rect.left)/rect.width)*100;
-        value = Math.min(Math.max(v,0),100);
-        updateSlider();
-      }
-      async function onUp() {
-        if(!dragging) return;
-        dragging=false;
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        localStorage.setItem('brightness', Math.round(value));
-        await setBrightness(Math.round(value));
-      }
-      sliderThumb.addEventListener('pointerdown', onDown);
-      brightnessContainer.addEventListener('pointerdown', onDown);
-      updateSlider();
-    })();
-
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const powerButton = document.getElementById('powerButton');
-  const infoButton = document.getElementById('infoButton');
-
-  powerButton?.addEventListener('click', togglePower);
-  infoButton?.addEventListener('click', () => showModal('infoModal'));
-});
-
-let powerOn = false;
-
-async function togglePower() {
-  powerOn = !powerOn;
-  updateUI();
-  try {
-    const response = await fetch(`http://${ESP_IP}/power?state=${powerOn ? 1 : 0}`);
-    if (!response.ok) throw new Error('Failed to toggle power');
-  } catch (err) {
-    console.error(err);
-    powerOn = !powerOn; // revert state on failure
-    updateUI();
-  }
-}
-
-function showModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) modal.classList.add('active');
-}
-
-function updateUI() {
-  const powerButton = document.getElementById('powerButton');
-  if (powerButton) {
-    powerButton.classList.toggle('active', powerOn);
-  }
-}
+    </script>
+  </body>
+</html>
