@@ -262,19 +262,89 @@
       brightnessContainer.style.display = (flashOn? 'none':'block');
     }
 
-    // Actions
-    async function togglePower() {
-      powerOn = !powerOn;
-      if (!powerOn && flashOn) flashOn = false;
-      updateUI();
-      await setPower(powerOn);
+// Actions
+async function togglePower() {
+  powerOn = !powerOn;
+  console.log(`Power is now ${powerOn ? 'ON' : 'OFF'}`);
+  if (!powerOn && flashOn) {
+    flashOn = false;
+    console.log("Flash turned OFF because power was turned off");
+  }
+  updateUI();
+  await setPower(powerOn);
+}
+
+async function toggleFlash() {
+  if (!powerOn) {
+    console.log("Cannot toggle flash — power is OFF");
+    return;
+  }
+  flashOn = !flashOn;
+  console.log(`Flash mode is now ${flashOn ? 'ON' : 'OFF'}`);
+  updateUI();
+  await setFlash(flashOn);
+}
+
+// Save flash settings
+flashSaveBtn.addEventListener('click', () => {
+  const onT = parseInt(onTimeInput.value, 10),
+        offT = parseInt(offTimeInput.value, 10);
+  if (isNaN(onT) || isNaN(offT) || onT < 10 || offT < 10) {
+    flashError.style.display = 'block';
+    console.log("Error: Flash settings must be between 10 and 100000 ms");
+    return;
+  }
+  localStorage.setItem('flashSettings', JSON.stringify({ onTime: onT, offTime: offT }));
+  console.log(`Flash settings saved: ON time = ${onT}ms, OFF time = ${offT}ms`);
+  closeModal('flashSettingsModal');
+});
+
+// Brightness slider logic
+;(function(){
+  let value = Number(localStorage.getItem('brightness')) || 50;
+  let dragging = false;
+  let lastLoggedValue = Math.round(value);
+
+  function updateSlider() {
+    sliderThumb.style.left = value + '%';
+    percentageLabel.textContent = Math.round(value) + '%';
+    percentageLabel.style.left = value + '%';
+    let currentValue = Math.round(value);
+    if (currentValue !== lastLoggedValue) {
+      console.log(`Brightness is at ${currentValue}%`);
+      lastLoggedValue = currentValue;
     }
-    async function toggleFlash() {
-      if (!powerOn) return;
-      flashOn = !flashOn;
-      updateUI();
-      await setFlash(flashOn);
-    }
+  }
+
+  function onDown(e) {
+    e.preventDefault();
+    dragging = true;
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }
+
+  function onMove(e) {
+    if (!dragging) return;
+    const rect = brightnessContainer.getBoundingClientRect();
+    let v = ((e.clientX - rect.left) / rect.width) * 100;
+    value = Math.min(Math.max(v, 0), 100);
+    updateSlider();
+  }
+
+  async function onUp() {
+    if (!dragging) return;
+    dragging = false;
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    localStorage.setItem('brightness', Math.round(value));
+    console.log(`Brightness set to ${Math.round(value)}% (final)`);
+    await setBrightness(Math.round(value));
+  }
+
+  sliderThumb.addEventListener('pointerdown', onDown);
+  brightnessContainer.addEventListener('pointerdown', onDown);
+  updateSlider();
+})();
 
     // Show/hide modals
     function showModal(id) { document.getElementById(id).classList.add('active'); }
