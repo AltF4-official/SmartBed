@@ -336,48 +336,17 @@
       updateSlider();
     })();
 
-    <!-- Bottom script -->
-    <script>
-      // Show modal by ID
-      function showModal(id) {
-        document.getElementById(id).classList.add('active');
+    // Close modals on Escape
+    document.addEventListener('keydown', e => {
+      if(e.key === 'Escape') {
+        ['infoModal','flashSettingsModal'].forEach(id => {
+          document.getElementById(id).classList.remove('active');
+        });
       }
+    });
 
-      // Hide modal by ID
-      function hideModal(id) {
-        document.getElementById(id).classList.remove('active');
-      }
-
-      // Toggle power state (placeholder ESP32 request)
-      function togglePower() {
-        console.log("Toggling power...");
-        // Send request to ESP32
-        fetch('/togglePower')
-          .then(res => res.text())
-          .then(data => console.log("ESP32 Response:", data))
-          .catch(err => console.error("ESP32 Error:", err));
-
-        // Update UI locally
-        updateUI();
-      }
-
-      // Example: update UI function
-      function updateUI() {
-        console.log("UI updated");
-        // You can add LED status, brightness updates, etc.
-      }
-
-      // Close modals on Escape
-      document.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-          ['infoModal', 'flashSettingsModal'].forEach(id => {
-            document.getElementById(id).classList.remove('active');
-          });
-        }
-      });
-
-      // Initialize UI
-      updateUI();
-    </script>
-  </body>
+    // Initialize UI
+    updateUI();
+  </script>
+</body>
 </html>
