@@ -240,21 +240,8 @@
     const onTimeInput = document.getElementById('onTimeInput');
     const offTimeInput = document.getElementById('offTimeInput');
 
-    // ESP API helper (left in place) — logs every call
-    let ESP_IP = localStorage.getItem('espIP') || '192.168.1.50';
-    async function callESP(path) {
-      const url = `http://${ESP_IP}${path}`;
-      console.log(`ESP: calling -> ${url}`);
-      try {
-        await fetch(url);
-        console.log(`ESP: request succeeded -> ${url}`);
-      } catch (e) {
-        console.error('ESP call failed:', e);
-      }
-    }
-    async function setPower(on) { return callESP(`/power?v=${on ? 1 : 0}`); }
-    async function setFlash(on) { return callESP(`/flash?v=${on ? 1 : 0}`); }
-    async function setBrightness(v) { return callESP(`/brightness?v=${v}`); }
+    // NOTE: All ESP32/ESP calls have been removed. This file is now fully front-end only.
+    console.log('NOTICE: ESP32 calls removed — running as front-end UI only.');
 
     // UI update (keeps visual state in sync)
     function updateUI() {
@@ -277,7 +264,7 @@
     }
 
     // Actions
-    async function togglePower() {
+    function togglePower() {
       powerOn = !powerOn;
       console.log(`Action: togglePower() -> Power is now ${powerOn ? 'ON' : 'OFF'}`);
 
@@ -287,11 +274,10 @@
       }
 
       updateUI();
-      // call ESP (kept in code)
-      await setPower(powerOn);
+      // no network calls
     }
 
-    async function toggleFlash() {
+    function toggleFlash() {
       if (!powerOn) {
         console.log('Action: toggleFlash() blocked — power is OFF');
         return;
@@ -300,7 +286,7 @@
       console.log(`Action: toggleFlash() -> Flash mode is now ${flashOn ? 'ON' : 'OFF'}`);
 
       updateUI();
-      await setFlash(flashOn);
+      // no network calls
     }
 
     // Show/hide modals (with logging)
@@ -379,7 +365,7 @@
         updateSlider();
       }
 
-      async function onUp() {
+      function onUp() {
         if (!dragging) return;
         dragging = false;
         sliderThumb.classList.remove('dragging');
@@ -387,31 +373,29 @@
         window.removeEventListener('pointerup', onUp);
         localStorage.setItem('brightness', Math.round(value));
         console.log(`Action: brightnessSet -> Brightness set to ${Math.round(value)}% (final)`);
-        await setBrightness(Math.round(value));
+        // no network calls
       }
 
       sliderThumb.addEventListener('pointerdown', onDown);
       brightnessContainer.addEventListener('pointerdown', onDown);
 
       // Keyboard accessibility: left/right arrows adjust by 1%
-      brightnessContainer.addEventListener('keydown', async (e) => {
+      brightnessContainer.addEventListener('keydown', (e) => {
         const key = e.key;
         if (key === 'ArrowLeft' || key === 'ArrowDown') {
           value = Math.max(0, value - 1);
           updateSlider();
           localStorage.setItem('brightness', Math.round(value));
           console.log(`Action: brightnessKeyboard -> Brightness is at ${Math.round(value)}%`);
-          await setBrightness(Math.round(value));
         } else if (key === 'ArrowRight' || key === 'ArrowUp') {
           value = Math.min(100, value + 1);
           updateSlider();
           localStorage.setItem('brightness', Math.round(value));
           console.log(`Action: brightnessKeyboard -> Brightness is at ${Math.round(value)}%`);
-          await setBrightness(Math.round(value));
         } else if (key === 'Home') {
-          value = 0; updateSlider(); localStorage.setItem('brightness', 0); console.log('Action: brightnessKeyboard -> Brightness is at 0%'); await setBrightness(0);
+          value = 0; updateSlider(); localStorage.setItem('brightness', 0); console.log('Action: brightnessKeyboard -> Brightness is at 0%');
         } else if (key === 'End') {
-          value = 100; updateSlider(); localStorage.setItem('brightness', 100); console.log('Action: brightnessKeyboard -> Brightness is at 100%'); await setBrightness(100);
+          value = 100; updateSlider(); localStorage.setItem('brightness', 100); console.log('Action: brightnessKeyboard -> Brightness is at 100%');
         }
       });
 
@@ -434,7 +418,6 @@
     // Initialize UI and log initial state
     updateUI();
     console.log(`Initial state -> powerOn: ${powerOn}, flashOn: ${flashOn}`);
-    // report stored brightness & flash settings (if any)
     const storedBrightness = localStorage.getItem('brightness');
     console.log(`Initial: stored brightness = ${storedBrightness !== null ? storedBrightness + '%' : 'none (default 50%)'}`);
     const storedFlashSettings = localStorage.getItem('flashSettings');
