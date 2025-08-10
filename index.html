@@ -215,9 +215,11 @@
 <script>
 let ESP_IP = localStorage.getItem('espIP') || '192.168.1.109';
 
-async function callESP(path) {
+// Helper: send GET request with multiple params as query string
+async function callESP(params) {
+  const url = `http://${ESP_IP}/?${new URLSearchParams(params).toString()}`;
   try {
-    const res = await fetch(`http://${ESP_IP}${path}`, { mode: 'cors' });
+    const res = await fetch(url, { mode: 'cors' });
     if (!res.ok) {
       console.warn('ESP responded with status', res.status);
       return null;
@@ -230,19 +232,21 @@ async function callESP(path) {
 }
 
 async function espSetPower(on) {
-  return callESP(`/power?v=${on ? 1 : 0}`);
+  return callESP({ power: on ? 'on' : 'off' });
 }
 
 async function espSetFlash(on) {
-  return callESP(`/flash?v=${on ? 1 : 0}`);
+  return callESP({ flash: on ? 'on' : 'off' });
 }
 
 async function espSetBrightness(val) {
-  return callESP(`/brightness?v=${val}`);
+  // Map 0-100 to 0-255 for brightness
+  const brightnessVal = Math.round((val / 100) * 255);
+  return callESP({ brightness: brightnessVal.toString() });
 }
 
 async function espSetFlashSettings(onMs, offMs) {
-  return callESP(`/flashSettings?on=${onMs}&off=${offMs}`);
+  return callESP({ onTime: onMs.toString(), offTime: offMs.toString() });
 }
 
 // UI elements
@@ -361,39 +365,49 @@ flashSaveBtn.addEventListener('click', async () => {
   function onMove(e) {
     if (!dragging) return;
     let rect = brightnessContainer.getBoundingClientRect();
-    let pos = e.clientX - rect.left;
-    pos = Math.min(Math.max(pos, 0), rect.width);
-    brightness = (pos / rect.width) * 100;
+    let x = e.clientX - rect.left;
+    let val = Math.min(Math.max(x / rect.width, 0), 1) * 100;
+    brightness = val;
     updateSlider();
   }
 
   function onUp(e) {
+    if (!dragging) return;
     dragging = false;
     sliderThumb.classList.remove('dragging');
     window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', onUp);
-    localStorage.setItem('brightness', brightness.toFixed(0));
-    espSetBrightness(Math.round(brightness));
+
+    localStorage.setItem('brightness', Math.round(brightness));
+    espSetBrightness(brightness).catch(() => {
+      console.warn('Failed to set brightness on ESP');
+    });
   }
 
   sliderThumb.addEventListener('pointerdown', onDown);
   brightnessContainer.addEventListener('click', e => {
     let rect = brightnessContainer.getBoundingClientRect();
-    let pos = e.clientX - rect.left;
-    pos = Math.min(Math.max(pos, 0), rect.width);
-    brightness = (pos / rect.width) * 100;
+    let x = e.clientX - rect.left;
+    let val = Math.min(Math.max(x / rect.width, 0), 1) * 100;
+    brightness = val;
     updateSlider();
-    localStorage.setItem('brightness', brightness.toFixed(0));
-    espSetBrightness(Math.round(brightness));
+    localStorage.setItem('brightness', Math.round(brightness));
+    espSetBrightness(brightness).catch(() => {
+      console.warn('Failed to set brightness on ESP');
+    });
   });
 
-  // Initialize slider position
   updateSlider();
+  updateUI();
 })();
 
-// Initialize UI visibility
-updateUI();
+// Close modals on clicking outside content
+window.addEventListener('click', (e) => {
+  if (e.target.classList.contains('modal')) {
+    e.target.classList.remove('active');
+    flashError.style.display = 'none';
+  }
+});
 </script>
-
 </body>
 </html>
